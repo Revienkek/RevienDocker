@@ -72,15 +72,9 @@ kbd { font: 700 0.72rem var(--mono); background: var(--panel-3); border: 1px sol
 /* ---------- Barra de título ---------- */
 .titlebar { height: 50px; flex: none; display: flex; align-items: center; gap: 12px; padding: 0 0 0 14px; background: var(--panel); border-bottom: 1px solid var(--line); }
 .tb-brand { display: flex; align-items: center; gap: 9px; font-weight: 700; letter-spacing: -0.01em; font-size: 0.95rem; }
-/* Título metálico en blanco y negro: degradado de opacidades recortado al texto + filete fino y brillo tenue */
-.tb-brand span {
-  font: 400 1.3rem/1 var(--font-title); letter-spacing: 0.06em; text-transform: uppercase;
-  background: linear-gradient(100deg, #ffffff 0%, rgba(255, 255, 255, 0.5) 26%, #ffffff 42%, rgba(255, 255, 255, 0.28) 60%, #ffffff 78%, rgba(255, 255, 255, 0.62) 100%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-  -webkit-text-stroke: 0.4px rgba(255, 255, 255, 0.3);
-  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.14));
-}
-.logo { width: 26px; height: 26px; border-radius: 4px; }
+/* Título: vector (assets/wordmark.svg), con el degradado metálico y el filete fino dentro del propio SVG */
+.tb-brand .wordmark { height: 20px; width: auto; display: block; }
+.logo { width: 26px; height: 26px; }
 .tb-drag { flex: 1; height: 100%; min-width: 12px; }
 .modes { display: flex; gap: 3px; padding: 3px; background: var(--bg); border: 1px solid var(--line); border-radius: 4px; }
 .modes button { border: 1px solid transparent; background: transparent; padding: 6px 12px; border-radius: 4px; color: var(--muted); }
@@ -101,7 +95,7 @@ kbd { font: 700 0.72rem var(--mono); background: var(--panel-3); border: 1px sol
 .workspace { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: 12px; align-items: start; }
 @media (max-width: 960px) { .workspace { grid-template-columns: 1fr; } }
 @media (max-width: 1000px) {
-  .tb-brand span, #deviceText, #engineText, #flashText { display: none; }
+  .tb-brand .wordmark, #deviceText, #engineText, #flashText { display: none; }
 }
 /* Ventana sin marco: zonas finas en bordes y esquinas (solo con puntero fino; el arrastre lo hace studio_app.py) */
 .resize { position: fixed; inset: 0; pointer-events: none; z-index: 45; }
