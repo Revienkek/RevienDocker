@@ -11,14 +11,14 @@ Un macropad CH57x visto como **mecanismo de relojería**: teclas de cera negra, 
 ## Icono
 
 - Fuente: `assets/Icon_definitivo.jpg` (ilustración definitiva, fondo negro).
-- `studio_icon.py` centra el dibujo sobre el mismo negro, así el fondo se funde y no queda marco. La esquina es suave (20 % del lado) y la máscara se dibuja con supersampleado para que el borde no tenga escalera de píxeles.
-- Salidas: `assets/icon.png` (1024 px) y `assets/icon.ico` (16 a 256 px). Se regeneran con `python studio_icon.py`.
+- `studio_icon.py` elimina el fondo negro exterior, conserva las zonas negras del dispositivo y su halo, y ajusta la ilustración al espacio disponible.
+- Salidas independientes: `assets/icon.ico` (16 a 256 px) para Windows, `assets/icon.png` para la bandeja y `assets/brand-icon.png` para la cabecera. Se regeneran con `python studio_icon.py`.
 - `assets/icon.svg` ya no se usa; se puede borrar cuando lo confirmes.
 
 ## Logotipo
 
-- `assets/wordmark.svg`: «REVIENDOCKER» en vector. Lo genera `python studio_wordmark.py` a partir de Doris PP instalada: las letras son trazos, no texto, así que se ve nítido a cualquier tamaño y no depende de la fuente instalada.
-- En la cabecera van juntos el icono (26 px) y el wordmark (20 px de alto).
+- `assets/wordmark.svg`: «REVIENDOCKER» en trazos vectoriales, con la R inicial y la D de Docker más altas. No depende de la fuente instalada.
+- En la cabecera van juntos el icono (46 × 34 px) y el wordmark (24 px de alto).
 
 ## Paleta
 

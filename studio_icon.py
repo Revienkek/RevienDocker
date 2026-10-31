@@ -1,48 +1,52 @@
-"""Genera los iconos de RevienDocker desde assets/Icon_definitivo.jpg (PNG HD + ICO multitamaño).
-
-    python studio_icon.py        # escribe assets/icon.png y assets/icon.ico
-"""
+"""Genera los recursos de icono a partir de la ilustración definitiva."""
 
 from pathlib import Path
 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageOps
 
 ASSETS = Path(__file__).resolve().parent / "assets"
 SOURCE = ASSETS / "Icon_definitivo.jpg"
 ICO_SIZES = [16, 24, 32, 48, 64, 128, 256]
-ART_SHARE = 0.84  # parte del lado que ocupa el dibujo; el resto es margen negro
-TILE_RADIUS = 0.2  # esquina suave: ni 0 ni 90º
-SUPERSAMPLE = 4  # la máscara se dibuja ampliada y se reduce: bordes suaves, sin escalera de píxeles
 
 
-def _art_square() -> Image.Image:
-    """Centra el dibujo en un cuadrado negro. El fondo de la ilustración ya es negro, así que se funde con el icono."""
+def artwork() -> Image.Image:
+    """Quita el negro exterior conservando las zonas negras dentro del contorno."""
     src = Image.open(SOURCE).convert("RGB")
-    box = src.convert("L").point(lambda v: 255 if v > 30 else 0).getbbox()  # incluye el halo blanco
-    cx, cy = (box[0] + box[2]) / 2, (box[1] + box[3]) / 2
-    side = round(max(box[2] - box[0], box[3] - box[1]) / ART_SHARE)
-    square = Image.new("RGB", (side, side), (0, 0, 0))
-    square.paste(src, (round(side / 2 - cx), round(side / 2 - cy)))
-    return square
+    luminance = ImageOps.grayscale(src)
+    # El contorno blanco separa el fondo de las piezas negras del dispositivo.
+    barriers = luminance.point(lambda value: 255 if value > 45 else 0)
+    ImageDraw.floodfill(barriers, (0, 0), 128)
+    outside = barriers.point(lambda value: 255 if value == 128 else 0)
+    # En el exterior, el halo blanco se desvanece hacia transparencia.
+    halo = luminance.point(lambda value: min(255, value * 4))
+    alpha = Image.composite(halo, Image.new("L", src.size, 255), outside)
+    image = src.convert("RGBA")
+    image.putalpha(alpha)
+    box = alpha.point(lambda value: 255 if value > 32 else 0).getbbox()
+    if box is None:
+        raise ValueError("No se ha encontrado el dispositivo en la imagen")
+    return image.crop(box)
 
 
 def render(size: int) -> Image.Image:
-    """Icono cuadrado RGBA de `size` px: dibujo centrado sobre negro, con esquinas suaves."""
-    art = _art_square().resize((size, size), Image.LANCZOS).convert("RGBA")
-    big = size * SUPERSAMPLE
-    mask = Image.new("L", (big, big), 0)
-    ImageDraw.Draw(mask).rounded_rectangle((0, 0, big - 1, big - 1), radius=round(big * TILE_RADIUS), fill=255)
-    art.putalpha(mask.resize((size, size), Image.LANCZOS))
-    return art
+    """Composición cuadrada para Windows, ajustada al ancho disponible."""
+    art = artwork()
+    art.thumbnail((round(size * 0.97), round(size * 0.97)), Image.Resampling.LANCZOS)
+    canvas = Image.new("RGBA", (size, size))
+    canvas.alpha_composite(art, ((size - art.width) // 2, (size - art.height) // 2))
+    return canvas
 
 
 def icon_image(size: int = 64) -> Image.Image:
-    """Icono de la bandeja: usa el PNG ya generado (así el .exe no necesita el rasterizador SVG)."""
+    """Icono de la bandeja incluido en el ejecutable."""
     from studio_engine import RESOURCE_DIR
-    return Image.open(RESOURCE_DIR / "assets" / "icon.png").convert("RGBA").resize((size, size), Image.LANCZOS)
+    return Image.open(RESOURCE_DIR / "assets" / "icon.png").convert("RGBA").resize((size, size), Image.Resampling.LANCZOS)
 
 
 if __name__ == "__main__":
+    art = artwork()
+    art.thumbnail((1024, 1024), Image.Resampling.LANCZOS)
+    art.save(ASSETS / "brand-icon.png")
     render(1024).save(ASSETS / "icon.png")
     render(256).save(ASSETS / "icon.ico", sizes=[(s, s) for s in ICO_SIZES])
-    print("OK", ASSETS / "icon.ico")
+    print("OK: icon.png, icon.ico y brand-icon.png")
