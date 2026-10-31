@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RevienDocker</title>
+  <link rel="icon" href="assets/icon.png" />
+  <link rel="stylesheet" href="studio.css" />
+</head>
+<body>
+<div class="app">
+  <header class="titlebar">
+    <div class="tb-brand pywebview-drag-region"><img class="logo" src="assets/icon.png" alt="" /><span>RevienDocker</span></div>
+    <div class="modes" role="radiogroup" aria-label="Modo">
+      <button data-mode="direct" role="radio" title="Los atajos se guardan dentro del teclado: funciona solo, en cualquier PC."><i data-ic="target"></i>Directo</button>
+      <button data-mode="smart" role="radio" title="Cada botón cambia según la app que tengas abierta. Necesita RevienDocker en marcha."><i data-ic="brain"></i>Inteligente</button>
+    </div>
+    <div class="tb-drag pywebview-drag-region"></div>
+    <span class="pill" id="devicePill" title="Estado del teclado"><i class="dot"></i><span id="deviceText">Simulador</span></span>
+    <span class="pill" id="enginePill" hidden><i class="dot"></i><span id="engineText"></span></span>
+    <button id="btnConnect" class="icon-btn" title="Buscar el teclado"><i data-ic="plug"></i></button>
+    <button id="btnFlashAll" class="primary" title="Escribe la configuración en el teclado"><i data-ic="zap"></i><span id="flashText">Flashear</span><i class="flash-dot" id="flashDot" hidden title="Hay cambios sin escribir en el teclado"></i></button>
+    <div class="winctl" id="winctl" hidden>
+      <button data-win="minimize" title="Minimizar"><i data-ic="minus"></i></button>
+      <button data-win="maximize" title="Maximizar"><i data-ic="square"></i></button>
+      <button data-win="close" class="close" id="winClose" title="Cerrar"><i data-ic="x"></i></button>
+    </div>
+  </header>
+  <div class="infobar"><i id="infoIcon"></i><span id="infoText"></span></div>
+
+  <div class="scroll">
+  <main class="workspace">
+    <section class="panel">
+      <div class="panel-title"><span><span class="step">1</span>Botón</span><em id="selectedLabel"></em></div>
+
+      <div id="layerWrap" class="layerbar" hidden></div>
+
+      <div class="chassis-wrap" id="chassis">
+        <div class="acrylic-case" id="device">
+          <div class="keycap selected" data-target="KEY_1" tabindex="0" role="button" title="Tecla 1"><span class="k-id">1</span><span class="k-val" id="lbl_KEY_1"></span></div>
+          <div class="keycap" data-target="KEY_2" tabindex="0" role="button" title="Tecla 2"><span class="k-id">2</span><span class="k-val" id="lbl_KEY_2"></span></div>
+          <div class="keycap" data-target="KEY_3" tabindex="0" role="button" title="Tecla 3"><span class="k-id">3</span><span class="k-val" id="lbl_KEY_3"></span></div>
+          <div class="encoder-group">
+            <div class="encoder-ring">
+              <div class="enc-dir" data-target="KNOB_CCW" id="lbl_KNOB_CCW" tabindex="0" role="button" title="Giro a la izquierda"></div>
+              <div class="enc-dir" data-target="KNOB_CW" id="lbl_KNOB_CW" tabindex="0" role="button" title="Giro a la derecha"></div>
+            </div>
+            <div class="knob" data-target="KNOB_PRESS" tabindex="0" role="button" title="Pulsar la rueda"><div class="knob-indicator"></div><span id="lbl_KNOB_PRESS"></span></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="smartCard" class="form-group" hidden>
+        <div class="flow" id="flow">
+          <div class="node" title="Pulsas un botón del teclado"><i data-ic="keyboard"></i><span>Botón</span></div>
+          <i class="op" data-ic="plus"></i>
+          <div class="node trig" title="Tecla de activación: mantenla pulsada mientras pulsas el botón"><div class="seg" id="triggerSeg"></div></div>
+          <i class="op" data-ic="arrow-right"></i>
+          <div class="node app" title="App en primer plano ahora mismo"><i data-ic="app-window"></i><span id="activeApp">—</span></div>
+          <i class="op" data-ic="arrow-right"></i>
+          <div class="node out" title="Capa que se ejecutará"><i data-ic="zap"></i><span id="flowLayer">Base</span></div>
+        </div>
+        <div id="layerEdit" class="layer-edit" hidden>
+          <div class="form-group"><label for="layerName">Nombre</label><input type="text" id="layerName" maxlength="40" /></div>
+          <div class="form-group"><label for="layerExes">Programas (.exe, con comas)</label><input type="text" id="layerExes" placeholder="obs64.exe, chrome.exe" /></div>
+          <button id="btnDelLayer" class="danger" title="Quitar esta capa"><i data-ic="trash-2"></i></button>
+        </div>
+        <p class="err" id="engineErr" hidden></p>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-title"><span><span class="step">2</span>Acción</span><span class="num muted" id="comboCount"></span></div>
+
+      <div id="knobTools" class="recipe-tools" hidden>
+        <div class="panel-title"><span>Recetas de rueda</span></div>
+        <div id="recipes" class="tiles"></div>
+        <div class="recipe-map" id="recipeMap"></div>
+        <div class="speed-row" id="knobSpeedRow"><label><i data-ic="gauge"></i>Giro</label><div class="seg" id="knobSpeedSeg"></div></div>
+        <button id="btnInvert"><i data-ic="arrow-left-right"></i>Invertir sentido</button>
+      </div>
+
+      <div class="cur-card" id="curCard">
+        <div class="cur-head"><span class="muted" id="curLabel">Asignado</span><span class="muted" id="curMeta"></span></div>
+        <div id="curChips" class="chips big"></div>
+        <div class="speed-row" id="speedRow"><label><i data-ic="gauge"></i>Velocidad</label><div class="seg" id="speedSeg"></div></div>
+        <div class="cur-actions">
+          <button id="btnRecord" class="primary" title="Pulsa la combinación en tu teclado y ratón"><i data-ic="circle-dot"></i>Grabar</button>
+          <button id="btnTest" hidden title="Ejecuta la acción en este PC tras 3 segundos"><i data-ic="play"></i>Probar</button>
+          <button id="btnClear" title="Borrar"><i data-ic="trash-2"></i></button>
+        </div>
+      </div>
+
+      <details class="fold">
+        <summary><i data-ic="command"></i>Atajos del sistema<i class="chev" data-ic="chevron-down"></i></summary>
+        <div class="lib" id="lib"></div>
+      </details>
+
+      <details class="fold">
+        <summary><i data-ic="sliders-horizontal"></i>Elegir a mano<i class="chev" data-ic="chevron-down"></i></summary>
+        <div class="tabs">
+          <button class="tab" data-tab="keyboard"><i data-ic="keyboard"></i>Teclado</button>
+          <button class="tab" data-tab="mouse"><i data-ic="mouse"></i>Ratón</button>
+          <button class="tab" data-tab="media"><i data-ic="music"></i>Multimedia</button>
+          <button class="tab" data-tab="obs" id="tabObs"><i data-ic="clapperboard"></i>OBS</button>
+        </div>
+        <div id="modsRow" class="modifiers-grid">
+          <div class="mod-btn" data-bit="1" tabindex="0" role="button">Ctrl</div>
+          <div class="mod-btn" data-bit="2" tabindex="0" role="button">Shift</div>
+          <div class="mod-btn" data-bit="4" tabindex="0" role="button">Alt</div>
+          <div class="mod-btn" data-bit="8" tabindex="0" role="button">Win</div>
+        </div>
+        <div id="m-keyboard" class="m-body"><select id="keySelect" aria-label="Tecla"></select></div>
+        <div id="m-mouse" class="m-body opt-grid"></div>
+        <div id="m-media" class="m-body opt-grid"></div>
+        <div id="m-obs" class="m-body">
+          <div class="opt-grid show" id="obsOps"></div>
+          <div class="form-group" id="obsTargetRow" style="margin-top:8px" hidden>
+            <label for="obsTarget" id="obsTargetLabel">Nombre</label>
+            <input type="text" id="obsTarget" />
+          </div>
+          <details style="margin-top:8px">
+            <summary><i data-ic="plug-zap"></i>Conexión a OBS<i class="chev" data-ic="chevron-down"></i></summary>
+            <p class="muted" style="margin:6px 0">En OBS: Herramientas → Ajustes del servidor WebSocket.</p>
+            <div class="obs-conn">
+              <input type="text" id="obsHost" aria-label="Host" placeholder="127.0.0.1" />
+              <input type="number" id="obsPort" aria-label="Puerto" placeholder="4455" />
+              <input type="password" id="obsPass" aria-label="Contraseña" placeholder="Contraseña" />
+            </div>
+          </details>
+        </div>
+      </details>
+
+      <details class="fold">
+        <summary><i data-ic="settings-2"></i>Plantillas, luz y tramas<i class="chev" data-ic="chevron-down"></i></summary>
+        <div class="presets-bar">
+          <button data-preset="fkeys"><i data-ic="ghost"></i>Fantasma F13–F18</button>
+          <button data-preset="media"><i data-ic="music"></i>Multimedia</button>
+          <button data-preset="obs"><i data-ic="clapperboard"></i>OBS por atajos</button>
+          <button data-preset="dev"><i data-ic="code-xml"></i>Dev</button>
+        </div>
+        <div class="form-group">
+          <label for="ledMode"><i data-ic="lightbulb"></i> Iluminación del teclado</label>
+          <select id="ledMode">
+            <option value="0">Apagada</option>
+            <option value="1" selected>Fija</option>
+            <option value="2">Respiración</option>
+            <option value="3">Reactiva al pulsar</option>
+          </select>
+        </div>
+        <div class="hex-console" id="hexConsole" aria-label="Tramas USB"></div>
+      </details>
+    </section>
+  </main>
+  </div>
+</div>
+
+<div class="resize" id="resize" hidden>
+  <i data-edge="n"></i><i data-edge="s"></i><i data-edge="w"></i><i data-edge="e"></i>
+  <i data-edge="nw"></i><i data-edge="ne"></i><i data-edge="sw"></i><i data-edge="se"></i>
+</div>
+
+<div id="recOverlay" class="overlay">
+  <div class="modal-card rec-card">
+    <h2><span class="rec-dot"></span><span id="recTitle">Grabando…</span></h2>
+    <div class="muted">Pulsa la combinación, haz clic con el ratón o mueve la rueda. Se guarda al soltar.</div>
+    <div id="recChips" class="chips big"></div>
+    <div id="recStatus" class="rec-status"></div>
+    <button id="recCancel">Cancelar</button>
+  </div>
+</div>
+
+<div id="addOverlay" class="overlay">
+  <div class="modal-card">
+    <h2><i data-ic="layers"></i>Añadir una app</h2>
+    <div class="form-group"><label>Plantillas</label><div class="pick-list" id="tplList"></div></div>
+    <div class="form-group"><label>Abiertas ahora</label><div class="pick-list" id="winList"></div><p class="muted" id="winHint"></p></div>
+    <div class="form-group">
+      <label for="newExe">O escribe el programa</label>
+      <div class="layer-edit" style="grid-template-columns:1fr 1fr auto">
+        <input type="text" id="newName" placeholder="Nombre (ej. Premiere)" maxlength="40" />
+        <input type="text" id="newExe" placeholder="premiere.exe" />
+        <button id="btnNewLayer" class="primary"><i data-ic="plus"></i>Añadir</button>
+      </div>
+    </div>
+    <button id="addCancel">Cerrar</button>
+  </div>
+</div>
+
+<div id="toast" class="toast" role="status"></div>
+<script src="studio_icons.js"></script>
+<script src="studio.js"></script>
+</body>
+</html>
