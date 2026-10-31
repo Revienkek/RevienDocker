@@ -1,20 +1,27 @@
-"""Genera los iconos de RevienDocker a partir de assets/icon.svg (SVG → PNG HD + ICO multitamaño).
+"""Genera los iconos de RevienDocker a partir de assets/ICON.jpg (PNG HD + ICO multitamaño).
 
     python studio_icon.py        # escribe assets/icon.png y assets/icon.ico
 """
 
-import io
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, ImageDraw, ImageOps
 
 ASSETS = Path(__file__).resolve().parent / "assets"
 
 
 def render(size: int = 1024) -> Image.Image:
-    import resvg_py  # solo hace falta al regenerar los iconos
-    png = resvg_py.svg_to_bytes(svg_path=str(ASSETS / "icon.svg"), width=size, height=size)
-    return Image.open(io.BytesIO(bytes(png))).convert("RGBA")
+    """Recorta el dibujo (fondo blanco fuera), lo centra en un cuadrado y lo redondea con una esquina suave."""
+    rgb = Image.open(ASSETS / "ICON.jpg").convert("RGB")
+    box = rgb.convert("L").point(lambda v: 255 if v < 200 else 0).getbbox()
+    pad = int(max(box[2] - box[0], box[3] - box[1]) * 0.04)
+    box = (max(0, box[0] - pad), max(0, box[1] - pad), min(rgb.width, box[2] + pad), min(rgb.height, box[3] + pad))
+    art = ImageOps.pad(rgb.crop(box), (size, size), color=(255, 255, 255), method=Image.LANCZOS)
+    mask = Image.new("L", (size, size), 0)
+    ImageDraw.Draw(mask).rounded_rectangle((0, 0, size - 1, size - 1), radius=int(size * 0.18), fill=255)
+    out = Image.new("RGBA", (size, size), (255, 255, 255, 0))
+    out.paste(art.convert("RGBA"), (0, 0), mask)
+    return out
 
 
 def icon_image(size: int = 64) -> Image.Image:

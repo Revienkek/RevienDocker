@@ -1,72 +1,75 @@
 # RevienDocker
 
-Programa de escritorio (Windows) para configurar el macropad acrílico de 3 teclas + 1 rueda (WCH CH57x / CH552, VID `0x1189` / PID `0x8890`) sin el ejecutable del fabricante.
+Programa de escritorio para Windows que configura el macropad de 3 teclas y 1 rueda (chip WCH CH57x) desde tu PC.
 
-- **Modo Directo:** las asignaciones (teclas, ratón, multimedia) se graban en la memoria del teclado.
-- **Modo Inteligente:** cada botón cambia según la app en primer plano (capas por app, acciones nativas de OBS por WebSocket). Corre en tu PC y se queda en la bandeja.
-- Grabación real de combinaciones (incluidas Alt+Tab y Win), botones del ratón, recetas de rueda con velocidad.
+![Icono de RevienDocker](assets/icon.png)
 
-Guía de uso: [GUIA_USUARIO.md](GUIA_USUARIO.md).
+## Qué necesitas
 
-> Estado: probado con simuladores y pruebas automáticas. Las tramas USB de ratón, multimedia con repeticiones y velocidad son extensiones propias **no verificadas** contra el firmware real.
+- Windows 10 u 11.
+- El macropad conectado por USB. Sin él, el programa funciona en modo simulador para probar la interfaz.
+- Para el modo Inteligente: RevienDocker abierto (en la bandeja del reloj basta).
 
-## Estructura
+## Cómo empezar
 
-| Ruta | Qué es |
-|---|---|
-| `index.html`, `studio.css`, `studio.js`, `studio_icons.js` | Interfaz (sin dependencias) |
-| `app.py` | Servidor local `127.0.0.1:8765`, API y flasheo USB HID (`hidapi`, con simulador automático) |
-| `studio_engine.py` | Motor inteligente: hook F13–F18, capas por app, SendInput, cliente OBS WebSocket, captura de teclado |
-| `studio_app.py` | App de escritorio: ventana sin marco (pywebview), bandeja, instancia única |
-| `studio_icon.py`, `assets/` | Icono (`icon.svg` es la fuente; `icon.png/.ico` se generan) |
-| `tools/build_icons.py` | Genera `studio_icons.js` con iconos [Lucide](https://lucide.dev) (licencia ISC) |
-| `tests/` | Pruebas sin hardware ni OBS |
-| `build_exe.ps1` | Compila `dist\RevienDocker.exe` |
+1. Abre **RevienDocker** (el acceso directo del escritorio o `dist\RevienDocker.exe`).
+2. Pulsa el enchufe de la cabecera para buscar el teclado. La píldora «Simulador» pasa a verde cuando lo detecta.
+3. Elige un botón en el teclado (panel 1) y decide qué hace en el panel 2.
+4. Pulsa **Flashear**. Eso escribe la configuración dentro del teclado.
 
-**Seguridad:** la API solo acepta Host local y exige la cabecera `X-Studio`, así que una web externa no puede pulsar teclas en tu PC.
+Cuando el teclado tiene la configuración escrita, funciona solo, sin que el programa esté abierto.
 
-## Uso
+## Los dos modos
+
+- **Directo:** las asignaciones (teclas, ratón, multimedia) se guardan dentro del teclado. Funciona en cualquier PC.
+- **Inteligente:** cada botón cambia según la app que tengas en primer plano (por ejemplo, otro atajo en OBS que en el navegador). Necesita RevienDocker en marcha; cerrar la ventana la oculta en la bandeja y el motor sigue activo.
+
+Para elegir un modo, pulsa **Directo** o **Inteligente** en la cabecera.
+
+## Ventana
+
+- Arrastra cualquier borde o esquina para cambiar el tamaño (mínimo 820 × 560).
+- Los botones de la esquina superior derecha minimizan, maximizan o cierran.
+
+## Guía completa
+
+La guía paso a paso (modo Inteligente, capas por app, OBS, recetas de rueda y problemas conocidos) está en [GUIA_USUARIO.md](GUIA_USUARIO.md). El diseño visual está en [DISEÑO.md](DISEÑO.md).
+
+## Compilar el ejecutable
+
+Solo si quieres generar tu propio `.exe`:
 
 ```bash
-pip install -r requirements.txt
-python studio_app.py        # app de escritorio
-python start_studio.py      # solo servidor + navegador (desarrollo)
-```
-
-Compilar el `.exe`:
-
-```bash
-pip install -r requirements-dev.txt
+pip install -r requirements.txt -r requirements-dev.txt
 powershell -ExecutionPolicy Bypass -File build_exe.ps1
 ```
 
-- `RevienDocker.exe --minimized` arranca oculto en la bandeja (acceso directo en `shell:startup` para que arranque con Windows).
-- Tu configuración queda en `%APPDATA%\RevienDocker\studio.json` (en desarrollo, `studio.json` junto al código).
-- Cerrar la ventana: en modo Inteligente se oculta en la bandeja; en Directo, sale.
+El resultado queda en `dist\RevienDocker.exe`.
 
-Pruebas:
+Para ejecutarlo desde el código sin compilar:
+
+```bash
+pip install -r requirements.txt
+python studio_app.py
+```
+
+## Datos y privacidad
+
+- Con el `.exe`, tu configuración se guarda en `%APPDATA%\RevienDocker\studio.json`. Desde el código, en `studio.json` junto a los archivos.
+- El programa solo escucha en tu propio PC (`127.0.0.1`). Otras webs no pueden usarlo para pulsar teclas.
+
+## Pruebas
 
 ```bash
 python -m unittest discover -s tests -t . -v
 ```
 
-## Protocolo USB HID (0x1189:0x8890)
+Las pruebas no necesitan el teclado ni OBS.
 
-Interfaz con Usage Page `0xFF00`, tramas de 65 bytes (Report ID `0x03` + 64 de payload).
+## Estado
 
-| Botón | Slot (byte 1) |
-|---|---|
-| KEY_1 / KEY_2 / KEY_3 | `0x01` / `0x02` / `0x03` |
-| KNOB_CCW / KNOB_PRESS / KNOB_CW | `0x0D` / `0x0E` / `0x0F` |
+La configuración de teclado y la grabación de atajos están probadas con simulador y pruebas automáticas. Las extensiones de ratón, multimedia con repeticiones y velocidad no están verificadas contra el firmware real del teclado.
 
-Secuencia: unlock `03 A1 01` → una escritura por botón → LED `03 A2 <modo 0-3>` → commit `03 AA AA`.
+## Licencia
 
-- Tecla: `03 <slot> 11 01 01 <mod> <código>`
-- Multimedia: `03 <slot> 12 <lo> <hi> <repeticiones>`
-- Ratón: `03 <slot> 13 <mod> <botones> <rueda con signo>` (botones: 1 izq, 2 der, 4 central, 8 atrás, 16 adelante)
-
-Tecla, multimedia, LED y commit vienen de la documentación original; ratón, repeticiones y velocidad son extensiones propias.
-
-## Licencias
-
-Iconos de interfaz: Lucide (ISC). El proyecto aún no tiene licencia propia: elige una antes de publicarlo.
+Licencia MIT, ver [LICENSE](LICENSE). Los iconos de interfaz son de Lucide (licencia ISC).

@@ -145,6 +145,7 @@ _(vacío; se rellena al probar con el hardware)_
 
 | Fecha | Cambio |
 |---|---|
+| 2026-10-31 | v0.02: icono nuevo (`assets/ICON.jpg` → `icon.png/.ico`), título metálico en Doris PP, interfaz en Expressway, esquinas suaves (nunca cuadradas) y documento de diseño `DISEÑO.md`. |
 | 2026-10-31 | v0.01: ventana redimensionable por bordes y esquinas (zonas propias, la ventana sin marco no tenía borde nativo), diseño que se adapta de 820 a 1400 px (flujo del modo Inteligente sin saltos de fila, dos columnas pasan a una en anchuras medianas), botones de ventana visibles también al arrancar en modo Directo, lista blanca de acciones en `/api/window`. |
 | 2026-10-31 | Renombrado a **RevienDocker**: icono nuevo (R · v · D), ventana propia sin marco y compacta, iconos Lucide, interfaz reducida con flujo visual, grabación nativa de teclado, aviso de «sin flashear». |
 | 2026-10-31 | Aplicación de escritorio: `RevienDocker.exe` con ventana, bandeja, instancia única y USB por hidapi. |
