@@ -47,7 +47,7 @@ Activa en OBS: Herramientas → Ajustes del servidor WebSocket → Habilitar. Se
 
 ## 3. La pantalla
 
-El selector de modo encabeza la pantalla y el Docker aparece debajo. Pulsa el lápiz de un control para editarlo: en Directo se abre un panel superpuesto con una cruz para cerrarlo. En Inteligente y Modos, las opciones de aplicación o modo siguen al Docker.
+El selector de modo encabeza la pantalla y el Docker aparece debajo. Pulsa el lápiz de un control para editarlo: se abre un panel superpuesto con una cruz para cerrarlo en cualquiera de los tres modos. En Inteligente y Modos, las opciones de aplicación o modo siguen al Docker.
 
 ### Cabecera y acciones laterales del visor
 - **Píldoras de estado:** ámbar = simulador; verde = teclado real conectado y estado del motor.

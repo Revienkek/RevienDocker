@@ -275,7 +275,6 @@ function refreshUI(opts = {}) {
   const obsApp = smart && isApp() && (layer().exes || []).some(exe => /(^|[\\/])obs(?:64|32)?\.exe$/i.test(exe));
   $("obsConnection").hidden = !obsApp;
   $("obsTools").hidden = !obsApp;
-  $("editor").classList.toggle("editor-overlay", S.mode === "direct");
   if (smart) {
     renderLayers();
     renderSeg($("triggerSeg"), S.trigger, v => { S.trigger = v; persist(); refreshUI(); }, Object.entries(TRIGGERS));

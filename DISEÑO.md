@@ -86,4 +86,4 @@ El selector de perfiles se abre desde el icono «+» junto a Directo. El panel c
 
 ## Jerarquía y edición
 
-El Docker precede a las opciones de app o modo. En Directo, el lápiz abre el editor superpuesto y conserva la altura de la vista. La conexión WebSocket aparece dentro de los ajustes de la app OBS.
+El Docker precede a las opciones de app o modo. En los tres modos, el lápiz abre el editor superpuesto y conserva la altura de la vista. La cruz comparte la fila superior con la asignación. La conexión WebSocket aparece dentro de los ajustes de la app OBS.

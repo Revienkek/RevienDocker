@@ -144,10 +144,10 @@
       </details>
     </section>
 
-    <section class="editor" id="editor" aria-label="Editar control" hidden>
-      <div class="editor-head"><span id="comboCount" hidden></span><button id="closeEditor" class="close-editor" aria-label="Cerrar editor">×</button></div>
+    <section class="editor editor-overlay" id="editor" aria-label="Editar control" hidden>
+      <span id="comboCount" hidden></span>
       <div class="cur-card" id="curCard">
-        <div class="cur-head"><span class="muted" id="curLabel">Asignado</span><div class="seg" id="knobTargetSeg" hidden></div><span class="muted" id="curMeta"></span></div>
+        <div class="cur-head"><span class="muted" id="curLabel">Asignado</span><div class="seg" id="knobTargetSeg" hidden></div><span id="curMeta" hidden></span><button id="closeEditor" class="close-editor" aria-label="Cerrar editor">×</button></div>
         <div id="curChips" class="chips big"></div>
         <div class="speed-row" id="speedRow"><label><i data-ic="gauge"></i>Velocidad</label><div class="seg" id="speedSeg"></div></div>
         <div class="cur-actions">
