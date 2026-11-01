@@ -10,11 +10,11 @@
 <body>
 <div class="app">
   <header class="titlebar">
+    <span class="pill" id="devicePill" title="Estado del teclado"><i data-ic="keyboard"></i><i class="dot"></i><span id="deviceText" class="sr-only">Simulador</span></span>
+    <span class="pill" id="enginePill" title="El docker y la app funcionan juntos: si el motor se detiene, los botones no hacen nada"><i data-ic="zap"></i><i class="dot"></i><span id="engineText" class="sr-only">Motor…</span></span>
+    <button id="btnConnect" class="icon-btn" title="Buscar el teclado"><i data-ic="plug"></i></button>
     <div class="tb-brand pywebview-drag-region"><img class="logo" src="assets/brand-icon.png" alt="" /><img class="wordmark" src="assets/wordmark.svg" alt="RevienDocker" /></div>
     <div class="tb-drag pywebview-drag-region"></div>
-    <span class="pill" id="devicePill" title="Estado del teclado"><i class="dot"></i><span id="deviceText">Simulador</span></span>
-    <span class="pill" id="enginePill" title="El docker y la app funcionan juntos: si el motor se detiene, los botones no hacen nada"><i class="dot"></i><span id="engineText">Motor…</span></span>
-    <button id="btnConnect" class="icon-btn" title="Buscar el teclado"><i data-ic="plug"></i></button>
     <div class="winctl" id="winctl" hidden>
       <button data-win="minimize" title="Minimizar"><i data-ic="minus"></i></button>
       <button data-win="maximize" title="Maximizar"><i data-ic="square"></i></button>

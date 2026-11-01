@@ -56,7 +56,7 @@ button:focus-visible, .keycap:focus-visible, .enc-dir:focus-visible, .knob:focus
 }
 button.primary { background: #fff; border-color: #fff; color: #0a0a0c; }
 @media (hover: hover) and (pointer: fine) { button.primary:hover { background: #dfe3ea; border-color: #dfe3ea; } }
-button.icon-btn { padding: 8px 9px; }
+button.icon-btn { padding: 6px 9px; height: 32px; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; }
 button.danger { color: var(--red); }
 button:disabled { opacity: 0.4; pointer-events: none; }
 select, input[type="text"], input[type="number"], input[type="password"] {
@@ -72,19 +72,20 @@ label { font-size: 0.74rem; color: var(--muted); font-weight: 600; }
 kbd { font: 700 0.72rem var(--mono); background: var(--panel-3); border: 1px solid var(--line-2); border-bottom-width: 2px; border-radius: 4px; padding: 1px 6px; }
 
 /* ---------- Barra de título ---------- */
-.titlebar { height: 50px; flex: none; display: flex; align-items: center; gap: 12px; padding: 0 0 0 14px; background: var(--panel); border-bottom: 1px solid var(--line); }
-.tb-brand { display: flex; align-items: center; gap: 8px; flex: none; }
+.titlebar { height: 50px; flex: none; display: flex; align-items: center; gap: 8px; padding: 0 0 0 14px; background: var(--panel); border-bottom: 1px solid var(--line); position: relative; }
+.tb-brand { position: absolute; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 8px; flex: none; }
 /* Título: vector (assets/wordmark.svg), con el degradado metálico y el filete fino dentro del propio SVG */
 .tb-brand .wordmark { height: 24px; width: auto; display: block; shape-rendering: geometricPrecision; }
 .logo { width: 46px; height: 34px; object-fit: contain; display: block; image-rendering: -webkit-optimize-contrast; image-rendering: high-quality; }
 .tb-drag { flex: 1; height: 100%; min-width: 12px; }
-.pill { display: inline-flex; align-items: center; gap: 7px; font-size: 0.72rem; font-weight: 600; padding: 5px 10px; border-radius: 4px; background: var(--panel-2); border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.pill { display: inline-flex; align-items: center; gap: 7px; font-size: 0.72rem; font-weight: 600; padding: 5px 9px; height: 32px; box-sizing: border-box; border-radius: 4px; background: var(--panel-2); border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.pill .ic { width: 14px; height: 14px; }
 .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--amber); }
 .pill.ok .dot { background: var(--green); }
 .pill.bad .dot { background: var(--red); }
 .pill.ok { color: var(--text); }
 
-.winctl { display: flex; align-self: stretch; margin-left: 6px; position: relative; z-index: 46; }
+.winctl { display: flex; align-self: stretch; margin-left: auto; position: relative; z-index: 46; }
 .winctl button { border: 0; border-radius: 3px; width: 46px; padding: 0; background: transparent; color: var(--muted); }
 .winctl button:active { transform: none; }
 
