@@ -58,7 +58,7 @@ El selector de modo encabeza la pantalla y el Docker aparece debajo. Pulsa el l�
 
 ### ① El teclado (centro)
 - **Directo / Inteligente** está justo encima: es el modo de trabajo (ver sección 2b).
-- En modo Inteligente, debajo del teclado aparece **Atajos para:** una fila con «Todas las apps», una pestaña por cada app y «Añadir app». A la derecha, la app que tienes en primer plano (ignora a RevienDocker: si vuelves a la ventana, sigue mostrando la última app real). Si esa app aún no tiene atajos, sale el botón **Crear atajos para <app>**: un clic y ya tiene su pestaña.
+- En modo Inteligente, el botón de capas junto a los modos abre el panel **Atajos para:** una fila con «Todas las apps», una pestaña por cada app y «Añadir app». A la derecha, la app que tienes en primer plano (ignora a RevienDocker: si vuelves a la ventana, sigue mostrando la última app real). Si esa app aún no tiene atajos, sale el botón **Crear atajos para <app>**: un clic y ya tiene su pestaña.
 - Encima del teclado, una línea visual explica la regla de la pestaña elegida, por ejemplo `Shift + Botón → OBS Studio` («mantén Shift mientras pulsas, con esa app en primer plano») o `Botón → cualquier app` («pulsa el botón solo»). Ahí mismo eliges la tecla de activación (Shift, Ctrl o Alt) y, en las apps, sus ajustes (nombre, programas, quitar).
 - **KEY 1/2/3:** las tres teclas mecánicas. Muestran la acción asignada (ej. `Ctrl+Shift+F13`).
 - **↺ / ↻:** giro de la rueda a izquierda / derecha.

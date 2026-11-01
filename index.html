@@ -13,7 +13,7 @@
     <span class="pill" id="devicePill" title="Estado del teclado"><i data-ic="keyboard"></i><i class="dot"></i><span id="deviceText" class="sr-only">Simulador</span></span>
     <span class="pill" id="enginePill" title="El docker y la app funcionan juntos: si el motor se detiene, los botones no hacen nada"><i data-ic="zap"></i><i class="dot"></i><span id="engineText" class="sr-only">Motor…</span></span>
     <button id="btnConnect" class="icon-btn" title="Buscar el teclado"><i data-ic="plug"></i></button>
-    <div class="tb-brand pywebview-drag-region"><img class="logo" src="assets/brand-icon.png" alt="" /><img class="wordmark" src="assets/wordmark.svg" alt="RevienDocker" /></div>
+    <div class="tb-brand pywebview-drag-region"><img class="wordmark" src="assets/wordmark.svg" alt="RevienDocker" /></div>
     <div class="tb-drag pywebview-drag-region"></div>
     <div class="winctl" id="winctl" hidden>
       <button data-win="minimize" title="Minimizar"><i data-ic="minus"></i></button>
@@ -25,7 +25,7 @@
   <main class="stage">
 
     <section class="mode-block">
-      <div class="mode-controls"><div class="profile-wrap" id="profileWrap"><button id="profileToggle" class="profile-toggle" title="Perfiles de Directo" aria-label="Perfiles de Directo" aria-expanded="false"><i data-ic="plus"></i></button><div class="profile-panel" id="profilePanel" hidden><div class="profile-create"><input id="profileName" maxlength="12" placeholder="Nombre" aria-label="Nombre del perfil" /><button id="profileSave" title="Guardar perfil confirmado" aria-label="Guardar perfil confirmado"><i data-ic="save"></i></button></div><div id="profileList" class="profile-list"></div></div></div><div class="modes" role="radiogroup" aria-label="Modo">
+      <div class="mode-controls"><div class="profile-wrap" id="profileWrap"><button id="profileToggle" class="profile-toggle" title="Perfiles de Directo" aria-label="Perfiles de Directo" aria-expanded="false"><i data-ic="plus"></i></button><div class="profile-panel" id="profilePanel" hidden><div class="profile-create"><input id="profileName" maxlength="12" placeholder="Nombre" aria-label="Nombre del perfil" /><button id="profileSave" title="Guardar perfil confirmado" aria-label="Guardar perfil confirmado"><i data-ic="save"></i></button></div><div id="profileList" class="profile-list"></div></div></div><button id="smartToggle" class="profile-toggle" aria-label="Atajos para apps" title="Atajos para apps" aria-expanded="false" aria-controls="smartPanel" hidden><i data-ic="layers"></i></button><div class="modes" role="radiogroup" aria-label="Modo">
       <button data-mode="direct" role="radio" title="Lo que hace cada botón al pulsarlo solo, en cualquier app. Es la base de todo."><i data-ic="target"></i>Directo</button>
       <button data-mode="smart" role="radio" title="Mantén un modificador y pulsa un botón: atajos propios para la app que tengas delante."><i data-ic="brain"></i>Inteligente</button>
       <button data-mode="modes" role="radio" title="Tres modos de trabajo: Alt+Shift+1/2/3 cambia de modo y repetirlo vuelve a Directo."><i data-ic="shapes"></i>Modos</button>
@@ -81,10 +81,11 @@
       <div class="ctx" id="deviceCtx"></div>
     </section>
 
+    <div class="smart-panel" id="smartPanel" aria-label="Atajos para apps" hidden>
     <section class="smart-tabs" id="smartCard" hidden>
       <div class="smart-head">
         <span class="s-label"><i data-ic="layers"></i>Atajos para</span>
-        <span class="live-app" id="liveApp" title="App que tienes en primer plano (ignora RevienDocker)"><i data-ic="app-window"></i><span id="activeApp">—</span></span>
+        <span class="smart-head-actions"><span class="live-app" id="liveApp" title="App que tienes en primer plano (ignora RevienDocker)"><i data-ic="app-window"></i><span id="activeApp">—</span></span><button id="smartClose" class="close-editor" aria-label="Cerrar atajos para apps">×</button></span>
       </div>
       <div id="layerWrap" class="layerbar"></div>
       <button id="appSuggest" class="suggest" hidden><i data-ic="plus"></i><span id="appSuggestText"></span></button>
@@ -112,6 +113,8 @@
       <div class="trig-row"><span class="muted">Tecla de activación</span><div class="seg" id="triggerSeg"></div></div>
       <p class="err" id="engineErr" hidden></p>
     </section>
+
+    </div>
 
     <section class="mode-bar" id="modeBar" hidden>
       <div class="smart-head">

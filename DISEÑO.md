@@ -18,7 +18,7 @@ Un macropad CH57x visto como **mecanismo de relojería**: teclas de cera negra, 
 ## Logotipo
 
 - `assets/wordmark.svg`: «REVIENDOCKER» en trazos vectoriales, con la R inicial y la D de Docker más altas. No depende de la fuente instalada.
-- En la cabecera van juntos el icono (46 × 34 px) y el wordmark (24 px de alto).
+- La cabecera centra el wordmark sin icono lateral.
 
 ## Paleta
 
@@ -87,3 +87,5 @@ El selector de perfiles se abre desde el icono «+» junto a Directo. El panel c
 ## Jerarquía y edición
 
 El Docker precede a las opciones de app o modo. En los tres modos, el lápiz abre el editor superpuesto y conserva la altura de la vista. La cruz comparte la fila superior con la asignación. La conexión WebSocket aparece dentro de los ajustes de la app OBS.
+
+En Inteligente, el icono de capas abre las apps y sus ajustes en un panel superpuesto; la cruz comparte la cabecera con «Atajos para».

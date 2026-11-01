@@ -263,6 +263,8 @@ function refreshUI(opts = {}) {
   else if (smart && layerId === "base" && S.layers.length > 1) layerId = S.layers[1].id;
   $("profileWrap").hidden = S.mode !== "direct";
   if (S.mode !== "direct") { $("profilePanel").hidden = true; $("profileToggle").setAttribute("aria-expanded", "false"); }
+  $("smartToggle").hidden = !smart;
+  if (!smart) showSmartPanel(false);
   $("smartCard").hidden = !smart; $("smartRule").hidden = !smart; $("modeBar").hidden = !modes;
   if (!editable()) closeEditorUI();
   $("device").classList.toggle("locked", !editable());   // sin app o sin modo elegido: el dibujo es solo una vista
@@ -455,6 +457,14 @@ $("profileSave").addEventListener("click", () => {
 });
 document.addEventListener("click", e => { if (!$("profileWrap").contains(e.target)) { $("profilePanel").hidden = true; $("profileToggle").setAttribute("aria-expanded", "false"); } });
 
+function showSmartPanel(show) {
+  if (show) closeEditorUI();
+  $("smartPanel").hidden = !show;
+  $("smartToggle").setAttribute("aria-expanded", String(show));
+}
+$("smartToggle").addEventListener("click", () => showSmartPanel($("smartPanel").hidden));
+$("smartClose").addEventListener("click", () => { showSmartPanel(false); $("smartToggle").focus(); });
+
 // ---------- Eventos de la interfaz ----------
 // Clic directo en una pieza del docker = abre grabación directa.
 document.querySelectorAll("[data-target]").forEach(t => {
@@ -493,7 +503,7 @@ function closeEditorUI() {
   $("selectedLabel").textContent = "";
 }
 $("closeEditor").addEventListener("click", closeEditorUI);
-document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("editor").hidden) { closeEditorUI(); } });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("editor").hidden) { closeEditorUI(); } else if (e.key === "Escape" && !$("smartPanel").hidden && !$("addOverlay").classList.contains("show")) { showSmartPanel(false); $("smartToggle").focus(); } });
 function showLighting(show) {
   $("lightingPanel").hidden = !show;
   $("btnLighting").setAttribute("aria-expanded", String(show));
