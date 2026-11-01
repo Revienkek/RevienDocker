@@ -168,4 +168,4 @@ En Directo, el botón «+» junto a los modos abre los perfiles. Confirma primer
 
 ## Modos de trabajo
 
-En Modos, el icono de ajustes junto al selector abre los tres modos de trabajo, sus plantillas y ajustes en un panel superpuesto. Ciérralo con la cruz.
+En Modos, el icono de ajustes junto al selector abre los tres modos de trabajo, sus plantillas en un panel superpuesto. El lápiz cambia el nombre y la papelera quita el modo; la cruz cierra el panel.

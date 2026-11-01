@@ -356,3 +356,15 @@ details[open] > summary .chev { transform: rotate(180deg); }
 .smart-panel .smart-bar { padding: 14px; }
 
 #workModesPanel .mode-bar { padding: 0; border: 0; background: transparent; }
+
+/* Acciones y nombre en la propia fila del modo. */
+.mode-slots { grid-template-columns: 1fr; }
+.mode-row { display: flex; align-items: center; gap: 4px; min-width: 0; padding-right: 5px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 4px; }
+.mode-row.active { border-color: #fff; background: var(--panel-3); }
+.mode-row.empty { border-style: dashed; }
+.mode-row .mode-slot { flex: 1; min-width: 0; background: transparent; border: 0; }
+.mode-row-action { flex: none; padding: 7px; background: transparent; border: 0; color: var(--muted); }
+.mode-row-action .ic { width: 16px; height: 16px; }
+.mode-row-delete:hover { color: var(--red); }
+.mode-inline-name { flex: 1; min-width: 0; width: 100%; padding: 4px 6px; }
+.mode-row.is-live .live { opacity: 1; }

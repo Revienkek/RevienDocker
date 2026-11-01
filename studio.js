@@ -396,17 +396,34 @@ function renderCtx() {
 function renderModes() {
   const box = $("modeSlots"); box.innerHTML = "";
   S.modes.forEach((m, i) => {
-    const b = el("button", "mode-slot" + (i === modeIdx ? " active" : "") + (i === liveMode ? " is-live" : "") + (m ? "" : " empty"));
-    b.setAttribute("role", "radio"); b.setAttribute("aria-checked", i === modeIdx);
-    b.innerHTML = `<kbd>${i + 1}</kbd>` + ic(m ? m.icon : "plus") + `<span class="m-name"></span><i class="live"></i>`;
-    b.querySelector(".m-name").textContent = m ? m.name : "Vacío";
-    b.title = m ? `Alt+Shift+${i + 1} activa «${m.name}»` : `Hueco libre: Alt+Shift+${i + 1}`;
-    b.addEventListener("click", () => { if (i !== modeIdx) { modeIdx = i; closeEditorUI(); collapseAllFolds(); swapFx(); refreshUI(); } });
-    box.appendChild(b);
+    const row = el("div", "mode-row" + (i === modeIdx ? " active" : "") + (i === liveMode ? " is-live" : "") + (m ? "" : " empty"));
+    const select = el("button", "mode-slot"); select.type = "button";
+    select.setAttribute("role", "radio"); select.setAttribute("aria-checked", i === modeIdx);
+    select.innerHTML = `<kbd>${i + 1}</kbd>` + ic(m ? m.icon : "plus") + `<span class="m-name"></span><i class="live"></i>`;
+    select.querySelector(".m-name").textContent = m ? m.name : "Vacío";
+    select.title = m ? `Alt+Shift+${i + 1} activa «${m.name}»` : `Hueco libre: Alt+Shift+${i + 1}`;
+    select.addEventListener("click", () => { if (i !== modeIdx) { modeIdx = i; closeEditorUI(); collapseAllFolds(); swapFx(); refreshUI(); } });
+    row.appendChild(select);
+    if (m) {
+      const edit = el("button", "mode-row-action"), remove = el("button", "mode-row-action mode-row-delete");
+      edit.type = remove.type = "button"; edit.innerHTML = ic("pencil"); remove.innerHTML = ic("trash-2");
+      edit.title = edit.ariaLabel = `Cambiar nombre de ${m.name}`; remove.title = remove.ariaLabel = `Eliminar ${m.name}`;
+      edit.addEventListener("click", () => {
+        const input = el("input", "mode-inline-name");
+        input.value = m.name; input.maxLength = 30; input.setAttribute("aria-label", "Nombre del modo");
+        select.hidden = true; row.insertBefore(input, edit); input.focus(); input.select();
+        let finished = false;
+        const finish = save => { if (finished) return; finished = true; if (save) { m.name = input.value.trim().slice(0, 30) || `Modo ${i + 1}`; persist(); } renderModes(); renderCtx(); };
+        input.addEventListener("click", e => e.stopPropagation());
+        input.addEventListener("keydown", e => { e.stopPropagation(); if (e.key === "Enter") finish(true); else if (e.key === "Escape") finish(false); });
+        input.addEventListener("blur", () => finish(true));
+      });
+      remove.addEventListener("click", () => { if (!window.confirm(`¿Quitar el modo «${m.name}»?`)) return; S.modes[i] = null; persist(); closeEditorUI(); swapFx(); refreshUI(); });
+      row.append(edit, remove);
+    }
+    box.appendChild(row);
   });
   const m = slotMode();
-  $("modeEdit").hidden = !m;
-  if (m) setVal($("modeName"), m.name);
   $("modeTplTitle").innerHTML = (m ? "Cambiar plantilla" : "Elige una plantilla") + "<small>Un modo completo, listo para personalizar</small>";
   $("modeToggle").hidden = !API.ok || !m;
   $("modeToggleText").textContent = liveMode === modeIdx ? "Volver a Directo" : "Activar ahora";
@@ -638,14 +655,6 @@ $("applyPreset").addEventListener("click", () => {
   toast(`Modo ${modeIdx + 1}: ${S.modes[modeIdx].name}`);
 });
 $("btnBlankMode").addEventListener("click", () => { fillMode({ name: `Modo ${modeIdx + 1}`, icon: "sliders-horizontal", actions: {} }); toast("Modo en blanco: lo que no definas hace lo de Directo"); });
-$("modeName").addEventListener("input", e => { const m = slotMode(); if (m) { m.name = e.target.value.trim().slice(0, 30) || `Modo ${modeIdx + 1}`; persist(); renderModes(); renderCtx(); } });
-let delModeArm = null;
-const delModeLabel = () => { $("btnDelMode").querySelector("span").textContent = delModeArm ? "¿Seguro? Clic otra vez" : "Quitar modo"; };
-$("btnDelMode").addEventListener("click", () => {
-  if (!delModeArm) { delModeArm = setTimeout(() => { delModeArm = null; delModeLabel(); }, 3000); delModeLabel(); return; }
-  clearTimeout(delModeArm); delModeArm = null; delModeLabel();
-  S.modes[modeIdx] = null; persist(); closeEditorUI(); swapFx(); refreshUI();
-});
 $("modeToggle").addEventListener("click", () => api("/api/mode", { slot: modeIdx }).then(updateEngineUI).catch(() => toast("No se pudo cambiar de modo", true)));
 
 // ---------- Capas: añadir app ----------
