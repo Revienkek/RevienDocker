@@ -2,3 +2,4 @@ pywebview>=5
 pystray>=0.19
 pillow>=10
 hidapi>=0.14
+pycaw>=20251023

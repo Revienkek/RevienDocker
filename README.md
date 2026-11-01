@@ -15,13 +15,13 @@ Programa de escritorio para Windows que configura el macropad de 3 teclas y 1 ru
 1. Abre **RevienDocker** (el acceso directo del escritorio o `dist\RevienDocker.exe`).
 2. Pulsa el enchufe de la cabecera para buscar el teclado. La píldora «Simulador» pasa a verde cuando lo detecta.
 3. Elige un botón en el teclado (panel 1) y decide qué hace en el panel 2.
-4. Pulsa **Flashear**. Eso escribe la configuración dentro del teclado.
+4. Pulsa **Aplicar cambios**. Eso escribe la configuración dentro del teclado.
 
 Cuando el teclado tiene la configuración escrita, funciona solo, sin que el programa esté abierto.
 
 ## Los dos modos
 
-- **Directo:** las asignaciones (teclas, ratón, multimedia) se guardan dentro del teclado. Funciona en cualquier PC.
+- **Directo:** las asignaciones se guardan dentro del teclado y funcionan en cualquier PC. Para los pasos configurables del volumen de la rueda, RevienDocker debe estar abierto o en la bandeja de Windows.
 - **Inteligente:** cada botón cambia según la app que tengas en primer plano (por ejemplo, otro atajo en OBS que en el navegador). Necesita RevienDocker en marcha; cerrar la ventana la oculta en la bandeja y el motor sigue activo.
 
 Para elegir un modo, pulsa **Directo** o **Inteligente** en la cabecera.
@@ -68,7 +68,7 @@ Las pruebas no necesitan el teclado ni OBS.
 
 ## Estado
 
-La configuración de teclado y la grabación de atajos están probadas con simulador y pruebas automáticas. Las extensiones de ratón, multimedia con repeticiones y velocidad no están verificadas contra el firmware real del teclado.
+La configuración de teclado y la grabación de atajos están probadas con simulador y pruebas automáticas. El formato de escritura USB es el de ch57x-keyboard-tool para este chip. Los botones de ratón atrás/adelante y los modos de luz 0–3 no están confirmados en el teclado real.
 
 ## Licencia
 

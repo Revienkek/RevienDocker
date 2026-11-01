@@ -7,6 +7,7 @@ automático para trabajar en la interfaz antes de conectar el hardware físico.
 import json
 import sys
 import threading
+import time
 from pathlib import Path
 from http.server import HTTPServer, SimpleHTTPRequestHandler, ThreadingHTTPServer
 
@@ -79,78 +80,80 @@ class CH57xController:
         return {"connected": False, "reason": "no detectado"}
 
     @staticmethod
-    def build_packet(slot_name: str, action_type: str, modifiers: int, hid_code: int,
-                     wheel: int = 0, speed: int = 1) -> bytes:
-        """Construye la trama exacta de 65 bytes (Report ID 0x03 + 64B payload)."""
-        slot_id = SLOTS.get(slot_name, 0x01)
-        pkt = bytearray(65)
-        pkt[0] = REPORT_ID
-        pkt[1] = slot_id
-
-        if action_type == "keyboard":
-            pkt[2] = 0x11  # Layer 1 + Tipo Teclado (1)
-            pkt[3] = 0x01  # Longitud de macro: 1 tecla
-            pkt[4] = 0x01  # Secuencia índice 1
-            pkt[5] = modifiers & 0xFF
-            pkt[6] = hid_code & 0xFF
-        elif action_type == "media":
-            pkt[2] = 0x12  # Layer 1 + Tipo Multimedia (2)
-            pkt[3] = hid_code & 0xFF
-            pkt[4] = (hid_code >> 8) & 0xFF
-            pkt[5] = max(1, speed) & 0xFF  # repeticiones por paso (velocidad de la rueda)
+    def key_messages(slot_name: str, action_type: str, modifiers: int, code: int, wheel: int = 0, speed: int = 1) -> list:
+        """Mensajes que fijan UN botón (capa 1). Protocolo del CH57x 0x8890, el mismo de ch57x-keyboard-tool:
+        inicio `03 FE capa 01 01`, uno o varios mensajes del botón y cierre `03 AA AA`.
+        Cada mensaje son 64 bytes: el primero es el Report ID 0x03."""
+        sid = SLOTS.get(slot_name, 0x01)
+        layer = 0x10  # (capa 0 + 1) << 4
+        def msg(*b):
+            m = bytearray(64)
+            m[0] = REPORT_ID
+            m[1:1 + len(b)] = bytes(x & 0xFF for x in b)
+            return bytes(m)
+        out = [msg(0xFE, 0x01, 0x01, 0x01)]
+        if action_type == "media":
+            out.append(msg(sid, layer | 0x02, code & 0xFF, (code >> 8) & 0xFF))
         elif action_type == "mouse":
-            pkt[2] = 0x13  # Layer 1 + Tipo Ratón (3)
-            pkt[3] = modifiers & 0xFF      # modificadores (ej. Ctrl + rueda = zoom)
-            pkt[4] = hid_code & 0xFF       # máscara de botones: 1 izq, 2 der, 4 central, 8 atrás, 16 adelante
-            pkt[5] = (wheel * max(1, speed)) & 0xFF  # rueda con signo: +arriba / -abajo
+            # botones, dx, dy, rueda con signo, modificadores (la velocidad multiplica la rueda)
+            out.append(msg(sid, layer | 0x03, code, 0, 0, wheel * max(1, speed), modifiers))
+        else:
+            out.append(msg(sid, layer | 0x01, 1, 0, 0, 0))                    # el firmware pide primero una tecla vacía
+            out.append(msg(sid, layer | 0x01, 1, 1, modifiers, code))         # largo 1, posición 1, modificadores, tecla
+        out.append(msg(0xAA, 0xAA))
+        return out
 
-        return bytes(pkt)
+    @classmethod
+    def flash_messages(cls, mappings: dict, led_mode: int = 1) -> list:
+        """Secuencia completa como lista de (etiqueta, mensaje de 64 bytes)."""
+        seq = []
+        for slot_name, cfg in mappings.items():
+            msgs = cls.key_messages(slot_name, cfg.get("type", "keyboard"), int(cfg.get("modifiers", 0)),
+                                    int(cfg.get("hid_code", 0)), int(cfg.get("wheel", 0)), int(cfg.get("speed", 1)))
+            seq += [(f"{slot_name}", m) for m in msgs]
+        return seq + cls.led_messages(led_mode)
+
+    @staticmethod
+    def led_messages(mode: int) -> list:
+        """Luz del teclado: `A1 01`, `B0 18 <modo>`, `AA A1`. Solo se conocen los modos 0, 1 y 2; el color no se programa."""
+        return [("LED", bytes([REPORT_ID, 0xA1, 0x01]) + bytes(61)),
+                ("LED", bytes([REPORT_ID, 0xB0, 0x18, mode & 0xFF]) + bytes(60)),
+                ("LED", bytes([REPORT_ID, 0xAA, 0xA1]) + bytes(61))]
+
+    def set_led(self, mode: int) -> dict:
+        """Cambia solo la luz, al instante. `sent` es False si no hay teclado (simulador)."""
+        status = self.connect()
+        logs = []
+        try:
+            for tag, m in self.led_messages(mode):
+                self._send(m, logs, tag)
+        finally:
+            if self.device:
+                self.device.close()
+                self.device = None
+        return {"sent": bool(status.get("connected")), "logs": logs}
 
     def flash_mappings(self, mappings: dict, led_mode: int = 1) -> list:
-        """Envía la secuencia completa Unlock -> Slots -> Commit a la EEPROM."""
+        """Escribe todos los botones y la luz. Lanza OSError si el teclado rechaza algún mensaje."""
         status = self.connect()
         logs = [f"Estado del bus: {status['mode']}"]
-
-        unlock_pkt = bytearray(65)
-        unlock_pkt[0] = REPORT_ID
-        unlock_pkt[1] = 0xA1
-        unlock_pkt[2] = 0x01
-        self._send(unlock_pkt, logs, "UNLOCK_EEPROM")
-
-        for slot_name, cfg in mappings.items():
-            pkt = self.build_packet(
-                slot_name=slot_name,
-                action_type=cfg.get("type", "keyboard"),
-                modifiers=int(cfg.get("modifiers", 0)),
-                hid_code=int(cfg.get("hid_code", 104)),
-                wheel=int(cfg.get("wheel", 0)),
-                speed=int(cfg.get("speed", 1)),
-            )
-            self._send(pkt, logs, f"WRITE_{slot_name}")
-
-        led_pkt = bytearray(65)
-        led_pkt[0] = REPORT_ID
-        led_pkt[1] = 0xA2
-        led_pkt[2] = led_mode & 0xFF
-        self._send(led_pkt, logs, "SET_LED")
-
-        commit_pkt = bytearray(65)
-        commit_pkt[0] = REPORT_ID
-        commit_pkt[1] = 0xAA
-        commit_pkt[2] = 0xAA
-        self._send(commit_pkt, logs, "COMMIT_EEPROM")
-
-        if self.device:
-            self.device.close()
-            self.device = None
-
+        try:
+            for tag, m in self.flash_messages(mappings, led_mode):
+                self._send(m, logs, tag)
+        finally:
+            if self.device:
+                self.device.close()
+                self.device = None
         return logs
 
     def _send(self, pkt: bytes, logs: list, tag: str):
-        hex_preview = " ".join(f"{b:02X}" for b in pkt[:12])
+        hex_preview = " ".join(f"{b:02X}" for b in pkt[:10])
         if not self.simulated and self.device:
-            self.device.write(pkt)
+            n = self.device.write(pkt)
+            if n < 0:
+                raise OSError(f"el teclado rechazó el mensaje {tag}: {self.device.error()}")
             logs.append(f"[TX USB] {tag}: {hex_preview} ...")
+            time.sleep(0.01)
         else:
             logs.append(f"[SIMULADOR] {tag}: {hex_preview} ...")
 
@@ -158,7 +161,7 @@ class CH57xController:
 BASE_DIR = RESOURCE_DIR
 PORT = 8765
 # Acciones permitidas en /api/window (las resuelve studio_app.py; cualquier otra se rechaza).
-WINDOW_ACTIONS = ("minimize", "maximize", "close",
+WINDOW_ACTIONS = ("minimize", "maximize", "close", "show", "restore",
                   "resize-n", "resize-s", "resize-e", "resize-w",
                   "resize-ne", "resize-nw", "resize-se", "resize-sw")
 
@@ -226,16 +229,29 @@ class StudioHandler(SimpleHTTPRequestHandler):
         except ValueError:
             return self._json({"ok": False, "error": "bad json"}, 400)
         if self.path == "/api/flash":
-            logs = self.controller.flash_mappings(body.get("mappings", {}), led_mode=int(body.get("led_mode", 1)))
+            try:
+                logs = self.controller.flash_mappings(body.get("mappings", {}), led_mode=int(body.get("led_mode", 1)))
+            except OSError as exc:
+                return self._json({"ok": False, "error": str(exc)})
             return self._json({"ok": True, "logs": logs})
+        if self.path == "/api/led":
+            try:
+                res = self.controller.set_led(max(0, min(255, int(body.get("mode", 1)))))
+            except (OSError, ValueError) as exc:
+                return self._json({"ok": False, "error": str(exc)})
+            return self._json({"ok": True, **res})
         if self.path == "/api/config":
             studio = self.engine.apply(body.get("studio", {}))
             return self._json({"ok": True, "studio": studio, **self.engine.status(), "desktop": self.window_control is not None})
         if self.path == "/api/window":
             if self.window_control is None or body.get("action") not in WINDOW_ACTIONS:
                 return self._json({"ok": False}, 400)
-            # type(self): leer la función desde la clase evita que Python la convierta en método
-            threading.Thread(target=type(self).window_control, args=(body["action"],), daemon=True).start()
+            # Leer desde la clase evita convertir la función en método. El arrastre
+            # ya inicia su propio hilo; las demás acciones pueden informar errores.
+            try:
+                type(self).window_control(body["action"])
+            except Exception as exc:
+                return self._json({"ok": False, "error": str(exc)}, 500)
             return self._json({"ok": True})
         if self.path == "/api/record":
             if body.get("action") == "start":
@@ -248,9 +264,13 @@ class StudioHandler(SimpleHTTPRequestHandler):
         self._json({"ok": False, "error": "not found"}, 404)
 
 
+class SingleInstanceServer(ThreadingHTTPServer):
+    allow_reuse_address = False
+
+
 def make_server(port: int = PORT) -> ThreadingHTTPServer:
     """Crea el servidor local (solo 127.0.0.1). Lanza OSError si el puerto está ocupado (otra instancia)."""
-    return ThreadingHTTPServer(("127.0.0.1", port), StudioHandler)
+    return SingleInstanceServer(("127.0.0.1", port), StudioHandler)
 
 
 def serve(port: int = PORT, open_browser: bool = False):

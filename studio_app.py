@@ -25,25 +25,99 @@ from studio_icon import icon_image
 TITLE = "RevienDocker"
 MIN_W, MIN_H = 820, 560  # = min_size de la ventana
 VK_LBUTTON = 0x01
+MUTEX_NAME = "Local\\RevienDocker_SingleInstance_Mutex"
+ERROR_ALREADY_EXISTS = 183
 
 
 class _Point(ctypes.Structure):
     _fields_ = [("x", ctypes.c_long), ("y", ctypes.c_long)]
 
 
+def activate_existing_instance() -> bool:
+    """Intenta despertar la instancia ya abierta por HTTP y traerla al frente."""
+    try:
+        import urllib.request
+        req = urllib.request.Request(
+            f"http://127.0.0.1:{PORT}/api/window",
+            data=b'{"action":"show"}',
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=1.0) as resp:
+            return resp.status == 200
+    except Exception:
+        pass
+    user32 = ctypes.windll.user32
+    hwnd = user32.FindWindowW(None, TITLE)
+    if hwnd:
+        user32.ShowWindow(hwnd, 9)  # SW_RESTORE
+        user32.SetForegroundWindow(hwnd)
+        return True
+    return False
+
+
 def main():
+    mutex = ctypes.windll.kernel32.CreateMutexW(None, False, MUTEX_NAME)
+    if ctypes.windll.kernel32.GetLastError() == ERROR_ALREADY_EXISTS:
+        activate_existing_instance()
+        return
+
     try:
         server = make_server(PORT)
     except OSError:
-        ctypes.windll.user32.MessageBoxW(0, "RevienDocker ya está en marcha: búscalo en la bandeja del sistema (junto al reloj).", TITLE, 0x40)
+        if not activate_existing_instance():
+            ctypes.windll.user32.MessageBoxW(0, "RevienDocker ya está en marcha: búscalo en la bandeja del sistema (junto al reloj).", TITLE, 0x40)
         return
     ENGINE.apply(ENGINE.studio, persist=False)  # reanuda el modo inteligente si estaba activo
     threading.Thread(target=server.serve_forever, daemon=True, name="studio-http").start()
 
     window = webview.create_window(TITLE, f"http://127.0.0.1:{PORT}/index.html", width=1040, height=720, min_size=(820, 560),
                                    frameless=True, easy_drag=False, background_color="#08090c", hidden="--minimized" in sys.argv)
-    state = {"quit": False, "max": False}
+    state = {"quit": False, "max": False, "hidden": "--minimized" in sys.argv, "minimized": False}
     tray = None
+
+    def set_maximized():
+        state["max"] = True
+
+    def set_restored():
+        state["max"] = False
+        state["minimized"] = False
+        if tray:
+            tray.update_menu()
+
+    def set_minimized():
+        state["minimized"] = True
+        if tray:
+            tray.update_menu()
+
+    window.events.maximized += set_maximized
+    window.events.restored += set_restored
+    window.events.minimized += set_minimized
+
+    def hide_to_tray():
+        window.hide()
+        state["hidden"] = True
+        if tray:
+            tray.update_menu()
+
+    def show_window():
+        window.show()
+        if state["minimized"]:
+            window.restore()
+        state["hidden"] = False
+        state["minimized"] = False
+        if tray:
+            tray.update_menu()
+        hwnd = ctypes.windll.user32.FindWindowW(None, TITLE)
+        if hwnd:
+            ctypes.windll.user32.ShowWindow(hwnd, 9)  # SW_RESTORE
+            ctypes.windll.user32.SetForegroundWindow(hwnd)
+
+    def toggle_window():
+        if state["hidden"] or state["minimized"]:
+            show_window()
+        else:
+            hide_to_tray()
 
     def resize_drag(edge):
         """Ventana sin marco: Windows no ofrece borde nativo que arrastrar, así que seguimos el ratón
@@ -92,16 +166,18 @@ def main():
             window.minimize()
         elif action == "maximize":
             window.restore() if state["max"] else window.maximize()
-            state["max"] = not state["max"]
         elif action == "close":
-            if ENGINE.hook is not None and ENGINE.studio["mode"] == "smart":
-                window.hide()  # el motor inteligente sigue en la bandeja
+            if ENGINE.hook is not None:
+                hide_to_tray()  # el motor inteligente sigue en la bandeja
             else:
                 quit_app()
+        elif action in ("show", "restore"):
+            show_window()
 
     app.StudioHandler.window_control = control
     tray = pystray.Icon("revien-docker", icon_image(64), TITLE, menu=pystray.Menu(
-        pystray.MenuItem("Abrir RevienDocker", lambda *_: window.show(), default=True),
+        pystray.MenuItem(lambda _: "Mostrar RevienDocker" if state["hidden"] or state["minimized"] else "Minimizar a la bandeja",
+                         lambda *_: toggle_window(), default=True),
         pystray.MenuItem("Salir", lambda *_: quit_app())))
     tray.run_detached()
     webview.start()

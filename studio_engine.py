@@ -51,6 +51,8 @@ DEFAULT_STUDIO = {
     "trigger": "shift",
     "led_mode": 1,
     "flashed": "",
+    "applied": None,
+    "volume_bridge": False,
     "layers": [{"id": "base", "name": "Base", "exes": [], "actions": {}}],
     "obs": {"host": "127.0.0.1", "port": 4455, "password": ""},
 }
@@ -85,10 +87,14 @@ def normalize_studio(d):
     """Devuelve una configuración válida (descarta lo que no encaja) sin lanzar excepciones."""
     d = d if isinstance(d, dict) else {}
     out = json.loads(json.dumps(DEFAULT_STUDIO))
-    out["mode"] = d.get("mode") if d.get("mode") in ("direct", "smart") else "direct"
+    out["mode"] = d.get("mode") if d.get("mode") in ("direct", "smart", "modes") else "direct"
     out["trigger"] = d.get("trigger") if d.get("trigger") in TRIGGER_VK else "shift"
-    out["led_mode"] = _int(d.get("led_mode"), 0, 3, 1)
+    out["led_mode"] = _int(d.get("led_mode"), 0, 255, 1)
     out["flashed"] = str(d.get("flashed", ""))[:600]  # firma de lo último escrito en el teclado (para el aviso de «sin flashear»)
+    out["volume_bridge"] = d.get("volume_bridge") is True
+    ap = d.get("applied")
+    if isinstance(ap, dict):  # lo último aplicado al teclado en modo Directo: {botón: acción}
+        out["applied"] = {s: c for s, a in ap.items() if s in SLOTS and (c := _clean_action(a))}
     o = d.get("obs") if isinstance(d.get("obs"), dict) else {}
     out["obs"] = {"host": str(o.get("host", "127.0.0.1"))[:100] or "127.0.0.1",
                   "port": _int(o.get("port"), 1, 65535, 4455), "password": str(o.get("password", ""))[:200]}
@@ -273,8 +279,33 @@ if IS_WIN:
 
     def run_media(code, speed):
         vk = MEDIA_VK.get(code)
-        for _ in range(max(1, speed) if vk else 0):
+        count = max(1, speed) if vk else 0
+        for i in range(count):
             _send([_kb(vk), _kb(vk, True)])
+            # Evita que pulsaciones consecutivas lleguen como una sola ráfaga
+            # a los componentes que procesan las teclas multimedia de Windows.
+            if i + 1 < count:
+                time.sleep(0.025)
+
+    def adjust_system_volume(code, step):
+        """Ajusta en puntos porcentuales el dispositivo de salida predeterminado."""
+        import comtypes
+        from pycaw.pycaw import AudioUtilities
+
+        comtypes.CoInitialize()
+        try:
+            device = AudioUtilities.GetSpeakers()
+            if device is None:
+                raise RuntimeError("No hay dispositivo de salida de audio predeterminado")
+            endpoint = device.EndpointVolume
+            current = round(endpoint.GetMasterVolumeLevelScalar() * 100)
+            target = max(0, min(100, current + (step if code == 0xE9 else -step)))
+            endpoint.SetMasterVolumeLevelScalar(target / 100.0, None)
+            del endpoint, device
+        finally:
+            comtypes.CoUninitialize()
+        from volume_overlay import show_volume
+        show_volume(target)
 
     _MOUSE_FLAGS = {1: (0x0002, 0x0004, 0), 2: (0x0008, 0x0010, 0), 4: (0x0020, 0x0040, 0),
                     8: (0x0080, 0x0100, 1), 16: (0x0080, 0x0100, 2)}
@@ -340,6 +371,7 @@ if IS_WIN:
             self.accept_injected = accept_injected
             self.trigger = "shift"
             self.capture = None
+            self.ghost_slots = set(GHOST_VK.values())
             self.phys = {"shift": False, "ctrl": False, "alt": False}
             self.tid = 0
             self.hhook = None
@@ -356,7 +388,7 @@ if IS_WIN:
                     if cap is not None:
                         cap.feed(vk, up)
                         return 1  # grabando: ni Windows ni las apps ven la tecla (Alt+Tab, Win…)
-                    if vk in GHOST_VK:
+                    if vk in GHOST_VK and GHOST_VK[vk] in self.ghost_slots:
                         if not up:
                             self.on_ghost(GHOST_VK[vk], self.phys[self.trigger])
                         return 1  # se traga: ninguna app ve F13–F18
@@ -553,11 +585,18 @@ class StudioEngine:
     def apply(self, studio, persist=True):
         self.studio = save_studio(studio, self.path) if persist else normalize_studio(studio)
         self.obs.configure(self.studio["obs"])
-        if self.studio["mode"] == "smart":
+        if self.studio["mode"] == "smart" or self.direct_volume_slots():
             self.start()
         else:
             self.stop()
         return self.studio
+
+    def direct_volume_slots(self):
+        if self.studio["mode"] != "direct" or not self.studio.get("volume_bridge"):
+            return set()
+        applied = self.studio.get("applied") or {}
+        return {slot for slot in ("KNOB_CCW", "KNOB_CW")
+                if applied.get(slot, {}).get("type") == "media" and applied[slot].get("code") in (0xE9, 0xEA)}
 
     def start(self):
         if not IS_WIN:
@@ -575,6 +614,7 @@ class StudioEngine:
             self.worker = threading.Thread(target=self._loop, daemon=True, name="studio-worker")
             self.worker.start()
         self.hook.trigger = self.studio["trigger"]
+        self.hook.ghost_slots = set(GHOST_VK.values()) if self.studio["mode"] == "smart" else self.direct_volume_slots()
         self.error = ""
         return True
 
@@ -602,7 +642,15 @@ class StudioEngine:
 
     def handle(self, slot, trigger_held):
         exe = self.foreground()
-        action, layer = resolve(self.studio, slot, exe, trigger_held)
+        if self.studio["mode"] == "direct":
+            if slot not in self.direct_volume_slots():
+                return
+            action = self.studio["layers"][0]["actions"].get(slot)
+            if not action or action.get("type") != "media" or action.get("code") not in (0xE9, 0xEA):
+                action = self.studio["applied"][slot]
+            layer, trigger_held = "base", False
+        else:
+            action, layer = resolve(self.studio, slot, exe, trigger_held)
         self.last = {"slot": slot, "exe": exe, "layer": layer, "trigger": trigger_held,
                      "action": action and action.get("type"), "at": time.time()}
         if action:
@@ -624,7 +672,10 @@ class StudioEngine:
             if t == "keyboard":
                 run_keyboard(a["mod"], a["code"])
             elif t == "media":
-                run_media(a["code"], a["speed"])
+                if a["code"] in (0xE9, 0xEA):
+                    adjust_system_volume(a["code"], a["speed"])
+                else:
+                    run_media(a["code"], a["speed"])
             elif t == "mouse":
                 run_mouse(a["mod"], a["code"], a["wheel"], a["speed"])
         finally:

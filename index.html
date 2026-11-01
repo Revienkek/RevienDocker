@@ -11,33 +11,70 @@
 <div class="app">
   <header class="titlebar">
     <div class="tb-brand pywebview-drag-region"><img class="logo" src="assets/brand-icon.png" alt="" /><img class="wordmark" src="assets/wordmark.svg" alt="RevienDocker" /></div>
-    <div class="modes" role="radiogroup" aria-label="Modo">
-      <button data-mode="direct" role="radio" title="Los atajos se guardan dentro del teclado: funciona solo, en cualquier PC."><i data-ic="target"></i>Directo</button>
-      <button data-mode="smart" role="radio" title="Cada botón cambia según la app que tengas abierta. Necesita RevienDocker en marcha."><i data-ic="brain"></i>Inteligente</button>
-    </div>
     <div class="tb-drag pywebview-drag-region"></div>
     <span class="pill" id="devicePill" title="Estado del teclado"><i class="dot"></i><span id="deviceText">Simulador</span></span>
     <span class="pill" id="enginePill" hidden><i class="dot"></i><span id="engineText"></span></span>
     <button id="btnConnect" class="icon-btn" title="Buscar el teclado"><i data-ic="plug"></i></button>
-    <button id="btnFlashAll" class="primary" title="Escribe la configuración en el teclado"><i data-ic="zap"></i><span id="flashText">Flashear</span><i class="flash-dot" id="flashDot" hidden title="Hay cambios sin escribir en el teclado"></i></button>
+    <button id="btnDiscard" class="icon-btn" hidden title="Descartar los cambios y volver a lo último que aplicaste"><i data-ic="undo-2"></i></button>
+    <button id="btnFlashAll" class="primary" title="Escribe en el teclado lo que ves en pantalla"><i data-ic="check"></i><span id="flashText">Aplicar cambios</span><i class="flash-dot" id="flashDot" hidden title="Hay cambios sin aplicar al teclado"></i></button>
     <div class="winctl" id="winctl" hidden>
       <button data-win="minimize" title="Minimizar"><i data-ic="minus"></i></button>
       <button data-win="maximize" title="Maximizar"><i data-ic="square"></i></button>
       <button data-win="close" class="close" id="winClose" title="Cerrar"><i data-ic="x"></i></button>
     </div>
   </header>
-  <div class="infobar"><i id="infoIcon"></i><span id="infoText"></span></div>
-
   <div class="scroll">
-  <main class="workspace">
-    <section class="panel">
-      <div class="panel-title"><span><span class="step">1</span>Botón</span><em id="selectedLabel"></em></div>
+  <main class="stage">
 
-      <div id="layerWrap" class="layerbar" hidden></div>
+    <section class="mode-block">
+      <div class="mode-controls"><div class="modes" role="radiogroup" aria-label="Modo">
+      <button data-mode="direct" role="radio" title="Los atajos se guardan dentro del teclado: funciona solo, en cualquier PC."><i data-ic="target"></i>Directo</button>
+      <button data-mode="smart" role="radio" title="Mantén el modificador para usar los atajos de la app activa. Necesita RevienDocker en marcha."><i data-ic="brain"></i>Inteligente</button>
+      <button data-mode="modes" role="radio" title="Modos y perfiles de trabajo (próximamente)"><i data-ic="shapes"></i>Modos</button>
+    </div><button id="btnLighting" class="lighting-button" aria-expanded="false" aria-controls="lightingPanel" title="Iluminación"><i data-ic="lightbulb"></i><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18h1a2 2 0 0 0 1.5-3.3 1.7 1.7 0 0 1 1.3-2.8H18a3 3 0 0 0 3-3 9 9 0 0 0-9-9Z"/><circle cx="7.5" cy="10" r=".6"/><circle cx="10" cy="6.8" r=".6"/><circle cx="14" cy="6.8" r=".6"/><circle cx="17" cy="10" r=".6"/></svg><span class="sr-only">Iluminación</span></button></div>
+      <div class="infobar"><i id="infoIcon"></i><span id="infoText"></span></div>
+      <div id="lightingPanel" class="lighting-panel" hidden>
+        <div class="lighting-title"><strong>Iluminación</strong><button id="closeLighting" aria-label="Cerrar iluminación">×</button></div>
+        <div class="fold-body">
+        <div class="led-box">
+          <button id="ledToggle" role="switch" aria-checked="true" title="Enciende o apaga la luz"><i data-ic="lightbulb"></i><span id="ledToggleText">Encendida</span></button>
+          <div class="seg" id="ledModes" role="radiogroup" aria-label="Modo de luz"></div>
+          <p class="muted" id="ledNote"></p>
+        </div>
+      </div>
+      </div>
 
+
+    </section>
+
+    <section class="smart-tabs" id="smartCard" hidden>
+      <div class="smart-head">
+        <span class="s-label"><i data-ic="layers"></i>Atajos para</span>
+        <span class="live-app" id="liveApp" title="App que tienes en primer plano (ignora RevienDocker)"><i data-ic="app-window"></i><span id="activeApp">—</span></span>
+      </div>
+      <div id="layerWrap" class="layerbar"></div>
+      <button id="appSuggest" class="suggest" hidden><i data-ic="plus"></i><span id="appSuggestText"></span></button>
+    </section>
+
+    <section class="smart-bar" id="smartRule" hidden>
+      <div class="rule" id="rule"></div>
+      <details class="fold mini" id="layerEdit" hidden>
+        <summary><i data-ic="settings-2"></i><span class="s-t">Ajustes de esta app</span><i class="chev" data-ic="chevron-down"></i></summary>
+        <div class="fold-body layer-edit">
+          <div class="form-group"><label for="layerName">Nombre</label><input type="text" id="layerName" maxlength="40" /></div>
+          <div class="form-group"><label for="layerExes">Programas (.exe, con comas)</label><input type="text" id="layerExes" placeholder="obs64.exe, chrome.exe" /></div>
+          <button id="btnDelLayer" class="danger" title="Quitar esta app y sus atajos"><i data-ic="trash-2"></i><span>Quitar app</span></button>
+        </div>
+      </details>
+      <div class="trig-row"><span class="muted">Tecla de activación</span><div class="seg" id="triggerSeg"></div></div>
+      <p class="err" id="engineErr" hidden></p>
+    </section>
+
+    <section class="device-card">
+      <div class="step-row"><span class="step">1</span><span>Elige un botón</span><em id="selectedLabel"></em></div>
       <div class="chassis-wrap" id="chassis">
         <div class="acrylic-case" id="device">
-          <div class="keycap selected" data-target="KEY_1" tabindex="0" role="button" title="Tecla 1"><span class="k-id">1</span><span class="k-val" id="lbl_KEY_1"></span></div>
+          <div class="keycap" data-target="KEY_1" tabindex="0" role="button" title="Tecla 1"><span class="k-id">1</span><span class="k-val" id="lbl_KEY_1"></span></div>
           <div class="keycap" data-target="KEY_2" tabindex="0" role="button" title="Tecla 2"><span class="k-id">2</span><span class="k-val" id="lbl_KEY_2"></span></div>
           <div class="keycap" data-target="KEY_3" tabindex="0" role="button" title="Tecla 3"><span class="k-id">3</span><span class="k-val" id="lbl_KEY_3"></span></div>
           <div class="encoder-group">
@@ -49,37 +86,10 @@
           </div>
         </div>
       </div>
-
-      <div id="smartCard" class="form-group" hidden>
-        <div class="flow" id="flow">
-          <div class="node" title="Pulsas un botón del teclado"><i data-ic="keyboard"></i><span>Botón</span></div>
-          <i class="op" data-ic="plus"></i>
-          <div class="node trig" title="Tecla de activación: mantenla pulsada mientras pulsas el botón"><div class="seg" id="triggerSeg"></div></div>
-          <i class="op" data-ic="arrow-right"></i>
-          <div class="node app" title="App en primer plano ahora mismo"><i data-ic="app-window"></i><span id="activeApp">—</span></div>
-          <i class="op" data-ic="arrow-right"></i>
-          <div class="node out" title="Capa que se ejecutará"><i data-ic="zap"></i><span id="flowLayer">Base</span></div>
-        </div>
-        <div id="layerEdit" class="layer-edit" hidden>
-          <div class="form-group"><label for="layerName">Nombre</label><input type="text" id="layerName" maxlength="40" /></div>
-          <div class="form-group"><label for="layerExes">Programas (.exe, con comas)</label><input type="text" id="layerExes" placeholder="obs64.exe, chrome.exe" /></div>
-          <button id="btnDelLayer" class="danger" title="Quitar esta capa"><i data-ic="trash-2"></i></button>
-        </div>
-        <p class="err" id="engineErr" hidden></p>
-      </div>
     </section>
 
-    <section class="panel">
-      <div class="panel-title"><span><span class="step">2</span>Acción</span><span class="num muted" id="comboCount"></span></div>
-
-      <div id="knobTools" class="recipe-tools" hidden>
-        <div class="panel-title"><span>Recetas de rueda</span></div>
-        <div id="recipes" class="tiles"></div>
-        <div class="recipe-map" id="recipeMap"></div>
-        <div class="speed-row" id="knobSpeedRow"><label><i data-ic="gauge"></i>Giro</label><div class="seg" id="knobSpeedSeg"></div></div>
-        <button id="btnInvert"><i data-ic="arrow-left-right"></i>Invertir sentido</button>
-      </div>
-
+    <section class="editor" id="editor" hidden>
+      <div class="step-row"><span class="step">2</span><span>Elige qué hace</span><span class="num muted" id="comboCount"></span><button id="closeEditor" class="close-editor" aria-label="Cerrar editor">×</button></div>
       <div class="cur-card" id="curCard">
         <div class="cur-head"><span class="muted" id="curLabel">Asignado</span><span class="muted" id="curMeta"></span></div>
         <div id="curChips" class="chips big"></div>
@@ -91,13 +101,27 @@
         </div>
       </div>
 
-      <details class="fold">
-        <summary><i data-ic="command"></i>Atajos del sistema<i class="chev" data-ic="chevron-down"></i></summary>
-        <div class="lib" id="lib"></div>
+      <div class="acc">
+      <details class="fold" name="acc" id="knobTools" hidden>
+        <summary><i data-ic="gauge"></i><span class="s-t">Recetas de rueda<small>Volumen, scroll, zoom… en un clic</small></span><i class="chev" data-ic="chevron-down"></i></summary>
+        <div class="fold-body">
+          <div id="recipes" class="tiles"></div>
+          <div class="recipe-map" id="recipeMap"></div>
+          <div class="speed-row" id="knobSpeedRow"><label><i data-ic="gauge"></i>Giro</label><div class="seg" id="knobSpeedSeg"></div></div>
+          <button id="btnInvert"><i data-ic="arrow-left-right"></i>Invertir sentido</button>
+        </div>
       </details>
 
-      <details class="fold">
-        <summary><i data-ic="sliders-horizontal"></i>Elegir a mano<i class="chev" data-ic="chevron-down"></i></summary>
+      <details class="fold" name="acc">
+        <summary><i data-ic="command"></i><span class="s-t">Atajos del sistema<small>Alt+Tab, Win+D, Ctrl+Shift+Esc…</small></span><i class="chev" data-ic="chevron-down"></i></summary>
+        <div class="fold-body">
+        <div class="lib" id="lib"></div>
+      </div>
+      </details>
+
+      <details class="fold" name="acc" id="manualTools">
+        <summary><i data-ic="sliders-horizontal"></i><span class="s-t">Elegir a mano<small>Teclado, ratón, multimedia y OBS</small></span><i class="chev" data-ic="chevron-down"></i></summary>
+        <div class="fold-body">
         <div class="tabs">
           <button class="tab" data-tab="keyboard"><i data-ic="keyboard"></i>Teclado</button>
           <button class="tab" data-tab="mouse"><i data-ic="mouse"></i>Ratón</button>
@@ -129,26 +153,28 @@
             </div>
           </details>
         </div>
+      </div>
       </details>
 
-      <details class="fold">
-        <summary><i data-ic="settings-2"></i>Plantillas, luz y tramas<i class="chev" data-ic="chevron-down"></i></summary>
-        <div class="presets-bar">
-          <button data-preset="fkeys"><i data-ic="ghost"></i>Fantasma F13–F18</button>
-          <button data-preset="media"><i data-ic="music"></i>Multimedia</button>
-          <button data-preset="obs"><i data-ic="clapperboard"></i>OBS por atajos</button>
-          <button data-preset="dev"><i data-ic="code-xml"></i>Dev</button>
+      </div>
+    </section>
+    <section class="advanced-section">
+      <details class="fold" name="acc">
+        <summary><i data-ic="layout-grid"></i><span class="s-t">Plantillas<small>Configuraciones listas para personalizar</small></span><i class="chev" data-ic="chevron-down"></i></summary>
+        <div class="fold-body">
+          <p class="muted">Elige una plantilla para ver qué hace cada control antes de aplicarla.</p>
+          <div class="preset-grid" id="presets"></div>
+          <div class="preset-preview" id="presetPreview" hidden>
+            <div><strong id="presetTitle"></strong><p class="muted" id="presetDescription"></p></div>
+            <div class="preset-mapping" id="presetMapping"></div>
+            <p class="muted" id="presetNote"></p>
+            <button class="primary" id="applyPreset">Usar esta plantilla</button>
+          </div>
         </div>
-        <div class="form-group">
-          <label for="ledMode"><i data-ic="lightbulb"></i> Iluminación del teclado</label>
-          <select id="ledMode">
-            <option value="0">Apagada</option>
-            <option value="1" selected>Fija</option>
-            <option value="2">Respiración</option>
-            <option value="3">Reactiva al pulsar</option>
-          </select>
-        </div>
-        <div class="hex-console" id="hexConsole" aria-label="Tramas USB"></div>
+      </details>
+      <details class="fold diagnostics">
+        <summary><i data-ic="terminal"></i><span class="s-t">Diagnóstico<small>Información técnica de conexión</small></span><i class="chev" data-ic="chevron-down"></i></summary>
+        <div class="fold-body"><p class="muted">Actividad USB y vista previa de comandos</p><div class="hex-console" id="hexConsole" aria-label="Registro de diagnóstico USB"></div></div>
       </details>
     </section>
   </main>

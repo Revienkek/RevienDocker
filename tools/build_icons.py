@@ -14,7 +14,7 @@ from pathlib import Path
 NAMES = """keyboard mouse mouse-pointer-click music clapperboard zap plug brain target layers plus trash-2 play circle-dot minus x
 square copy rotate-ccw volume-2 scroll zoom-in app-window undo-2 skip-forward brush mic settings-2 chevron-right chevron-down
 arrow-right sparkles ghost code-xml sliders-horizontal lightbulb terminal panel-top film gauge arrow-left-right info check
-command monitor-up circle-help cable save pointer bolt gamepad-2 layout-grid hash plug-zap flame wand-sparkles circle-alert""".split()
+command monitor-up circle-help cable save pointer bolt gamepad-2 layout-grid hash plug-zap flame wand-sparkles circle-alert shapes""".split()
 
 ROOT = Path(subprocess.check_output("npm root -g", shell=True, text=True).strip()) / "lucide-static" / "icons"
 OUT = Path(__file__).resolve().parent.parent / "studio_icons.js"
