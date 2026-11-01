@@ -340,3 +340,12 @@ details[open] > summary .chev { transform: rotate(180deg); }
 .profile-select { flex: 1; min-width: 0; justify-content: flex-start; overflow: hidden; text-overflow: ellipsis; }
 .profile-delete .ic, .profile-create .ic { width: 16px; height: 16px; }
 @media (max-width: 700px) { .mode-controls { gap: 5px; } .modes button { padding: 10px 10px; } }
+
+/* Editor superpuesto para mantener estable la vista Directo. */
+.tb-brand .wordmark { max-width: 215px; height: 20px; }
+.editor-head { display: flex; justify-content: flex-end; }
+.editor-head .close-editor { color: var(--muted); min-width: 36px; min-height: 36px; }
+.editor-overlay { position: fixed; z-index: 40; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(620px, calc(100vw - 32px)); max-height: calc(100vh - 80px); overflow-y: auto; background: var(--panel); border: 1px solid var(--line-2); box-shadow: 0 18px 55px #000c; }
+#obsConnection { border-top: 1px solid var(--line); padding-top: 12px; }
+#obsConnection > summary { min-height: 36px; }
+#obsConnection .obs-conn { margin-top: 10px; }

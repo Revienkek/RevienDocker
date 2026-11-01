@@ -9,9 +9,9 @@ Un programador para el macropad de 3 teclas + 1 rueda (chip WCH CH57x). El tecla
 ## 2. Arrancar
 
 **Como programa (recomendado):** abre el acceso directo «RevienDocker» del escritorio (o `dist\RevienDocker.exe`). Es una ventana propia, sin marco de Windows: arriba tiene su minimizar, maximizar y cerrar.
-- En modo **Directo**, cerrar sale del programa (el teclado ya lleva todo dentro).
+- RevienDocker debe estar abierto o en la bandeja para que el motor ejecute las acciones de los controles.
 - En modo **Inteligente**, cerrar la oculta en la bandeja (junto al reloj) y el motor sigue activo. Salir del todo: clic derecho en su icono → Salir.
-- En el menú del icono de la bandeja puedes elegir **Minimizar a la bandeja** o **Mostrar RevienDocker**, según esté visible u oculta. En modo Directo el teclado sigue funcionando por sí solo; en Inteligente el motor continúa activo mientras la app esté en la bandeja.
+- En el menú del icono de la bandeja puedes elegir **Minimizar a la bandeja** o **Mostrar RevienDocker**, según esté visible u oculta. El motor continúa activo mientras la app esté en la bandeja.
 - Instancia única garantizada: si intentas abrir RevienDocker mientras ya está en marcha (o minimizado/oculto en la bandeja), se despierta y se trae al frente la ventana activa en lugar de acumular procesos e iconos duplicados.
 
 **En desarrollo:**
@@ -43,11 +43,11 @@ Abre `http://127.0.0.1:8765/index.html`. También vale abrir `index.html` con do
 Qué pasa por dentro: el motor es un hook de teclado que solo reacciona a F13–F18 y no consume nada mientras no pulsas. La acción se ejecuta con Shift/Ctrl/Alt «soltado» y se restaura al terminar, para que la app no vea Shift+tu atajo.
 
 ### OBS Studio (acciones nativas)
-Activa en OBS: Herramientas → Ajustes del servidor WebSocket → Habilitar. Pon host, puerto y contraseña en «Acciones de OBS → Conexión a OBS». Acciones: escena siguiente/anterior, ir a una escena, mostrar/ocultar una fuente de la escena actual (ej. «Fondo negro»), silenciar un micro, subir/bajar su volumen (la velocidad son dB por clic) e iniciar/parar grabación o directo. La plantilla «OBS Studio» y la receta «Volumen del micro (OBS)» lo dejan listo con la entrada `Mic/Aux`; cambia el nombre si tu micro se llama distinto.
+Activa en OBS: Herramientas → Ajustes del servidor WebSocket → Habilitar. Selecciona OBS Studio en Inteligente y configura host, puerto y contraseña en «Ajustes de esta app → Conexión a OBS». Después, abre el lápiz de un control y elige su acción de OBS. Acciones: escena siguiente/anterior, ir a una escena, mostrar/ocultar una fuente de la escena actual (ej. «Fondo negro»), silenciar un micro, subir/bajar su volumen (la velocidad son dB por clic) e iniciar/parar grabación o directo. La plantilla «OBS Studio» y la receta «Volumen del micro (OBS)» lo dejan listo con la entrada `Mic/Aux`; cambia el nombre si tu micro se llama distinto.
 
 ## 3. La pantalla
 
-La pantalla es una sola columna que se lee de arriba abajo: el **selector Directo / Inteligente** y el **teclado** en el centro (**① elige un botón**). Al seleccionar un control aparece debajo **② qué hace**; se puede cerrar con la cruz. Las opciones secundarias están en secciones plegables. Al elegir la rueda se abren sus recetas solas.
+El selector de modo encabeza la pantalla y el Docker aparece debajo. Pulsa el lápiz de un control para editarlo: en Directo se abre un panel superpuesto con una cruz para cerrarlo. En Inteligente y Modos, las opciones de aplicación o modo siguen al Docker.
 
 ### Cabecera y acciones laterales del visor
 - **Píldoras de estado:** ámbar = simulador; verde = teclado real conectado y estado del motor.
@@ -58,7 +58,7 @@ La pantalla es una sola columna que se lee de arriba abajo: el **selector Direct
 
 ### ① El teclado (centro)
 - **Directo / Inteligente** está justo encima: es el modo de trabajo (ver sección 2b).
-- En modo Inteligente, encima del teclado aparece **Atajos para:** una fila con «Todas las apps», una pestaña por cada app y «Añadir app». A la derecha, la app que tienes en primer plano (ignora a RevienDocker: si vuelves a la ventana, sigue mostrando la última app real). Si esa app aún no tiene atajos, sale el botón **Crear atajos para <app>**: un clic y ya tiene su pestaña.
+- En modo Inteligente, debajo del teclado aparece **Atajos para:** una fila con «Todas las apps», una pestaña por cada app y «Añadir app». A la derecha, la app que tienes en primer plano (ignora a RevienDocker: si vuelves a la ventana, sigue mostrando la última app real). Si esa app aún no tiene atajos, sale el botón **Crear atajos para <app>**: un clic y ya tiene su pestaña.
 - Encima del teclado, una línea visual explica la regla de la pestaña elegida, por ejemplo `Shift + Botón → OBS Studio` («mantén Shift mientras pulsas, con esa app en primer plano») o `Botón → cualquier app` («pulsa el botón solo»). Ahí mismo eliges la tecla de activación (Shift, Ctrl o Alt) y, en las apps, sus ajustes (nombre, programas, quitar).
 - **KEY 1/2/3:** las tres teclas mecánicas. Muestran la acción asignada (ej. `Ctrl+Shift+F13`).
 - **↺ / ↻:** giro de la rueda a izquierda / derecha.
@@ -80,7 +80,7 @@ Se abre únicamente al pulsar el lápiz (`✎`) debajo de una tecla o de la rued
   - **Ctrl+Alt+Supr es imposible de capturar** (lo trata el propio Windows). Para eso y para los demás atajos del sistema están los «Atajos del sistema».
 - **Límite:** 1 tecla, o combinación de 2 o 3 en total, contando los modificadores. Ctrl+C = 2, Ctrl+Shift+F13 = 3. Una combinación es modificadores + una sola tecla normal (o un botón/rueda del ratón).
 - **Atajos del sistema:** Alt+Tab, Win+Tab, Alt+F4, Win+D, Win+L, Win+E, Win+V, Win+Shift+S, Ctrl+Alt+Supr, Ctrl+Shift+Esc, Win+., Alt+Esc. Un clic y se asignan sin grabar.
-- **Acciones de OBS:** escenas, fuentes, micrófono y conexión WebSocket con OBS Studio.
+- **Acciones de OBS:** escenas, fuentes y micrófono en el editor de la app OBS; la conexión WebSocket está en sus ajustes.
 - **Probar / Borrar:** prueba la acción tras 3 segundos o deja el botón sin asignar.
 - **Consola de tramas:** el paquete de cada cambio y de cada flasheo. Lo más reciente va arriba.
 

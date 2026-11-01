@@ -8,7 +8,7 @@ Programa de escritorio para Windows que configura el macropad de 3 teclas y 1 ru
 
 - Windows 10 u 11.
 - El macropad conectado por USB. Sin él, el programa funciona en modo simulador para probar la interfaz.
-- Para el modo Inteligente: RevienDocker abierto (en la bandeja del reloj basta).
+- RevienDocker debe estar abierto o en la bandeja para que el motor procese los controles.
 
 ## Cómo empezar
 
@@ -17,14 +17,16 @@ Programa de escritorio para Windows que configura el macropad de 3 teclas y 1 ru
 3. Elige un botón en el teclado (panel 1) y decide qué hace en el panel 2.
 4. Pulsa **Aplicar cambios**. Eso escribe la configuración dentro del teclado.
 
-Cuando el teclado tiene la configuración escrita, funciona solo, sin que el programa esté abierto.
+El teclado se prepara para comunicarse con el motor de RevienDocker, que ejecuta las acciones configuradas.
 
-## Los dos modos
+## Formas de uso
 
-- **Directo:** las asignaciones se guardan dentro del teclado y funcionan en cualquier PC. Para los pasos configurables del volumen de la rueda, RevienDocker debe estar abierto o en la bandeja de Windows.
+- **Directo:** asignaciones que se usan en cualquier aplicación; puedes guardarlas como perfiles.
 - **Inteligente:** cada botón cambia según la app que tengas en primer plano (por ejemplo, otro atajo en OBS que en el navegador). Necesita RevienDocker en marcha; cerrar la ventana la oculta en la bandeja y el motor sigue activo.
 
-Para elegir un modo, pulsa **Directo** o **Inteligente** en la cabecera.
+- **Modos:** hasta tres configuraciones independientes que se activan con el atajo mostrado en la aplicación.
+
+Selecciona la sección en la cabecera. El lápiz de cada control abre sus ajustes.
 
 ## Ventana
 

@@ -272,6 +272,10 @@ function refreshUI(opts = {}) {
   $("ledModes").querySelectorAll("button").forEach(b => b.classList.toggle("active", +b.dataset.led === S.led_mode));
   $("winClose").title = "Cerrar a la bandeja (el docker sigue funcionando)";
 
+  const obsApp = smart && isApp() && (layer().exes || []).some(exe => /(^|[\\/])obs(?:64|32)?\.exe$/i.test(exe));
+  $("obsConnection").hidden = !obsApp;
+  $("obsTools").hidden = !obsApp;
+  $("editor").classList.toggle("editor-overlay", S.mode === "direct");
   if (smart) {
     renderLayers();
     renderSeg($("triggerSeg"), S.trigger, v => { S.trigger = v; persist(); refreshUI(); }, Object.entries(TRIGGERS));
@@ -490,6 +494,7 @@ function closeEditorUI() {
   $("selectedLabel").textContent = "";
 }
 $("closeEditor").addEventListener("click", closeEditorUI);
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("editor").hidden) { closeEditorUI(); } });
 function showLighting(show) {
   $("lightingPanel").hidden = !show;
   $("btnLighting").setAttribute("aria-expanded", String(show));

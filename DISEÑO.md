@@ -83,3 +83,7 @@ Regla: **ninguna esquina llega a 90º ni queda pura (radio 0)**.
 ## Perfiles de Directo
 
 El selector de perfiles se abre desde el icono «+» junto a Directo. El panel compacto usa iconos para guardar y eliminar, y limita los nombres a 12 caracteres.
+
+## Jerarquía y edición
+
+El Docker precede a las opciones de app o modo. En Directo, el lápiz abre el editor superpuesto y conserva la altura de la vista. La conexión WebSocket aparece dentro de los ajustes de la app OBS.
