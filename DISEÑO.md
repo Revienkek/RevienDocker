@@ -79,3 +79,7 @@ Regla: **ninguna esquina llega a 90º ni queda pura (radio 0)**.
 3. **Negrita de Expressway**: solo tengo la variante Rg; los pesos 600 y 700 se sintetizan y pueden verse borrosos.
 4. **Radios**: 4 px en controles y 6 px en contenedores. ¿Te parece bien esa proporción?
 5. **Título en mayúsculas** con el degradado: ¿lo prefieres en tipo mixto?
+
+## Perfiles de Directo
+
+El selector de perfiles se abre desde el icono «+» junto a Directo. El panel compacto usa iconos para guardar y eliminar, y limita los nombres a 12 caracteres.

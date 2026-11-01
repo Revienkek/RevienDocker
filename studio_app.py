@@ -33,7 +33,7 @@ from app import ENGINE, PORT, make_server
 from studio_icon import icon_image
 
 TITLE = "RevienDocker"
-MIN_W, MIN_H = 820, 560  # = min_size de la ventana
+MIN_W, MIN_H = 720, 560  # = min_size de la ventana
 VK_LBUTTON = 0x01
 MUTEX_NAME = "Local\\RevienDocker_SingleInstance_Mutex"
 ERROR_ALREADY_EXISTS = 183
@@ -81,7 +81,7 @@ def main():
     ENGINE.apply(ENGINE.studio, persist=False)  # el motor arranca siempre: el docker y la app son uno
     threading.Thread(target=server.serve_forever, daemon=True, name="studio-http").start()
 
-    window = webview.create_window(TITLE, f"http://127.0.0.1:{PORT}/index.html", width=1040, height=720, min_size=(820, 560),
+    window = webview.create_window(TITLE, f"http://127.0.0.1:{PORT}/index.html", width=760, height=720, min_size=(MIN_W, MIN_H),
                                    frameless=True, easy_drag=False, background_color="#08090c", hidden="--minimized" in sys.argv)
     state = {"quit": False, "max": False, "hidden": "--minimized" in sys.argv, "minimized": False}
     tray = None

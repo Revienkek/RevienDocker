@@ -28,7 +28,7 @@ Para elegir un modo, pulsa **Directo** o **Inteligente** en la cabecera.
 
 ## Ventana
 
-- Arrastra cualquier borde o esquina para cambiar el tamaño (mínimo 820 × 560).
+- Arrastra cualquier borde o esquina para cambiar el tamaño (mínimo 720 × 560).
 - Los botones de la esquina superior derecha minimizan, maximizan o cierran.
 
 ## Guía completa

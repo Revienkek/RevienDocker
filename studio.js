@@ -99,7 +99,7 @@ const TRIGGERS = { shift: "Shift", ctrl: "Ctrl", alt: "Alt" };
 
 // ---------- Estado ----------
 const defaultBase = () => ({ KEY_1: K(0, kc("F13")), KEY_2: K(0, kc("F14")), KEY_3: K(0, kc("F15")), KNOB_CCW: M(0xEA), KNOB_PRESS: M(0xE2), KNOB_CW: M(0xE9) });
-const defaultState = () => ({ mode: "direct", trigger: "shift", led_mode: 1, flashed: "", modes: [null, null, null], obs: { host: "127.0.0.1", port: 4455, password: "" },
+const defaultState = () => ({ mode: "direct", trigger: "shift", led_mode: 1, flashed: "", modes: [null, null, null], profiles: [], obs: { host: "127.0.0.1", port: 4455, password: "" },
   layers: [{ id: "base", name: "Base", exes: [], actions: defaultBase() }] });
 const LS_KEY = "botonera.studio.v2";
 let S = defaultState();
@@ -128,6 +128,7 @@ function fixState(s) {
     return m && typeof m === "object" ? { name: String(m.name || `Modo ${i + 1}`).slice(0, 30), icon: String(m.icon || "sliders-horizontal"),
       actions: m.actions && typeof m.actions === "object" ? m.actions : {} } : null;
   });
+  s.profiles = Array.isArray(s.profiles) ? s.profiles.filter(p => p && typeof p.name === "string" && p.actions && typeof p.actions === "object").map(p => ({name: p.name.slice(0, 12), actions: p.actions})) : [];
   s.obs = { ...d.obs, ...(s.obs || {}) };
   s.layers = Array.isArray(s.layers) && s.layers.length ? s.layers : d.layers;
   if (s.layers[0].id !== "base") s.layers.unshift(d.layers[0]);
@@ -165,12 +166,7 @@ async function load() {
 
 // ---------- Utilidades de UI ----------
 const hexOf = f => Array.from(f).slice(0, 11).map(x => x.toString(16).padStart(2, "0").toUpperCase()).join(" ");
-const hexConsole = $("hexConsole");
-function logLine(text, color) {
-  const d = document.createElement("div");
-  if (color) d.style.color = color;
-  d.textContent = text; hexConsole.prepend(d);
-}
+function logLine(text, color) { if (color === "#fbbf24") toast(text, true); }
 let toastTimer = null;
 function toast(text, warn) {
   const t = $("toast");
@@ -265,6 +261,8 @@ function refreshUI(opts = {}) {
   $("btnDiscard").hidden = !cfgDirty;
   if (S.mode === "direct") layerId = "base";
   else if (smart && layerId === "base" && S.layers.length > 1) layerId = S.layers[1].id;
+  $("profileWrap").hidden = S.mode !== "direct";
+  if (S.mode !== "direct") { $("profilePanel").hidden = true; $("profileToggle").setAttribute("aria-expanded", "false"); }
   $("smartCard").hidden = !smart; $("smartRule").hidden = !smart; $("modeBar").hidden = !modes;
   if (!editable()) closeEditorUI();
   $("device").classList.toggle("locked", !editable());   // sin app o sin modo elegido: el dibujo es solo una vista
@@ -426,6 +424,33 @@ function setAction(a) { layer().actions[currentTarget] = a; persist(); refreshUI
     $("lib").appendChild(b);
   });
 })();
+
+// ---------- Perfiles de Directo ----------
+function renderProfiles() {
+  const list = $("profileList"); list.innerHTML = "";
+  S.profiles.forEach((profile, index) => {
+    const row = el("div", "profile-row"), select = el("button", "profile-select", profile.name), remove = el("button", "profile-delete");
+    select.title = `Seleccionar ${profile.name}`;
+    select.addEventListener("click", () => {
+      if (savedSnap && JSON.stringify(S.layers[0].actions) !== JSON.stringify(JSON.parse(savedSnap).layers[0].actions) && !window.confirm("Hay cambios sin confirmar. ¿Cambiar de perfil?")) return;
+      S.layers[0].actions = JSON.parse(JSON.stringify(profile.actions)); persist(); closeEditorUI(); refreshUI();
+      $("profilePanel").hidden = true; $("profileToggle").setAttribute("aria-expanded", "false"); toast(`Perfil: ${profile.name}`);
+    });
+    remove.type = "button"; remove.innerHTML = ic("trash-2"); remove.title = `Eliminar ${profile.name}`; remove.setAttribute("aria-label", remove.title);
+    remove.addEventListener("click", () => { if (!window.confirm(`¿Eliminar el perfil «${profile.name}»?`)) return; S.profiles.splice(index, 1); persist(); renderProfiles(); });
+    row.append(select, remove); list.appendChild(row);
+  });
+}
+$("profileToggle").addEventListener("click", () => { const panel = $("profilePanel"); panel.hidden = !panel.hidden; $("profileToggle").setAttribute("aria-expanded", String(!panel.hidden)); if (!panel.hidden) renderProfiles(); });
+$("profileSave").addEventListener("click", () => {
+  const name = $("profileName").value.trim().slice(0, 12);
+  if (!name) return toast("Escribe un nombre para el perfil", true);
+  if (S.profiles.some(p => p.name.toLocaleLowerCase() === name.toLocaleLowerCase())) return toast("Ya existe un perfil con ese nombre", true);
+  const confirmed = savedSnap && JSON.parse(savedSnap).layers[0].actions;
+  if (!confirmed || JSON.stringify(confirmed) !== JSON.stringify(S.layers[0].actions)) return toast("Confirma primero los cambios con el botón ✓", true);
+  S.profiles.push({name, actions: JSON.parse(JSON.stringify(confirmed))}); $("profileName").value = ""; persist(); renderProfiles(); toast("Perfil guardado");
+});
+document.addEventListener("click", e => { if (!$("profileWrap").contains(e.target)) { $("profilePanel").hidden = true; $("profileToggle").setAttribute("aria-expanded", "false"); } });
 
 // ---------- Eventos de la interfaz ----------
 // Clic directo en una pieza del docker = abre grabación directa.

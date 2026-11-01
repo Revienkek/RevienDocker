@@ -56,6 +56,7 @@ DEFAULT_STUDIO = {
     "flashed": "",
     "applied": None,
     "modes": [None, None, None],
+    "profiles": [],
     "layers": [{"id": "base", "name": "Base", "exes": [], "actions": {}}],
     "obs": {"host": "127.0.0.1", "port": 4455, "password": ""},
 }
@@ -120,6 +121,9 @@ def normalize_studio(d):
     out["flashed"] = str(d.get("flashed", ""))[:600]  # firma de lo último escrito en el teclado (para el aviso de «sin preparar»)
     out.pop("applied", None)
     out["modes"] = _clean_modes(d.get("modes"))
+    profiles = d.get("profiles") if isinstance(d.get("profiles"), list) else []
+    out["profiles"] = [{"name": str(p.get("name", "")).strip()[:12], "actions": _clean_actions(p.get("actions"))}
+                       for p in profiles[:100] if isinstance(p, dict) and str(p.get("name", "")).strip()]
     o = d.get("obs") if isinstance(d.get("obs"), dict) else {}
     out["obs"] = {"host": str(o.get("host", "127.0.0.1"))[:100] or "127.0.0.1",
                   "port": _int(o.get("port"), 1, 65535, 4455), "password": str(o.get("password", ""))[:200]}

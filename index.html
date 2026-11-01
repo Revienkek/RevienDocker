@@ -25,7 +25,7 @@
   <main class="stage">
 
     <section class="mode-block">
-      <div class="mode-controls"><div class="modes" role="radiogroup" aria-label="Modo">
+      <div class="mode-controls"><div class="profile-wrap" id="profileWrap"><button id="profileToggle" class="profile-toggle" title="Perfiles de Directo" aria-label="Perfiles de Directo" aria-expanded="false"><i data-ic="plus"></i></button><div class="profile-panel" id="profilePanel" hidden><div class="profile-create"><input id="profileName" maxlength="12" placeholder="Nombre" aria-label="Nombre del perfil" /><button id="profileSave" title="Guardar perfil confirmado" aria-label="Guardar perfil confirmado"><i data-ic="save"></i></button></div><div id="profileList" class="profile-list"></div></div></div><div class="modes" role="radiogroup" aria-label="Modo">
       <button data-mode="direct" role="radio" title="Lo que hace cada botón al pulsarlo solo, en cualquier app. Es la base de todo."><i data-ic="target"></i>Directo</button>
       <button data-mode="smart" role="radio" title="Mantén un modificador y pulsa un botón: atajos propios para la app que tengas delante."><i data-ic="brain"></i>Inteligente</button>
       <button data-mode="modes" role="radio" title="Tres modos de trabajo: Alt+Shift+1/2/3 cambia de modo y repetirlo vuelve a Directo."><i data-ic="shapes"></i>Modos</button>
@@ -185,12 +185,6 @@
       </details>
 
       </div>
-    </section>
-    <section class="advanced-section">
-      <details class="fold diagnostics">
-        <summary><i data-ic="terminal"></i><span class="s-t">Diagnóstico<small>Información técnica de conexión</small></span><i class="chev" data-ic="chevron-down"></i></summary>
-        <div class="fold-body"><p class="muted">Actividad USB y vista previa de comandos</p><div class="hex-console" id="hexConsole" aria-label="Registro de diagnóstico USB"></div></div>
-      </details>
     </section>
   </main>
   </div>

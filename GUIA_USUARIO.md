@@ -161,3 +161,7 @@ _(vacío; se rellena al probar con el hardware)_
 | 2026-10-31 | Editor de botón con captura de teclado (1 a 3 teclas), pestañas y catálogo completo de teclas. |
 | 2026-10-31 | Proyecto recuperado de Drive; modo simulador, LED, preset Dev, WebHID, pruebas. |
 
+
+## Perfiles de Directo
+
+En Directo, el botón «+» junto a los modos abre los perfiles. Confirma primero las asignaciones con ✓ y guárdalas con un nombre de hasta 12 caracteres. Selecciona un perfil para cargar sus acciones; usa la papelera para eliminarlo. Los cambios cargados se confirman con ✓.
