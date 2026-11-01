@@ -689,8 +689,7 @@ let rec = null;
 const recAction = r => (r.btn || r.wheel) ? Ms(r.mod, r.btn, r.wheel, 1) : K(r.mod, r.key);
 function updateRecStatus() {
   const s = $("recStatus");
-  if (rec && (rec.native || (rec.fs && rec.locked))) { s.classList.remove("warn"); s.textContent = "Captura total activa: Alt+Tab y Win incluidos. Solo Ctrl+Alt+Supr es imposible de capturar: usa «Atajos del sistema»."; }
-  else { s.classList.add("warn"); s.textContent = "Captura básica: tu PC puede quedarse Alt+Tab o Win. Para esos usa «Atajos del sistema»."; }
+  if (s) { s.classList.remove("warn"); s.textContent = ""; }
 }
 function recWarn(text) { const s = $("recStatus"); s.textContent = text; s.classList.add("warn"); }
 const recRender = () => renderChips($("recChips"), recAction(rec));
