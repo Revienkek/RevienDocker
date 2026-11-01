@@ -4,6 +4,7 @@ $ErrorActionPreference = "Stop"
 Set-Location $PSScriptRoot
 python studio_icon.py
 python -m PyInstaller --noconfirm --clean --onefile --noconsole --name RevienDocker --icon assets\icon.ico `
+    --manifest app.manifest `
     --add-data "index.html;." --add-data "studio.css;." --add-data "studio.js;." --add-data "studio_icons.js;." `
     --add-data "assets\icon.png;assets" --add-data "assets\brand-icon.png;assets" --add-data "assets\wordmark.svg;assets" `
     --collect-submodules webview --collect-submodules pycaw --hidden-import pystray._win32 studio_app.py

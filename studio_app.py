@@ -11,9 +11,19 @@ Se empaqueta con `build_exe.ps1` → dist/RevienDocker.exe
 """
 
 import ctypes
+import os
 import sys
 import threading
 import time
+
+# Declarar Per-Monitor V2 DPI awareness antes de inicializar ningún control WinForms / WebView2
+try:
+    ctypes.windll.user32.SetProcessDpiAwarenessContext(ctypes.c_void_p(-4))
+except Exception:
+    try:
+        ctypes.windll.shcore.SetProcessDpiAwareness(2)
+    except Exception:
+        pass
 
 import pystray
 import webview
