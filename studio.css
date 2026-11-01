@@ -354,3 +354,5 @@ details[open] > summary .chev { transform: rotate(180deg); }
 .smart-head-actions { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
 .smart-head-actions .close-editor { flex: none; min-width: 36px; min-height: 36px; color: var(--muted); }
 .smart-panel .smart-bar { padding: 14px; }
+
+#workModesPanel .mode-bar { padding: 0; border: 0; background: transparent; }

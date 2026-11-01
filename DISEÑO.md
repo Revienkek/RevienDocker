@@ -89,3 +89,5 @@ El selector de perfiles se abre desde el icono «+» junto a Directo. El panel c
 El Docker precede a las opciones de app o modo. En los tres modos, el lápiz abre el editor superpuesto y conserva la altura de la vista. La cruz comparte la fila superior con la asignación. La conexión WebSocket aparece dentro de los ajustes de la app OBS.
 
 En Inteligente, el icono de capas abre las apps y sus ajustes en un panel superpuesto; la cruz comparte la cabecera con «Atajos para».
+
+En Modos, el icono de ajustes abre los modos de trabajo en un panel superpuesto, con cierre en su cabecera.

@@ -165,3 +165,7 @@ _(vacío; se rellena al probar con el hardware)_
 ## Perfiles de Directo
 
 En Directo, el botón «+» junto a los modos abre los perfiles. Confirma primero las asignaciones con ✓ y guárdalas con un nombre de hasta 12 caracteres. Selecciona un perfil para cargar sus acciones; usa la papelera para eliminarlo. Los cambios cargados se confirman con ✓.
+
+## Modos de trabajo
+
+En Modos, el icono de ajustes junto al selector abre los tres modos de trabajo, sus plantillas y ajustes en un panel superpuesto. Ciérralo con la cruz.

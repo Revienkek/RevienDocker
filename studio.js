@@ -264,6 +264,8 @@ function refreshUI(opts = {}) {
   $("profileWrap").hidden = S.mode !== "direct";
   if (S.mode !== "direct") { $("profilePanel").hidden = true; $("profileToggle").setAttribute("aria-expanded", "false"); }
   $("smartToggle").hidden = !smart;
+  $("workModesToggle").hidden = !modes;
+  if (!modes) showWorkModesPanel(false);
   if (!smart) showSmartPanel(false);
   $("smartCard").hidden = !smart; $("smartRule").hidden = !smart; $("modeBar").hidden = !modes;
   if (!editable()) closeEditorUI();
@@ -465,6 +467,14 @@ function showSmartPanel(show) {
 $("smartToggle").addEventListener("click", () => showSmartPanel($("smartPanel").hidden));
 $("smartClose").addEventListener("click", () => { showSmartPanel(false); $("smartToggle").focus(); });
 
+function showWorkModesPanel(show) {
+  if (show) closeEditorUI();
+  $("workModesPanel").hidden = !show;
+  $("workModesToggle").setAttribute("aria-expanded", String(show));
+}
+$("workModesToggle").addEventListener("click", () => showWorkModesPanel($("workModesPanel").hidden));
+$("workModesClose").addEventListener("click", () => { showWorkModesPanel(false); $("workModesToggle").focus(); });
+
 // ---------- Eventos de la interfaz ----------
 // Clic directo en una pieza del docker = abre grabación directa.
 document.querySelectorAll("[data-target]").forEach(t => {
@@ -503,7 +513,7 @@ function closeEditorUI() {
   $("selectedLabel").textContent = "";
 }
 $("closeEditor").addEventListener("click", closeEditorUI);
-document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("editor").hidden) { closeEditorUI(); } else if (e.key === "Escape" && !$("smartPanel").hidden && !$("addOverlay").classList.contains("show")) { showSmartPanel(false); $("smartToggle").focus(); } });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("editor").hidden) { closeEditorUI(); } else if (e.key === "Escape" && !$("smartPanel").hidden && !$("addOverlay").classList.contains("show")) { showSmartPanel(false); $("smartToggle").focus(); } else if (e.key === "Escape" && !$("workModesPanel").hidden) { showWorkModesPanel(false); $("workModesToggle").focus(); } });
 function showLighting(show) {
   $("lightingPanel").hidden = !show;
   $("btnLighting").setAttribute("aria-expanded", String(show));

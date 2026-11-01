@@ -25,7 +25,7 @@
   <main class="stage">
 
     <section class="mode-block">
-      <div class="mode-controls"><div class="profile-wrap" id="profileWrap"><button id="profileToggle" class="profile-toggle" title="Perfiles de Directo" aria-label="Perfiles de Directo" aria-expanded="false"><i data-ic="plus"></i></button><div class="profile-panel" id="profilePanel" hidden><div class="profile-create"><input id="profileName" maxlength="12" placeholder="Nombre" aria-label="Nombre del perfil" /><button id="profileSave" title="Guardar perfil confirmado" aria-label="Guardar perfil confirmado"><i data-ic="save"></i></button></div><div id="profileList" class="profile-list"></div></div></div><button id="smartToggle" class="profile-toggle" aria-label="Atajos para apps" title="Atajos para apps" aria-expanded="false" aria-controls="smartPanel" hidden><i data-ic="layers"></i></button><div class="modes" role="radiogroup" aria-label="Modo">
+      <div class="mode-controls"><div class="profile-wrap" id="profileWrap"><button id="profileToggle" class="profile-toggle" title="Perfiles de Directo" aria-label="Perfiles de Directo" aria-expanded="false"><i data-ic="plus"></i></button><div class="profile-panel" id="profilePanel" hidden><div class="profile-create"><input id="profileName" maxlength="12" placeholder="Nombre" aria-label="Nombre del perfil" /><button id="profileSave" title="Guardar perfil confirmado" aria-label="Guardar perfil confirmado"><i data-ic="save"></i></button></div><div id="profileList" class="profile-list"></div></div></div><button id="smartToggle" class="profile-toggle" aria-label="Atajos para apps" title="Atajos para apps" aria-expanded="false" aria-controls="smartPanel" hidden><i data-ic="layers"></i></button><button id="workModesToggle" class="profile-toggle" aria-label="Modos de trabajo" title="Modos de trabajo" aria-expanded="false" aria-controls="workModesPanel" hidden><i data-ic="sliders-horizontal"></i></button><div class="modes" role="radiogroup" aria-label="Modo">
       <button data-mode="direct" role="radio" title="Lo que hace cada botón al pulsarlo solo, en cualquier app. Es la base de todo."><i data-ic="target"></i>Directo</button>
       <button data-mode="smart" role="radio" title="Mantén un modificador y pulsa un botón: atajos propios para la app que tengas delante."><i data-ic="brain"></i>Inteligente</button>
       <button data-mode="modes" role="radio" title="Tres modos de trabajo: Alt+Shift+1/2/3 cambia de modo y repetirlo vuelve a Directo."><i data-ic="shapes"></i>Modos</button>
@@ -116,10 +116,11 @@
 
     </div>
 
+    <div class="smart-panel" id="workModesPanel" aria-label="Modos de trabajo" hidden>
     <section class="mode-bar" id="modeBar" hidden>
       <div class="smart-head">
         <span class="s-label"><i data-ic="shapes"></i>Modos de trabajo</span>
-        <span class="chord" title="Mantén Alt y Shift y pulsa un botón del docker"><kbd>Alt</kbd><i data-ic="plus"></i><kbd>Shift</kbd><i data-ic="plus"></i><kbd>1 · 2 · 3</kbd></span>
+        <span class="smart-head-actions"><span class="chord" title="Mantén Alt y Shift y pulsa un botón del docker"><kbd>Alt</kbd><i data-ic="plus"></i><kbd>Shift</kbd><i data-ic="plus"></i><kbd>1 · 2 · 3</kbd></span><button id="workModesClose" class="close-editor" aria-label="Cerrar modos de trabajo">×</button></span>
       </div>
       <div class="mode-slots" id="modeSlots" role="radiogroup" aria-label="Modo que estás editando"></div>
       <div class="mode-actions">
@@ -146,6 +147,8 @@
         </div>
       </details>
     </section>
+
+    </div>
 
     <section class="editor editor-overlay" id="editor" aria-label="Editar control" hidden>
       <span id="comboCount" hidden></span>
