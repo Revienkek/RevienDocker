@@ -22,22 +22,15 @@ class VolumeStepTests(unittest.TestCase):
                     engine.adjust_system_volume(code, step)
                     endpoint.SetMasterVolumeLevelScalar.assert_called_with(expected, None)
 
-    def test_direct_only_routes_wheel_after_bridge_was_applied(self):
+    def test_volume_wheel_always_goes_through_engine(self):
         e = engine.StudioEngine(simulate=True)
         e.foreground = lambda: "example.exe"
         volume = {"type": "media", "code": 0xE9, "speed": 3, "mod": 0, "wheel": 0}
-        e.studio = engine.normalize_studio({"mode": "direct", "volume_bridge": True,
-            "applied": {"KNOB_CW": volume},
-            "layers": [{"id": "base", "actions": {"KNOB_CW": volume}}]})
-        self.assertEqual(e.direct_volume_slots(), {"KNOB_CW"})
-        e.handle("KNOB_CW", True)
+        e.studio = engine.normalize_studio({"layers": [{"id": "base", "actions": {"KNOB_CW": volume}}]})
+        e.handle("KNOB_CW", False)
         self.assertEqual(e.executed[0][0]["speed"], 3)
-        self.assertFalse(e.last["trigger"])
         e.handle("KEY_1", False)
         self.assertEqual(len(e.executed), 1)
-        e.studio["volume_bridge"] = False
-        self.assertEqual(e.direct_volume_slots(), set())
-
 
 if __name__ == "__main__":
     unittest.main()

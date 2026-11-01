@@ -1,13 +1,14 @@
 """
 studio_engine.py — Motor inteligente de RevienDocker (solo Windows para la parte de entrada).
 
-Cómo funciona el modo inteligente:
-  1. El macropad se flashea para emitir teclas fantasma F13–F18 (una por botón / giro de rueda).
+Cómo funciona RevienDocker (el docker y la app son un solo sistema):
+  1. El macropad se prepara una vez para emitir teclas fantasma F13–F18 (una por botón / giro de rueda).
   2. Este motor instala un hook de teclado de bajo nivel que SOLO mira esas seis teclas
      (las traga para que ninguna app las vea) y recuerda si la tecla de activación
      (Shift / Ctrl / Alt) está pulsada físicamente.
-  3. En un hilo aparte decide qué hacer: sin tecla de activación ejecuta la capa «base»;
-     con ella, la capa de la app que tienes en primer plano (si existe; si no, la base).
+  3. En un hilo aparte decide qué hacer. Prioridad: con la tecla de activación y una capa para la app en
+     primer plano, esa capa; si no, el modo activo (si lo hay); si no, la capa «base» (Directo).
+     Alt+Shift + botón 1/2/3 activa el modo 1/2/3; repetirlo vuelve a Directo.
   4. La acción se ejecuta por SendInput (teclado, ratón, multimedia) o por OBS WebSocket.
 
 No hay sondeo: el motor está dormido hasta que llega una tecla fantasma.
@@ -39,6 +40,8 @@ if FROZEN and _OLD.exists() and not (DATA_DIR / "studio.json").exists():
 STUDIO_FILE = DATA_DIR / "studio.json"
 
 SLOTS = ("KEY_1", "KEY_2", "KEY_3", "KNOB_CCW", "KNOB_CW", "KNOB_PRESS")
+MODE_SLOTS = 3
+MODE_KEYS = ("KEY_1", "KEY_2", "KEY_3")   # con Alt+Shift activan el modo 1, 2 o 3
 GHOST_VK = {0x7C: "KEY_1", 0x7D: "KEY_2", 0x7E: "KEY_3", 0x7F: "KNOB_CCW", 0x80: "KNOB_CW", 0x81: "KNOB_PRESS"}
 TRIGGER_VKS = {"shift": {0x10, 0xA0, 0xA1}, "ctrl": {0x11, 0xA2, 0xA3}, "alt": {0x12, 0xA4, 0xA5}}
 TRIGGER_VK = {"shift": 0x10, "ctrl": 0x11, "alt": 0x12}
@@ -47,12 +50,12 @@ OBS_OPS = ("next_scene", "prev_scene", "scene", "toggle_source", "toggle_mute",
            "volume_up", "volume_down", "toggle_record", "toggle_stream")
 
 DEFAULT_STUDIO = {
-    "mode": "direct",
+    "mode": "direct",               # solo recuerda la pestaña abierta; el motor siempre funciona igual
     "trigger": "shift",
     "led_mode": 1,
     "flashed": "",
     "applied": None,
-    "volume_bridge": False,
+    "modes": [None, None, None],
     "layers": [{"id": "base", "name": "Base", "exes": [], "actions": {}}],
     "obs": {"host": "127.0.0.1", "port": 4455, "password": ""},
 }
@@ -83,6 +86,30 @@ def _clean_action(a):
     return out
 
 
+def _clean_actions(raw):
+    acts = {}
+    for slot, a in (raw if isinstance(raw, dict) else {}).items():
+        c = _clean_action(a)
+        if slot in SLOTS and c:
+            acts[slot] = c
+    return acts
+
+
+def _clean_modes(raw):
+    """Tres huecos (Alt+Shift+1/2/3); cada uno vacío (None) o un modo {name, icon, actions}."""
+    raw = raw if isinstance(raw, list) else []
+    out = []
+    for i in range(MODE_SLOTS):
+        m = raw[i] if i < len(raw) else None
+        if isinstance(m, dict):
+            icon = re.sub(r"[^a-z0-9-]", "", str(m.get("icon", "")).lower())[:30] or "sliders-horizontal"
+            out.append({"name": str(m.get("name", ""))[:30] or f"Modo {i + 1}", "icon": icon,
+                        "actions": _clean_actions(m.get("actions"))})
+        else:
+            out.append(None)
+    return out
+
+
 def normalize_studio(d):
     """Devuelve una configuración válida (descarta lo que no encaja) sin lanzar excepciones."""
     d = d if isinstance(d, dict) else {}
@@ -90,11 +117,9 @@ def normalize_studio(d):
     out["mode"] = d.get("mode") if d.get("mode") in ("direct", "smart", "modes") else "direct"
     out["trigger"] = d.get("trigger") if d.get("trigger") in TRIGGER_VK else "shift"
     out["led_mode"] = _int(d.get("led_mode"), 0, 255, 1)
-    out["flashed"] = str(d.get("flashed", ""))[:600]  # firma de lo último escrito en el teclado (para el aviso de «sin flashear»)
-    out["volume_bridge"] = d.get("volume_bridge") is True
-    ap = d.get("applied")
-    if isinstance(ap, dict):  # lo último aplicado al teclado en modo Directo: {botón: acción}
-        out["applied"] = {s: c for s, a in ap.items() if s in SLOTS and (c := _clean_action(a))}
+    out["flashed"] = str(d.get("flashed", ""))[:600]  # firma de lo último escrito en el teclado (para el aviso de «sin preparar»)
+    out.pop("applied", None)
+    out["modes"] = _clean_modes(d.get("modes"))
     o = d.get("obs") if isinstance(d.get("obs"), dict) else {}
     out["obs"] = {"host": str(o.get("host", "127.0.0.1"))[:100] or "127.0.0.1",
                   "port": _int(o.get("port"), 1, 65535, 4455), "password": str(o.get("password", ""))[:200]}
@@ -137,10 +162,10 @@ def save_studio(data, path=STUDIO_FILE):
     return clean
 
 
-def resolve(studio, slot, exe, trigger_held):
-    """Decide qué acción corresponde a (botón, app activa, tecla de activación). Devuelve (acción, id_de_capa)."""
+def resolve(studio, slot, exe, trigger_held, active_mode=None):
+    """Decide qué acción corresponde a (botón, app activa, tecla de activación, modo activo).
+    Devuelve (acción, origen): id de la capa de la app, «mode:N» o «base»."""
     layers = studio["layers"]
-    base = layers[0]
     if trigger_held:
         exe = (exe or "").lower()
         for L in layers[1:]:
@@ -148,8 +173,12 @@ def resolve(studio, slot, exe, trigger_held):
                 a = L["actions"].get(slot)
                 if a:
                     return a, L["id"]
-                break  # capa de la app sin acción en este botón → cae a la base
-    return base["actions"].get(slot), "base"
+                break  # capa de la app sin acción en este botón → cae al modo activo / Directo
+    if active_mode is not None:
+        m = (studio.get("modes") or [None] * MODE_SLOTS)[active_mode]
+        if m and m["actions"].get(slot):
+            return m["actions"][slot], f"mode:{active_mode}"
+    return layers[0]["actions"].get(slot), "base"
 
 
 def layer_for_exe(studio, exe):
@@ -390,7 +419,8 @@ if IS_WIN:
                         return 1  # grabando: ni Windows ni las apps ven la tecla (Alt+Tab, Win…)
                     if vk in GHOST_VK and GHOST_VK[vk] in self.ghost_slots:
                         if not up:
-                            self.on_ghost(GHOST_VK[vk], self.phys[self.trigger])
+                            chord = self.phys["alt"] and self.phys["shift"]   # Alt+Shift: cambio de modo
+                            self.on_ghost(GHOST_VK[vk], self.phys[self.trigger], chord)
                         return 1  # se traga: ninguna app ve F13–F18
                     for name, vks in TRIGGER_VKS.items():
                         if vk in vks:
@@ -580,23 +610,33 @@ class StudioEngine:
         self.events = deque(maxlen=20)
         self.temp_hook = False
         self.cap_timer = None
+        self.active_mode = None            # índice 0–2 del modo activo; None = Directo (no se guarda: al arrancar, Directo)
 
     # -- ciclo de vida
     def apply(self, studio, persist=True):
         self.studio = save_studio(studio, self.path) if persist else normalize_studio(studio)
         self.obs.configure(self.studio["obs"])
-        if self.studio["mode"] == "smart" or self.direct_volume_slots():
-            self.start()
-        else:
-            self.stop()
+        if self.active_mode is not None and not self.studio["modes"][self.active_mode]:
+            self.active_mode = None        # el modo activo se quitó desde la interfaz
+        self.start()                       # el docker y la app son uno: el motor siempre está activo
         return self.studio
 
-    def direct_volume_slots(self):
-        if self.studio["mode"] != "direct" or not self.studio.get("volume_bridge"):
-            return set()
-        applied = self.studio.get("applied") or {}
-        return {slot for slot in ("KNOB_CCW", "KNOB_CW")
-                if applied.get(slot, {}).get("type") == "media" and applied[slot].get("code") in (0xE9, 0xEA)}
+    def set_mode(self, index):
+        """Alt+Shift+N: activa el modo N; repetirlo (o un hueco vacío) vuelve a Directo. Devuelve el índice activo o None."""
+        m = self.studio["modes"][index] if 0 <= index < MODE_SLOTS else None
+        if not m:
+            return self.active_mode
+        self.active_mode = None if self.active_mode == index else index
+        if not self.simulate:
+            try:
+                from volume_overlay import show_message
+                if self.active_mode is None:
+                    show_message("target", "Directo")
+                else:
+                    show_message(m["icon"], m["name"], f"Alt+Shift+{index + 1}")
+            except Exception:
+                pass
+        return self.active_mode
 
     def start(self):
         if not IS_WIN:
@@ -614,7 +654,7 @@ class StudioEngine:
             self.worker = threading.Thread(target=self._loop, daemon=True, name="studio-worker")
             self.worker.start()
         self.hook.trigger = self.studio["trigger"]
-        self.hook.ghost_slots = set(GHOST_VK.values()) if self.studio["mode"] == "smart" else self.direct_volume_slots()
+        self.hook.ghost_slots = set(GHOST_VK.values())
         self.error = ""
         return True
 
@@ -627,8 +667,8 @@ class StudioEngine:
             self.worker = None
 
     # -- eventos
-    def _on_ghost(self, slot, trigger_held):  # hilo del hook: lo mínimo
-        self.q.put((slot, trigger_held))
+    def _on_ghost(self, slot, trigger_held, chord=False):  # hilo del hook: lo mínimo
+        self.q.put((slot, trigger_held, chord))
 
     def _loop(self):
         while True:
@@ -640,17 +680,19 @@ class StudioEngine:
             except Exception as exc:  # un fallo de una acción no debe matar el motor
                 self.error = f"{type(exc).__name__}: {exc}"
 
-    def handle(self, slot, trigger_held):
+    def handle(self, slot, trigger_held, chord=False):
+        if chord and slot in MODE_KEYS:
+            # Alt y Shift siguen pulsados y la tecla fantasma no llegó a Windows: sin esta pulsación neutra,
+            # al soltarlos Windows lo tomaría por Alt+Shift (cambio de idioma) o por Alt solo (menú).
+            if IS_WIN and not self.simulate:
+                key_down(0xFF)
+                key_up(0xFF)
+            self.set_mode(MODE_KEYS.index(slot))
+            self.last = {"slot": slot, "exe": "", "layer": "mode-switch", "trigger": False, "action": "mode",
+                         "at": time.time()}
+            return
         exe = self.foreground()
-        if self.studio["mode"] == "direct":
-            if slot not in self.direct_volume_slots():
-                return
-            action = self.studio["layers"][0]["actions"].get(slot)
-            if not action or action.get("type") != "media" or action.get("code") not in (0xE9, 0xEA):
-                action = self.studio["applied"][slot]
-            layer, trigger_held = "base", False
-        else:
-            action, layer = resolve(self.studio, slot, exe, trigger_held)
+        action, layer = resolve(self.studio, slot, exe, trigger_held, self.active_mode)
         self.last = {"slot": slot, "exe": exe, "layer": layer, "trigger": trigger_held,
                      "action": action and action.get("type"), "at": time.time()}
         if action:
@@ -709,7 +751,7 @@ class StudioEngine:
             self.cap_timer = None
         if self.hook:
             self.hook.capture = None
-            if self.temp_hook and self.studio["mode"] != "smart":
+            if self.temp_hook:
                 self.stop()
 
     def run_now(self, action, delay=0.0):
@@ -732,7 +774,9 @@ class StudioEngine:
         exe = self.foreground()
         return {"platform_ok": IS_WIN, "running": self.hook is not None, "mode": self.studio["mode"],
                 "trigger": self.studio["trigger"], "active_exe": exe,
-                "active_layer": layer_for_exe(self.studio, exe), "last": self.last, "error": self.error}
+                "active_layer": layer_for_exe(self.studio, exe),
+                "active_mode": -1 if self.active_mode is None else self.active_mode,
+                "last": self.last, "error": self.error}
 
 
 ENGINE = StudioEngine()

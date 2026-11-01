@@ -32,7 +32,7 @@ Todo son tokens en `:root` de `studio.css`:
 | `--line` / `--line-2` | `#222a38` / `#323d52` | Bordes finos |
 | `--text` / `--muted` | `#eef1f6` / `#8791a3` | Texto principal y secundario |
 | `--accent` | `#ffffff` | Acciones primarias (blanco sobre negro) |
-| `--green` / `--amber` / `--red` | `#4ade80` / `#fbbf24` / `#f87171` | Solo estados |
+| `--green` / `--amber` / `--red` | `#4ade80` / `#fbbf24` / `#f87171` | Estados y botón de aplicar con cambios pendientes (`#btnFlashAll.alert`) |
 
 ## Tipografía
 
@@ -58,6 +58,13 @@ Regla: **ninguna esquina llega a 90º ni queda pura (radio 0)**.
 - Botones de ventana: **3 px** (antes 0).
 - Perilla y puntos de estado: círculos (`50%`), que no tienen esquinas.
 - Indicador de la perilla: 2 px, es una barra fina, no una caja.
+
+## Visor del dispositivo y edición
+
+- El visor `.acrylic-case` permanece siempre centrado en la columna; la botonera de aplicar y descartar (`.chassis-side`: `✓` y `×`) se ancla a su derecha (`left: calc(100% + 14px)`) sin desplazar el eje central.
+- Cuando hay cambios pendientes o el teclado requiere preparación, el botón `✓` cambia a fondo rojo completo (`--red`) en lugar de usar un punto flotante.
+- Debajo de cada pieza del visor (Tecla 1, Tecla 2, Tecla 3 y Rueda) se sitúa un botón compacto de lápiz (`.edit-pen`, 30 × 26 px): pulsar la pieza lanza la grabación directa y pulsar su lápiz abre o cierra el panel ② de edición en detalle.
+- Todos los desplegables (`.fold`) permanecen cerrados por defecto y se pliegan al cambiar entre Directo, Inteligente y Modos.
 
 ## Movimiento
 

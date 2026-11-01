@@ -99,15 +99,19 @@ const TRIGGERS = { shift: "Shift", ctrl: "Ctrl", alt: "Alt" };
 
 // ---------- Estado ----------
 const defaultBase = () => ({ KEY_1: K(0, kc("F13")), KEY_2: K(0, kc("F14")), KEY_3: K(0, kc("F15")), KNOB_CCW: M(0xEA), KNOB_PRESS: M(0xE2), KNOB_CW: M(0xE9) });
-const defaultState = () => ({ mode: "direct", trigger: "shift", led_mode: 1, flashed: "", applied: null, obs: { host: "127.0.0.1", port: 4455, password: "" },
+const defaultState = () => ({ mode: "direct", trigger: "shift", led_mode: 1, flashed: "", modes: [null, null, null], obs: { host: "127.0.0.1", port: 4455, password: "" },
   layers: [{ id: "base", name: "Base", exes: [], actions: defaultBase() }] });
 const LS_KEY = "botonera.studio.v2";
 let S = defaultState();
-let layerId = "base", currentTarget = "KEY_1", viewTab = "keyboard", knobSpeed = 1;
+let layerId = "base", currentTarget = "KEY_1", knobSpeed = 1, modeIdx = 0, liveMode = -1, savedSnap = "";
 const API = { ok: false, desktop: false };
 let deviceConnected = false;
-const layer = () => S.layers.find(l => l.id === layerId) || S.layers[0];
-const isApp = () => layer().id !== "base";
+// Tres capas de edición sobre el mismo dibujo: Directo (base), una app (Inteligente) o un hueco de Modos.
+// Las dos últimas heredan de Directo lo que no definen, igual que el motor.
+const slotMode = () => S.modes[modeIdx];
+const layer = () => S.mode === "modes" ? (slotMode() || { actions: {} }) : (S.layers.find(l => l.id === layerId) || S.layers[0]);
+const isApp = () => S.mode === "modes" || layer().id !== "base";
+const editable = () => S.mode === "direct" || (S.mode === "smart" ? layerId !== "base" : !!slotMode());
 const own = slot => layer().actions[slot];
 const shown = slot => own(slot) || (isApp() ? S.layers[0].actions[slot] : undefined);
 const cur = () => shown(currentTarget) || EMPTY;
@@ -119,7 +123,11 @@ function fixState(s) {
   s.trigger = TRIGGERS[s.trigger] ? s.trigger : "shift";
   s.led_mode = Number.isInteger(s.led_mode) ? s.led_mode : 1;
   s.flashed = typeof s.flashed === "string" ? s.flashed : "";
-  s.applied = s.applied && typeof s.applied === "object" ? s.applied : null;
+  s.modes = [0, 1, 2].map(i => {
+    const m = Array.isArray(s.modes) ? s.modes[i] : null;
+    return m && typeof m === "object" ? { name: String(m.name || `Modo ${i + 1}`).slice(0, 30), icon: String(m.icon || "sliders-horizontal"),
+      actions: m.actions && typeof m.actions === "object" ? m.actions : {} } : null;
+  });
   s.obs = { ...d.obs, ...(s.obs || {}) };
   s.layers = Array.isArray(s.layers) && s.layers.length ? s.layers : d.layers;
   if (s.layers[0].id !== "base") s.layers.unshift(d.layers[0]);
@@ -141,6 +149,7 @@ function persist() {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => api("/api/config", { studio: S }).then(updateEngineUI).catch(() => {}), 350);
 }
+const snapOf = () => JSON.stringify({ layers: S.layers, modes: S.modes, trigger: S.trigger });
 async function load() {
   let ls = null;
   try { ls = JSON.parse(localStorage.getItem(LS_KEY)); } catch (_) {}
@@ -151,6 +160,7 @@ async function load() {
     S = fixState(serverEmpty && ls ? ls : r.studio);
     if (serverEmpty && ls) persist();
   } catch (_) { S = fixState(ls); }
+  savedSnap = snapOf();
 }
 
 // ---------- Utilidades de UI ----------
@@ -193,10 +203,8 @@ function renderSeg(box, current, onPick, items = SPEEDS.map(([v, n]) => [v, `${n
 
 // ---------- Paquetes ----------
 const isWheelVolume = (slot, a) => (slot === "KNOB_CCW" || slot === "KNOB_CW") && a && a.type === "media" && (a.code === 0xE9 || a.code === 0xEA);
-const hwAction = slot => {
-  const a = S.layers[0].actions[slot];
-  return S.mode === "smart" || isWheelVolume(slot, a) ? K(0, kc(GHOST[slot])) : (a && a.type !== "obs" ? a : EMPTY);
-};
+// El docker y la app son uno: el teclado solo manda F13–F18 y el motor decide qué hacer (Directo, Inteligente o Modos).
+const hwAction = slot => K(0, kc(GHOST[slot]));
 // Mismo protocolo que el backend (app.py): cada mensaje son 63 bytes tras el Report ID 0x03.
 function msg(...b) { const m = new Uint8Array(63); m.set(b.map(x => x & 0xFF)); return m; }
 function slotMessages(slot, a) {
@@ -241,46 +249,40 @@ const TEMPLATES = [
 ];
 
 // ---------- Render ----------
-const INFO = {
-  direct: () => ["target", "Los atajos se guardan dentro del teclado y funcionan en cualquier PC."],
-  smart: t => ["brain", `Sin modificador se usa la acción base; mantén ${t} para usar la acción de la app activa. El motor debe estar abierto.`],
-  modes: () => ["shapes", "Próximamente: perfiles y modos de trabajo personalizados."]
-};
 const hwSig = () => SLOT_ORDER.map(k => slotMessages(k, hwAction(k)).map(hexOf).join("/")).join("|") ;
-let wasKnob = false;
-const layerLabel = () => layer().id === "base" ? "Todas las apps" : layer().name;
+const layerLabel = () => S.mode === "modes" ? (slotMode() ? slotMode().name : "") : layer().id === "base" ? "Todas las apps" : layer().name;
+function collapseAllFolds() {
+  document.querySelectorAll("details.fold").forEach(d => { d.open = false; });
+}
 function refreshUI(opts = {}) {
-  const smart = S.mode === "smart", trig = TRIGGERS[S.trigger];
+  const smart = S.mode === "smart", modes = S.mode === "modes";
   document.querySelectorAll(".modes button").forEach(c => { const on = c.dataset.mode === S.mode; c.classList.toggle("active", on); c.setAttribute("aria-checked", on); });
-  const [ico, txt] = (INFO[S.mode] || INFO.direct)(trig);
-  $("infoText").innerHTML = txt; $("infoIcon").innerHTML = ic(ico);
-  const dirty = deviceConnected && S.flashed !== hwSig();
-  $("flashText").textContent = smart ? "Preparar teclado" : "Aplicar cambios";
-  $("btnFlashAll").title = smart ? "Escribe en el teclado las teclas fantasma F13–F18 (solo hace falta una vez)" : "Escribe en el teclado lo que ves en pantalla";
-  $("flashDot").hidden = !dirty;
-  $("btnDiscard").hidden = !(dirty && !smart && S.applied);
-  if (!smart && deviceConnected && !S.applied) { $("infoText").textContent = "El teclado no se puede leer: no sé qué lleva dentro. Pulsa «Aplicar cambios» para que coincida con esta pantalla."; $("infoIcon").innerHTML = ic("info"); }
-  else if (!smart && ["KNOB_CCW", "KNOB_CW"].some(k => isWheelVolume(k, S.layers[0].actions[k]))) {
-    $("infoText").textContent = "El volumen ajustable necesita RevienDocker abierto o en la bandeja. El resto funciona directamente en el teclado.";
-    $("infoIcon").innerHTML = ic("info");
-  }
-  if (!smart) layerId = "base";
-  $("smartCard").hidden = !smart; $("smartRule").hidden = !smart; $("tabObs").hidden = !smart;
-  if (!smart && viewTab === "obs") viewTab = "keyboard";
+  const hwDirty = deviceConnected && S.flashed !== hwSig();
+  const cfgDirty = savedSnap && snapOf() !== savedSnap;
+  const dirty = hwDirty || cfgDirty;
+  $("btnFlashAll").classList.toggle("alert", dirty);
+  $("btnFlashAll").title = dirty ? "Hay cambios sin aplicar · Aplicar al teclado" : "Aplicar cambios al teclado";
+  $("btnDiscard").hidden = !cfgDirty;
+  if (S.mode === "direct") layerId = "base";
+  else if (smart && layerId === "base" && S.layers.length > 1) layerId = S.layers[1].id;
+  $("smartCard").hidden = !smart; $("smartRule").hidden = !smart; $("modeBar").hidden = !modes;
+  if (!editable()) closeEditorUI();
+  $("device").classList.toggle("locked", !editable());   // sin app o sin modo elegido: el dibujo es solo una vista
   $("ledToggle").setAttribute("aria-checked", S.led_mode !== 0);
   $("ledToggleText").textContent = S.led_mode !== 0 ? "Encendida" : "Apagada";
   $("ledNote").textContent = (LED_INFO[S.led_mode] || "Modo sin documentar.") + " El color lo decide el propio teclado: ni el programa del fabricante permite elegirlo.";
   $("ledModes").querySelectorAll("button").forEach(b => b.classList.toggle("active", +b.dataset.led === S.led_mode));
-  $("winClose").title = smart || S.volume_bridge ? "Cerrar a la bandeja (el motor sigue activo)" : "Cerrar";
+  $("winClose").title = "Cerrar a la bandeja (el docker sigue funcionando)";
 
   if (smart) {
     renderLayers();
     renderSeg($("triggerSeg"), S.trigger, v => { S.trigger = v; persist(); refreshUI(); }, Object.entries(TRIGGERS));
-    renderRule();
     $("layerEdit").hidden = !isApp();
     if (isApp()) { setVal($("layerName"), layer().name); setVal($("layerExes"), layer().exes.join(", ")); }
   }
 
+  if (modes) renderModes();
+  renderCtx();
   SLOT_ORDER.forEach(k => {
     const a = shown(k), box = document.querySelector(`[data-target="${k}"]`);
     box.classList.toggle("inherit", isApp() && !own(k));
@@ -289,12 +291,12 @@ function refreshUI(opts = {}) {
   });
 
   const a = cur(), isKnob = currentTarget.startsWith("KNOB"), inherited = isApp() && !own(currentTarget);
-  $("selectedLabel").textContent = $("editor").hidden ? "" : TARGET_NAME[currentTarget] + (smart ? ` · ${layerLabel()}` : "");
+  $("selectedLabel").textContent = $("editor").hidden ? "" : TARGET_NAME[currentTarget] + (S.mode !== "direct" ? ` · ${layerLabel()}` : "");
   $("comboCount").textContent = (a.type === "media" || a.type === "obs") ? "" : `${countOf(a)} / ${MAX_KEYS} teclas`;
   $("curMeta").textContent = TYPE_NAME[a.type];
   $("curCard").classList.toggle("inherited", inherited);
-  $("curLabel").textContent = inherited ? "Sin definir · usa la Base" : "Asignado";
-  $("btnClear").title = isApp() ? "Quitar (usar la Base)" : "Borrar";
+  $("curLabel").textContent = inherited ? "Sin definir · usa Directo" : "Asignado";
+  $("btnClear").title = isApp() ? "Quitar (usar Directo)" : "Borrar";
   $("btnClear").disabled = isApp() ? !own(currentTarget) : false;
   $("btnTest").hidden = !API.ok;
   renderChips($("curChips"), a);
@@ -308,12 +310,19 @@ function refreshUI(opts = {}) {
     } else setAction({ ...a, speed: v });
   }, speedOptions);
 
+  $("knobTargetSeg").hidden = !isKnob;
+  if (isKnob) {
+    renderSeg($("knobTargetSeg"), currentTarget, v => {
+      currentTarget = v;
+      document.querySelectorAll("[data-target]").forEach(n => n.classList.toggle("selected", n.dataset.target === v));
+      refreshUI({ quiet: true });
+    }, [["KNOB_CCW", "↺ Izq."], ["KNOB_PRESS", "● Pulsar"], ["KNOB_CW", "↻ Der."]]);
+  }
   $("knobTools").hidden = !isKnob;
-  if (isKnob !== wasKnob) { $("knobTools").open = isKnob; wasKnob = isKnob; }   // al elegir la rueda se abre sus recetas; el resto se cierra solo
   if (isKnob) {
     const box = $("recipes"); box.innerHTML = "";
     const mapOf = r => `↺ ${textOf(r.ccw)} · ↻ ${textOf(r.cw)}${r.press ? " · ● " + textOf(r.press) : ""}`;
-    RECIPES.filter(r => smart || !r.obs).forEach(r => {
+    RECIPES.forEach(r => {
       const on = sameAction(shown("KNOB_CCW"), r.ccw) && sameAction(shown("KNOB_CW"), r.cw);
       const b = el("button", "tile" + (on ? " active" : ""));
       b.innerHTML = ic(r.icon) + `<span>${r.name}</span>`;
@@ -340,16 +349,6 @@ function refreshUI(opts = {}) {
     }, isWheelVolume("KNOB_CCW", left) && isWheelVolume("KNOB_CW", right) ? [[1, "±1 %"], [2, "±2 %"], [3, "±3 %"], [5, "±5 %"]] : SPEEDS);
   }
 
-  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.tab === viewTab));
-  ["keyboard", "mouse", "media", "obs"].forEach(t => $("m-" + t).classList.toggle("show", t === viewTab));
-  $("modsRow").hidden = viewTab === "media" || viewTab === "obs";
-  document.querySelectorAll(".mod-btn").forEach(btn => btn.classList.toggle("active", modsOf(a) & parseInt(btn.dataset.bit, 10) ? true : false));
-  $("keySelect").value = a.type === "keyboard" ? a.code : 0;
-  document.querySelectorAll("#m-mouse .opt").forEach(o => {
-    const bit = parseInt(o.dataset.bit, 10), w = parseInt(o.dataset.wheel, 10);
-    o.classList.toggle("active", a.type === "mouse" && (w ? a.wheel === w : a.code === bit && !a.wheel));
-  });
-  document.querySelectorAll("#m-media .opt").forEach(o => o.classList.toggle("active", a.type === "media" && a.code === parseInt(o.dataset.code, 10)));
   document.querySelectorAll("#obsOps .opt").forEach(o => o.classList.toggle("active", a.type === "obs" && a.op === o.dataset.op));
   const od = a.type === "obs" ? OBS_BY_OP[a.op] : null;
   $("obsTargetRow").hidden = !(od && od.needs);
@@ -362,55 +361,65 @@ function logHex(tag, bytes) { logLine(`[${new Date().toLocaleTimeString()}] ${ta
 
 function renderLayers() {
   const bar = $("layerWrap"); bar.innerHTML = "";
-  S.layers.forEach(l => {
+  S.layers.slice(1).forEach(l => {
     const b = el("button", "layer-tab" + (l.id === layerId ? " active" : ""));
     b.innerHTML = ic(l.id === "base" ? "layers" : "app-window") + `<span></span><span class="live"></span>`;
     b.children[1].textContent = l.id === "base" ? "Todas las apps" : l.name; b.dataset.layer = l.id;
     b.title = l.id === "base" ? "Lo que hace cada botón al pulsarlo solo, en cualquier app" : `Se usa con ${TRIGGERS[S.trigger]} mantenida en: ${l.exes.join(", ") || "(sin programa)"}`;
-    b.addEventListener("click", () => { if (l.id !== layerId) { layerId = l.id; swapFx(); refreshUI(); } });
+    b.addEventListener("click", () => { if (l.id !== layerId) { layerId = l.id; closeEditorUI(); collapseAllFolds(); swapFx(); refreshUI(); } });
     bar.appendChild(b);
   });
   const add = el("button", "layer-tab add"); add.innerHTML = ic("plus") + "<span>Añadir app</span>"; add.title = "Atajos propios para otra app";
   add.addEventListener("click", openAdd);
   bar.appendChild(add);
 }
-function renderRule() {
-  const t = TRIGGERS[S.trigger], l = layer();
-  const kbd = s => `<kbd>${s}</kbd>`, plus = ic("plus"), arrow = ic("arrow-right");
-  $("rule").innerHTML = l.id === "base"
-    ? `${kbd("Botón")}${arrow}<b>cualquier app</b><span class="why">Pulsa el botón solo. Es también lo que hace en una app que no tenga atajos propios.</span>`
-    : `${kbd(t)}${plus}${kbd("Botón")}${arrow}<b></b><span class="why">Mantén ${t} mientras pulsas el botón, con esta app en primer plano.</span>`;
-  if (l.id !== "base") $("rule").querySelector("b").textContent = l.name;
+// Cómo se activa lo que estás editando: lo mismo en las tres pestañas, sobre el dibujo del docker.
+function renderCtx() {
+  const kbd = s => `<kbd>${s}</kbd>`, plus = ic("plus"), box = $("deviceCtx");
+  let keys = kbd("Botón"), why = "pulsado solo, en cualquier app", name = "";
+  if (S.mode === "smart") {
+    keys = `${kbd(TRIGGERS[S.trigger])}${plus}${kbd("Botón")}`;
+    if (layerId === "base") why = "añade una app para darle atajos propios";
+    else { why = "con <b></b> en primer plano"; name = layer().name; }
+  } else if (S.mode === "modes") {
+    if (slotMode()) { why = "con el modo <b></b> activo"; name = slotMode().name; }
+    else why = "elige una plantilla para este modo";
+  }
+  box.innerHTML = `${keys}<span class="why">${why}</span>`;
+  const b = box.querySelector("b"); if (b) b.textContent = name;
 }
+function renderModes() {
+  const box = $("modeSlots"); box.innerHTML = "";
+  S.modes.forEach((m, i) => {
+    const b = el("button", "mode-slot" + (i === modeIdx ? " active" : "") + (i === liveMode ? " is-live" : "") + (m ? "" : " empty"));
+    b.setAttribute("role", "radio"); b.setAttribute("aria-checked", i === modeIdx);
+    b.innerHTML = `<kbd>${i + 1}</kbd>` + ic(m ? m.icon : "plus") + `<span class="m-name"></span><i class="live"></i>`;
+    b.querySelector(".m-name").textContent = m ? m.name : "Vacío";
+    b.title = m ? `Alt+Shift+${i + 1} activa «${m.name}»` : `Hueco libre: Alt+Shift+${i + 1}`;
+    b.addEventListener("click", () => { if (i !== modeIdx) { modeIdx = i; closeEditorUI(); collapseAllFolds(); swapFx(); refreshUI(); } });
+    box.appendChild(b);
+  });
+  const m = slotMode();
+  $("modeEdit").hidden = !m;
+  if (m) setVal($("modeName"), m.name);
+  $("modeTplTitle").innerHTML = (m ? "Cambiar plantilla" : "Elige una plantilla") + "<small>Un modo completo, listo para personalizar</small>";
+  $("modeToggle").hidden = !API.ok || !m;
+  $("modeToggleText").textContent = liveMode === modeIdx ? "Volver a Directo" : "Activar ahora";
+}
+function fillMode(m) { S.modes[modeIdx] = m; persist(); closeEditorUI(); refreshUI(); }
 function setAction(a) { layer().actions[currentTarget] = a; persist(); refreshUI(); }
 
 // ---------- Controles estáticos ----------
 (function build() {
-  const none = el("option", "", "— sin tecla (solo modificadores) —"); none.value = 0;
-  $("keySelect").appendChild(none);
-  const groups = {};
-  KEYS.forEach(k => {
-    if (!groups[k.group]) { groups[k.group] = document.createElement("optgroup"); groups[k.group].label = k.group; $("keySelect").appendChild(groups[k.group]); }
-    const o = el("option", "", k.label); o.value = k.code; groups[k.group].appendChild(o);
+  OBS_OPS.forEach(o => {
+    const b = el("button", "opt", o.label);
+    b.dataset.op = o.op;
+    b.addEventListener("click", () => {
+      const a = cur();
+      setAction(O(o.op, a.type === "obs" && OBS_BY_OP[a.op].needs === o.needs ? a.target : (o.def || ""), o.speed ? speedOf(a) : 1));
+    });
+    $("obsOps").appendChild(b);
   });
-  const mk = (parent, text, attrs, fn) => {
-    const b = el("button", "opt", text);
-    Object.entries(attrs).forEach(([k, v]) => b.dataset[k] = v);
-    b.addEventListener("click", fn); parent.appendChild(b);
-  };
-  const tryMouse = (btn, wheel) => {
-    const a = cur(), mod = modsOf(a);
-    if (popcount(mod) + 1 > MAX_KEYS) return toast("Máximo 3 teclas en total", true);
-    setAction(Ms(mod, btn, wheel, speedOf(a)));
-  };
-  MOUSE_BTNS.forEach(b => mk($("m-mouse"), b.label, { bit: b.bit, wheel: 0 }, () => tryMouse(b.bit, 0)));
-  mk($("m-mouse"), "Rueda ↑ (scroll arriba)", { bit: 0, wheel: 1 }, () => tryMouse(0, 1));
-  mk($("m-mouse"), "Rueda ↓ (scroll abajo)", { bit: 0, wheel: -1 }, () => tryMouse(0, -1));
-  MEDIA.forEach(m => mk($("m-media"), m.label, { code: m.code }, () => setAction(M(m.code, speedOf(cur())))));
-  OBS_OPS.forEach(o => mk($("obsOps"), o.label, { op: o.op }, () => {
-    const a = cur();
-    setAction(O(o.op, a.type === "obs" && OBS_BY_OP[a.op].needs === o.needs ? a.target : (o.def || ""), o.speed ? speedOf(a) : 1));
-  }));
   LIB.forEach(([name, mod, dom]) => {
     const b = el("button", "", name);
     b.addEventListener("click", () => { setAction(K(mod, kc(dom))); toast("Asignado: " + name); });
@@ -419,23 +428,43 @@ function setAction(a) { layer().actions[currentTarget] = a; persist(); refreshUI
 })();
 
 // ---------- Eventos de la interfaz ----------
+// Clic directo en una pieza del docker = abre grabación directa.
 document.querySelectorAll("[data-target]").forEach(t => {
   t.addEventListener("click", () => {
-    document.querySelectorAll("[data-target]").forEach(n => n.classList.remove("selected"));
-    t.classList.add("selected");
+    if (!editable()) return S.mode === "smart" ? openAdd() : toast("Elige una plantilla o crea un modo en blanco", true);
     currentTarget = t.dataset.target;
+    knobSpeed = cur().speed || 1;
+    if (!$("editor").hidden) {
+      document.querySelectorAll("[data-target]").forEach(n => n.classList.toggle("selected", n === t));
+      const penKey = currentTarget.startsWith("KNOB") ? "KNOB" : currentTarget;
+      document.querySelectorAll(".edit-pen").forEach(p => p.classList.toggle("active", p.dataset.edit === penKey));
+    }
+    refreshUI({ quiet: true });
+    recStart();
+  });
+});
+// Clic en el lápiz debajo de cada pieza = abre o cierra el menú 2 para edición en detalle.
+document.querySelectorAll(".edit-pen").forEach(btn => {
+  btn.addEventListener("click", () => {
+    if (!editable()) return S.mode === "smart" ? openAdd() : toast("Elige una plantilla o crea un modo en blanco", true);
+    const key = btn.dataset.edit;
+    if (!$("editor").hidden && btn.classList.contains("active")) return closeEditorUI();
+    currentTarget = key === "KNOB" ? (currentTarget.startsWith("KNOB") ? currentTarget : "KNOB_PRESS") : key;
+    document.querySelectorAll(".edit-pen").forEach(p => p.classList.toggle("active", p === btn));
+    document.querySelectorAll("[data-target]").forEach(n => n.classList.toggle("selected", n.dataset.target === currentTarget));
+    collapseAllFolds();
     $("editor").hidden = false;
     knobSpeed = cur().speed || 1;
-    viewTab = cur().type;
-    if (!currentTarget.startsWith("KNOB")) $("manualTools").open = true;
     refreshUI();
   });
 });
-$("closeEditor").addEventListener("click", () => {
+function closeEditorUI() {
   $("editor").hidden = true;
   document.querySelectorAll("[data-target]").forEach(n => n.classList.remove("selected"));
+  document.querySelectorAll(".edit-pen").forEach(p => p.classList.remove("active"));
   $("selectedLabel").textContent = "";
-});
+}
+$("closeEditor").addEventListener("click", closeEditorUI);
 function showLighting(show) {
   $("lightingPanel").hidden = !show;
   $("btnLighting").setAttribute("aria-expanded", String(show));
@@ -452,13 +481,10 @@ $("device").addEventListener("keydown", e => {
     const next = document.querySelector(`[data-target="${n}"]`); next.focus(); next.click();
   }
 });
-document.querySelectorAll(".mod-btn").forEach(b => b.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); b.click(); } }));
 document.querySelectorAll(".modes button").forEach(c => c.addEventListener("click", () => {
   if (S.mode === c.dataset.mode) return;
-  S.mode = c.dataset.mode; persist(); refreshUI(); updateEngineUI(null);
-  if (S.mode === "smart") toast(API.ok ? "Modo inteligente: flashea una vez las teclas fantasma" : "El modo inteligente necesita la app RevienDocker abierta", !API.ok);
+  S.mode = c.dataset.mode; persist(); closeEditorUI(); collapseAllFolds(); showLighting(false); swapFx(); refreshUI();
 }));
-document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => { viewTab = t.dataset.tab; refreshUI({ quiet: true }); }));
 // ---------- Luz ----------
 // Solo existen los modos 0, 1 y 2 (los mismos que ofrece el programa del fabricante); descripciones comprobadas en el teclado real.
 const LED_INFO = {
@@ -497,14 +523,7 @@ $("btnTest").addEventListener("click", () => {
   if (!hasMain(a) && !a.mod) return toast("Esta acción está vacía", true);
   api("/api/run", { action: a, delay: 3 }).then(() => toast("Se ejecuta en 3 s: cambia a la ventana donde quieras probarlo")).catch(() => toast("No se pudo ejecutar", true));
 });
-$("keySelect").addEventListener("change", e => setAction(K(modsOf(cur()), parseInt(e.target.value, 10))));
-document.querySelectorAll(".mod-btn").forEach(btn => btn.addEventListener("click", () => {
-  const a = cur();
-  const base = (a.type === "media" || a.type === "obs") ? (viewTab === "mouse" ? Ms(0, 0) : K(0, 0)) : a;
-  const mod = base.mod ^ parseInt(btn.dataset.bit, 10);
-  if (popcount(mod) + (hasMain(base) ? 1 : 0) > MAX_KEYS) return toast("Máximo 3 teclas en total", true);
-  setAction({ ...base, mod });
-}));
+
 $("obsTarget").addEventListener("input", e => { const a = cur(); if (a.type === "obs") { layer().actions[currentTarget] = { ...a, target: e.target.value }; persist(); refreshUI({ quiet: true }); } });
 ["obsHost", "obsPort", "obsPass"].forEach(id => $(id).addEventListener("input", () => {
   S.obs = { host: $("obsHost").value.trim() || "127.0.0.1", port: parseInt($("obsPort").value, 10) || 4455, password: $("obsPass").value };
@@ -540,7 +559,7 @@ const PRESETS = [
     note: "Primero asigna Ctrl+Shift+F13/F14/F15 y Ctrl+M en los ajustes de atajos de OBS.",
     actions: () => ({ KEY_1: K(3, kc("F13")), KEY_2: K(3, kc("F14")), KEY_3: K(3, kc("F15")), KNOB_CCW: M(0xEA), KNOB_PRESS: K(1, kc("KeyM")), KNOB_CW: M(0xE9) }) },
   { id: "fkeys", name: "Teclas fantasma", icon: "ghost", desc: "F13–F18 para asignarlas en otras aplicaciones.",
-    note: "Son teclas poco habituales: no hacen nada por sí solas. Asígnalas a acciones en otra app. F16 y F17 también se usan para el volumen ajustable de RevienDocker.",
+    note: "Son teclas poco habituales: no hacen nada por sí solas. Asígnalas a acciones en otra app. RevienDocker las envía al pulsar el botón.",
     actions: () => ({ KEY_1: F(13), KEY_2: F(14), KEY_3: F(15), KNOB_CCW: F(16), KNOB_PRESS: F(18), KNOB_CW: F(17) }) }
 ];
 let selectedPreset = null;
@@ -552,7 +571,7 @@ PRESETS.forEach(p => {
     selectedPreset = p;
     document.querySelectorAll(".preset-card").forEach(card => card.classList.toggle("active", card === b));
     $("presetTitle").textContent = p.name; $("presetDescription").textContent = p.desc;
-    $("presetNote").textContent = p.note || "Se reemplazarán las seis acciones de la capa seleccionada. Después puedes personalizarlas.";
+    $("presetNote").textContent = p.note || "Rellena este modo con las seis acciones. Después puedes personalizarlas una a una.";
     const mapping = $("presetMapping"); mapping.innerHTML = "";
     const actions = p.actions();
     SLOT_ORDER.forEach(slot => { const cell = el("div"), label = el("small", "", TARGET_NAME[slot]), value = el("strong", "", textOf(actions[slot])); cell.append(label, value); mapping.appendChild(cell); });
@@ -562,10 +581,23 @@ PRESETS.forEach(p => {
 });
 $("applyPreset").addEventListener("click", () => {
   if (!selectedPreset) return;
-  const dest = layerLabel();
-  if (!window.confirm(`La plantilla «${selectedPreset.name}» reemplazará las seis acciones de «${dest}». ¿Continuar?`)) return;
-  layer().actions = selectedPreset.actions(); persist(); refreshUI(); toast(`Plantilla aplicada a ${dest}`);
+  const m = slotMode();
+  if (m && Object.keys(m.actions).length && !window.confirm(`«${selectedPreset.name}» reemplazará los atajos del modo «${m.name}». ¿Continuar?`)) return;
+  fillMode({ name: selectedPreset.name, icon: selectedPreset.icon, actions: selectedPreset.actions() });
+  $("presetPreview").hidden = true; selectedPreset = null;
+  document.querySelectorAll(".preset-card").forEach(card => card.classList.remove("active"));
+  toast(`Modo ${modeIdx + 1}: ${S.modes[modeIdx].name}`);
 });
+$("btnBlankMode").addEventListener("click", () => { fillMode({ name: `Modo ${modeIdx + 1}`, icon: "sliders-horizontal", actions: {} }); toast("Modo en blanco: lo que no definas hace lo de Directo"); });
+$("modeName").addEventListener("input", e => { const m = slotMode(); if (m) { m.name = e.target.value.trim().slice(0, 30) || `Modo ${modeIdx + 1}`; persist(); renderModes(); renderCtx(); } });
+let delModeArm = null;
+const delModeLabel = () => { $("btnDelMode").querySelector("span").textContent = delModeArm ? "¿Seguro? Clic otra vez" : "Quitar modo"; };
+$("btnDelMode").addEventListener("click", () => {
+  if (!delModeArm) { delModeArm = setTimeout(() => { delModeArm = null; delModeLabel(); }, 3000); delModeLabel(); return; }
+  clearTimeout(delModeArm); delModeArm = null; delModeLabel();
+  S.modes[modeIdx] = null; persist(); closeEditorUI(); swapFx(); refreshUI();
+});
+$("modeToggle").addEventListener("click", () => api("/api/mode", { slot: modeIdx }).then(updateEngineUI).catch(() => toast("No se pudo cambiar de modo", true)));
 
 // ---------- Capas: añadir app ----------
 function slug(s) { return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 30) || "app"; }
@@ -625,14 +657,13 @@ function renderSuggest() {
 }
 $("appSuggest").addEventListener("click", () => { const exe = lastOther.toLowerCase(); addLayer(exe.replace(/\.exe$/, ""), [exe], {}); });
 function updateEngineUI(st) {
-  const pill = $("enginePill"), smart = S.mode === "smart";
+  const pill = $("enginePill");
   if (st && st.desktop !== undefined) { API.desktop = st.desktop; $("winctl").hidden = !st.desktop; $("resize").hidden = !st.desktop; }
-  pill.hidden = !smart;
-  if (!smart) return;
+  if (st && st.active_mode !== undefined && st.active_mode !== liveMode) { liveMode = st.active_mode; if (S.mode === "modes") renderModes(); }
   let cls = "bad", text;
   if (!API.ok) text = "Motor sin conectar";
   else if (st && !st.platform_ok) text = "Solo Windows";
-  else if (st && st.running) { cls = "ok"; text = "Motor activo"; }
+  else if (st && st.running) { cls = "ok"; text = "Motor activo" + (liveMode >= 0 && S.modes[liveMode] ? " · " + S.modes[liveMode].name : ""); }
   else if (!st) { cls = ""; text = "Iniciando…"; }
   else text = "Motor detenido";
   pill.className = "pill " + cls; $("engineText").textContent = text;
@@ -647,7 +678,7 @@ function updateEngineUI(st) {
   } else if (!API.ok) $("activeApp").textContent = "—";
 }
 setInterval(() => {
-  if (!API.ok || S.mode !== "smart" || document.hidden) return;
+  if (!API.ok || document.hidden) return;
   api("/api/status").then(updateEngineUI).catch(() => { API.ok = false; updateEngineUI(null); });
 }, 1500);
 
@@ -676,7 +707,7 @@ function recKey(down, id, modBit, hid) {  // origen común: DOM o motor nativo
   const n = recSnap();
   if (modBit) n.mod |= modBit;
   else {
-    if (!hid) return recWarn("Tecla no soportada. Usa «Elegir a mano».");
+    if (!hid) return recWarn("Tecla no soportada. Usa «Atajos del sistema».");
     n.key = hid; n.btn = 0; n.wheel = 0;
   }
   recApply(n);
@@ -753,7 +784,6 @@ async function recStart() {
     .catch(() => {})
     .then(() => { if (rec === me) updateRecStatus(); });
 }
-$("btnRecord").addEventListener("click", recStart);
 $("recCancel").addEventListener("click", recEnd);
 document.addEventListener("fullscreenchange", () => { if (rec && rec.fs && !document.fullscreenElement) recEnd(); });
 window.addEventListener("blur", () => { if (rec && !rec.native) recEnd(); });
@@ -788,25 +818,26 @@ $("btnConnect").addEventListener("click", async () => {
   } catch (err) { logLine("Error WebHID: " + err.message + " · Sigues en simulador.", "#fbbf24"); }
 });
 function markApplied() {
-  S.flashed = hwSig();
-  S.volume_bridge = S.mode === "direct" && ["KNOB_CCW", "KNOB_CW"].some(k => isWheelVolume(k, S.layers[0].actions[k]));
-  if (S.mode === "direct") S.applied = JSON.parse(JSON.stringify(S.layers[0].actions));   // lo último que lleva el teclado (no se puede leer)
+  S.flashed = hwSig();   // lo último escrito en el teclado (no se puede leer); los atajos ya no pasan por el firmware
+  savedSnap = snapOf();
   persist(); refreshUI({ quiet: true });
 }
 $("btnDiscard").addEventListener("click", () => {
-  if (!S.applied) return;
-  S.layers[0].actions = JSON.parse(JSON.stringify(S.applied));
-  persist(); refreshUI(); toast("Cambios descartados: vuelves a lo último que aplicaste");
+  if (!savedSnap) return;
+  try {
+    const snap = JSON.parse(savedSnap);
+    S.layers = snap.layers; S.modes = snap.modes; S.trigger = snap.trigger;
+    closeEditorUI(); collapseAllFolds(); persist(); refreshUI();
+    toast("Cambios descartados");
+  } catch (_) {}
 });
 $("btnFlashAll").addEventListener("click", async () => {
-  if (S.mode === "direct" && Object.values(S.layers[0].actions).some(a => a.type === "obs"))
-    toast("Las acciones de OBS solo funcionan en modo Inteligente: se dejan vacías en el teclado", true);
   if (hidDevice) {
     for (const [tag, f] of framesToFlash()) {
       await hidDevice.sendReport(REPORT_ID, f);
       logLine(`[TX USB] ${tag}: 03 ${hexOf(f)} ...`, "#34d399");
     }
-    markApplied(); toast("Cambios aplicados al teclado");
+    markApplied(); toast("Teclado preparado");
     return;
   }
   const payload = {};
@@ -815,8 +846,8 @@ $("btnFlashAll").addEventListener("click", async () => {
     const r = await api("/api/flash", { mappings: payload, led_mode: S.led_mode });
     if (r.ok === false) return toast("No se pudo escribir en el teclado: " + r.error, true);
     r.logs.forEach(l => logLine(l, "#34d399"));
-    if (r.logs.some(l => l.includes("TX USB"))) { markApplied(); toast("Cambios aplicados al teclado"); }
-    else toast("Simulador: no hay teclado conectado, no se escribió nada", true);
+    if (r.logs.some(l => l.includes("TX USB"))) { markApplied(); toast("Teclado preparado"); }
+    else { savedSnap = snapOf(); refreshUI({ quiet: true }); toast("Cambios guardados"); }
   } catch (_) {
     for (const [tag, f] of framesToFlash()) logLine(`[SIMULADOR] ${tag}: 03 ${hexOf(f)} ...`, "#34d399");
   }

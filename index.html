@@ -13,10 +13,8 @@
     <div class="tb-brand pywebview-drag-region"><img class="logo" src="assets/brand-icon.png" alt="" /><img class="wordmark" src="assets/wordmark.svg" alt="RevienDocker" /></div>
     <div class="tb-drag pywebview-drag-region"></div>
     <span class="pill" id="devicePill" title="Estado del teclado"><i class="dot"></i><span id="deviceText">Simulador</span></span>
-    <span class="pill" id="enginePill" hidden><i class="dot"></i><span id="engineText"></span></span>
+    <span class="pill" id="enginePill" title="El docker y la app funcionan juntos: si el motor se detiene, los botones no hacen nada"><i class="dot"></i><span id="engineText">Motor…</span></span>
     <button id="btnConnect" class="icon-btn" title="Buscar el teclado"><i data-ic="plug"></i></button>
-    <button id="btnDiscard" class="icon-btn" hidden title="Descartar los cambios y volver a lo último que aplicaste"><i data-ic="undo-2"></i></button>
-    <button id="btnFlashAll" class="primary" title="Escribe en el teclado lo que ves en pantalla"><i data-ic="check"></i><span id="flashText">Aplicar cambios</span><i class="flash-dot" id="flashDot" hidden title="Hay cambios sin aplicar al teclado"></i></button>
     <div class="winctl" id="winctl" hidden>
       <button data-win="minimize" title="Minimizar"><i data-ic="minus"></i></button>
       <button data-win="maximize" title="Maximizar"><i data-ic="square"></i></button>
@@ -28,11 +26,10 @@
 
     <section class="mode-block">
       <div class="mode-controls"><div class="modes" role="radiogroup" aria-label="Modo">
-      <button data-mode="direct" role="radio" title="Los atajos se guardan dentro del teclado: funciona solo, en cualquier PC."><i data-ic="target"></i>Directo</button>
-      <button data-mode="smart" role="radio" title="Mantén el modificador para usar los atajos de la app activa. Necesita RevienDocker en marcha."><i data-ic="brain"></i>Inteligente</button>
-      <button data-mode="modes" role="radio" title="Modos y perfiles de trabajo (próximamente)"><i data-ic="shapes"></i>Modos</button>
+      <button data-mode="direct" role="radio" title="Lo que hace cada botón al pulsarlo solo, en cualquier app. Es la base de todo."><i data-ic="target"></i>Directo</button>
+      <button data-mode="smart" role="radio" title="Mantén un modificador y pulsa un botón: atajos propios para la app que tengas delante."><i data-ic="brain"></i>Inteligente</button>
+      <button data-mode="modes" role="radio" title="Tres modos de trabajo: Alt+Shift+1/2/3 cambia de modo y repetirlo vuelve a Directo."><i data-ic="shapes"></i>Modos</button>
     </div><button id="btnLighting" class="lighting-button" aria-expanded="false" aria-controls="lightingPanel" title="Iluminación"><i data-ic="lightbulb"></i><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18h1a2 2 0 0 0 1.5-3.3 1.7 1.7 0 0 1 1.3-2.8H18a3 3 0 0 0 3-3 9 9 0 0 0-9-9Z"/><circle cx="7.5" cy="10" r=".6"/><circle cx="10" cy="6.8" r=".6"/><circle cx="14" cy="6.8" r=".6"/><circle cx="17" cy="10" r=".6"/></svg><span class="sr-only">Iluminación</span></button></div>
-      <div class="infobar"><i id="infoIcon"></i><span id="infoText"></span></div>
       <div id="lightingPanel" class="lighting-panel" hidden>
         <div class="lighting-title"><strong>Iluminación</strong><button id="closeLighting" aria-label="Cerrar iluminación">×</button></div>
         <div class="fold-body">
@@ -57,7 +54,6 @@
     </section>
 
     <section class="smart-bar" id="smartRule" hidden>
-      <div class="rule" id="rule"></div>
       <details class="fold mini" id="layerEdit" hidden>
         <summary><i data-ic="settings-2"></i><span class="s-t">Ajustes de esta app</span><i class="chev" data-ic="chevron-down"></i></summary>
         <div class="fold-body layer-edit">
@@ -70,19 +66,69 @@
       <p class="err" id="engineErr" hidden></p>
     </section>
 
+    <section class="mode-bar" id="modeBar" hidden>
+      <div class="smart-head">
+        <span class="s-label"><i data-ic="shapes"></i>Modos de trabajo</span>
+        <span class="chord" title="Mantén Alt y Shift y pulsa un botón del docker"><kbd>Alt</kbd><i data-ic="plus"></i><kbd>Shift</kbd><i data-ic="plus"></i><kbd>1 · 2 · 3</kbd></span>
+      </div>
+      <div class="mode-slots" id="modeSlots" role="radiogroup" aria-label="Modo que estás editando"></div>
+      <div class="mode-actions">
+        <button id="modeToggle" title="Activa o desactiva este modo ahora, sin usar el teclado"><i data-ic="play"></i><span id="modeToggleText">Activar ahora</span></button>
+      </div>
+      <details class="fold" id="modeTpl">
+        <summary><i data-ic="layout-grid"></i><span class="s-t" id="modeTplTitle">Plantillas<small>Un modo completo, listo para personalizar</small></span><i class="chev" data-ic="chevron-down"></i></summary>
+        <div class="fold-body">
+          <div class="preset-grid" id="presets"></div>
+          <div class="preset-preview" id="presetPreview" hidden>
+            <div><strong id="presetTitle"></strong><p class="muted" id="presetDescription"></p></div>
+            <div class="preset-mapping" id="presetMapping"></div>
+            <p class="muted" id="presetNote"></p>
+            <button class="primary" id="applyPreset">Usar en este modo</button>
+          </div>
+          <button id="btnBlankMode" class="blank-mode"><i data-ic="plus"></i><span>Modo en blanco</span></button>
+        </div>
+      </details>
+      <details class="fold mini" id="modeEdit" hidden>
+        <summary><i data-ic="settings-2"></i><span class="s-t">Ajustes de este modo</span><i class="chev" data-ic="chevron-down"></i></summary>
+        <div class="fold-body layer-edit">
+          <div class="form-group"><label for="modeName">Nombre</label><input type="text" id="modeName" maxlength="30" /></div>
+          <button id="btnDelMode" class="danger" title="Vaciar este hueco"><i data-ic="trash-2"></i><span>Quitar modo</span></button>
+        </div>
+      </details>
+    </section>
+
     <section class="device-card">
       <div class="step-row"><span class="step">1</span><span>Elige un botón</span><em id="selectedLabel"></em></div>
+      <div class="ctx" id="deviceCtx"></div>
       <div class="chassis-wrap" id="chassis">
-        <div class="acrylic-case" id="device">
-          <div class="keycap" data-target="KEY_1" tabindex="0" role="button" title="Tecla 1"><span class="k-id">1</span><span class="k-val" id="lbl_KEY_1"></span></div>
-          <div class="keycap" data-target="KEY_2" tabindex="0" role="button" title="Tecla 2"><span class="k-id">2</span><span class="k-val" id="lbl_KEY_2"></span></div>
-          <div class="keycap" data-target="KEY_3" tabindex="0" role="button" title="Tecla 3"><span class="k-id">3</span><span class="k-val" id="lbl_KEY_3"></span></div>
-          <div class="encoder-group">
-            <div class="encoder-ring">
-              <div class="enc-dir" data-target="KNOB_CCW" id="lbl_KNOB_CCW" tabindex="0" role="button" title="Giro a la izquierda"></div>
-              <div class="enc-dir" data-target="KNOB_CW" id="lbl_KNOB_CW" tabindex="0" role="button" title="Giro a la derecha"></div>
+        <div class="device-stage">
+          <div class="acrylic-case" id="device">
+            <div class="piece-col">
+              <div class="keycap" data-target="KEY_1" tabindex="0" role="button" title="Tecla 1 · Clic para grabar"><span class="k-id">1</span><span class="k-val" id="lbl_KEY_1"></span></div>
+              <button class="edit-pen" data-edit="KEY_1" title="Editar Tecla 1 en detalle" aria-label="Editar Tecla 1"><i data-ic="pencil"></i></button>
             </div>
-            <div class="knob" data-target="KNOB_PRESS" tabindex="0" role="button" title="Pulsar la rueda"><div class="knob-indicator"></div><span id="lbl_KNOB_PRESS"></span></div>
+            <div class="piece-col">
+              <div class="keycap" data-target="KEY_2" tabindex="0" role="button" title="Tecla 2 · Clic para grabar"><span class="k-id">2</span><span class="k-val" id="lbl_KEY_2"></span></div>
+              <button class="edit-pen" data-edit="KEY_2" title="Editar Tecla 2 en detalle" aria-label="Editar Tecla 2"><i data-ic="pencil"></i></button>
+            </div>
+            <div class="piece-col">
+              <div class="keycap" data-target="KEY_3" tabindex="0" role="button" title="Tecla 3 · Clic para grabar"><span class="k-id">3</span><span class="k-val" id="lbl_KEY_3"></span></div>
+              <button class="edit-pen" data-edit="KEY_3" title="Editar Tecla 3 en detalle" aria-label="Editar Tecla 3"><i data-ic="pencil"></i></button>
+            </div>
+            <div class="piece-col encoder-col">
+              <div class="encoder-group">
+                <div class="encoder-ring">
+                  <div class="enc-dir" data-target="KNOB_CCW" id="lbl_KNOB_CCW" tabindex="0" role="button" title="Giro a la izquierda · Clic para grabar"></div>
+                  <div class="enc-dir" data-target="KNOB_CW" id="lbl_KNOB_CW" tabindex="0" role="button" title="Giro a la derecha · Clic para grabar"></div>
+                </div>
+                <div class="knob" data-target="KNOB_PRESS" tabindex="0" role="button" title="Pulsar la rueda · Clic para grabar"><div class="knob-indicator"></div><span id="lbl_KNOB_PRESS"></span></div>
+              </div>
+              <button class="edit-pen" data-edit="KNOB" title="Editar rueda en detalle" aria-label="Editar rueda"><i data-ic="pencil"></i></button>
+            </div>
+          </div>
+          <div class="chassis-side">
+            <button id="btnFlashAll" class="side-btn" title="Aplicar cambios al teclado"><i data-ic="check"></i><span class="sr-only" id="flashText">Aplicar cambios</span></button>
+            <button id="btnDiscard" class="side-btn" hidden title="Descartar cambios sin guardar"><i data-ic="x"></i><span class="sr-only">Descartar</span></button>
           </div>
         </div>
       </div>
@@ -91,11 +137,10 @@
     <section class="editor" id="editor" hidden>
       <div class="step-row"><span class="step">2</span><span>Elige qué hace</span><span class="num muted" id="comboCount"></span><button id="closeEditor" class="close-editor" aria-label="Cerrar editor">×</button></div>
       <div class="cur-card" id="curCard">
-        <div class="cur-head"><span class="muted" id="curLabel">Asignado</span><span class="muted" id="curMeta"></span></div>
+        <div class="cur-head"><span class="muted" id="curLabel">Asignado</span><div class="seg" id="knobTargetSeg" hidden></div><span class="muted" id="curMeta"></span></div>
         <div id="curChips" class="chips big"></div>
         <div class="speed-row" id="speedRow"><label><i data-ic="gauge"></i>Velocidad</label><div class="seg" id="speedSeg"></div></div>
         <div class="cur-actions">
-          <button id="btnRecord" class="primary" title="Pulsa la combinación en tu teclado y ratón"><i data-ic="circle-dot"></i>Grabar</button>
           <button id="btnTest" hidden title="Ejecuta la acción en este PC tras 3 segundos"><i data-ic="play"></i>Probar</button>
           <button id="btnClear" title="Borrar"><i data-ic="trash-2"></i></button>
         </div>
@@ -119,31 +164,15 @@
       </div>
       </details>
 
-      <details class="fold" name="acc" id="manualTools">
-        <summary><i data-ic="sliders-horizontal"></i><span class="s-t">Elegir a mano<small>Teclado, ratón, multimedia y OBS</small></span><i class="chev" data-ic="chevron-down"></i></summary>
+      <details class="fold" name="acc" id="obsTools">
+        <summary><i data-ic="clapperboard"></i><span class="s-t">Acciones de OBS<small>Escenas, fuentes, micrófono y directo</small></span><i class="chev" data-ic="chevron-down"></i></summary>
         <div class="fold-body">
-        <div class="tabs">
-          <button class="tab" data-tab="keyboard"><i data-ic="keyboard"></i>Teclado</button>
-          <button class="tab" data-tab="mouse"><i data-ic="mouse"></i>Ratón</button>
-          <button class="tab" data-tab="media"><i data-ic="music"></i>Multimedia</button>
-          <button class="tab" data-tab="obs" id="tabObs"><i data-ic="clapperboard"></i>OBS</button>
-        </div>
-        <div id="modsRow" class="modifiers-grid">
-          <div class="mod-btn" data-bit="1" tabindex="0" role="button">Ctrl</div>
-          <div class="mod-btn" data-bit="2" tabindex="0" role="button">Shift</div>
-          <div class="mod-btn" data-bit="4" tabindex="0" role="button">Alt</div>
-          <div class="mod-btn" data-bit="8" tabindex="0" role="button">Win</div>
-        </div>
-        <div id="m-keyboard" class="m-body"><select id="keySelect" aria-label="Tecla"></select></div>
-        <div id="m-mouse" class="m-body opt-grid"></div>
-        <div id="m-media" class="m-body opt-grid"></div>
-        <div id="m-obs" class="m-body">
           <div class="opt-grid show" id="obsOps"></div>
-          <div class="form-group" id="obsTargetRow" style="margin-top:8px" hidden>
+          <div class="form-group" id="obsTargetRow" hidden>
             <label for="obsTarget" id="obsTargetLabel">Nombre</label>
             <input type="text" id="obsTarget" />
           </div>
-          <details style="margin-top:8px">
+          <details>
             <summary><i data-ic="plug-zap"></i>Conexión a OBS<i class="chev" data-ic="chevron-down"></i></summary>
             <p class="muted" style="margin:6px 0">En OBS: Herramientas → Ajustes del servidor WebSocket.</p>
             <div class="obs-conn">
@@ -153,25 +182,11 @@
             </div>
           </details>
         </div>
-      </div>
       </details>
 
       </div>
     </section>
     <section class="advanced-section">
-      <details class="fold" name="acc">
-        <summary><i data-ic="layout-grid"></i><span class="s-t">Plantillas<small>Configuraciones listas para personalizar</small></span><i class="chev" data-ic="chevron-down"></i></summary>
-        <div class="fold-body">
-          <p class="muted">Elige una plantilla para ver qué hace cada control antes de aplicarla.</p>
-          <div class="preset-grid" id="presets"></div>
-          <div class="preset-preview" id="presetPreview" hidden>
-            <div><strong id="presetTitle"></strong><p class="muted" id="presetDescription"></p></div>
-            <div class="preset-mapping" id="presetMapping"></div>
-            <p class="muted" id="presetNote"></p>
-            <button class="primary" id="applyPreset">Usar esta plantilla</button>
-          </div>
-        </div>
-      </details>
       <details class="fold diagnostics">
         <summary><i data-ic="terminal"></i><span class="s-t">Diagnóstico<small>Información técnica de conexión</small></span><i class="chev" data-ic="chevron-down"></i></summary>
         <div class="fold-body"><p class="muted">Actividad USB y vista previa de comandos</p><div class="hex-console" id="hexConsole" aria-label="Registro de diagnóstico USB"></div></div>

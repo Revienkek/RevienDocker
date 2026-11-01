@@ -258,6 +258,12 @@ class StudioHandler(SimpleHTTPRequestHandler):
                 return self._json({"ok": self.engine.start_capture()})
             self.engine.stop_capture()
             return self._json({"ok": True})
+        if self.path == "/api/mode":
+            try:
+                self.engine.set_mode(int(body.get("slot", -1)))
+            except (TypeError, ValueError):
+                return self._json({"ok": False, "error": "bad slot"}, 400)
+            return self._json({"ok": True, **self.engine.status()})
         if self.path == "/api/run":
             ok = self.engine.run_now(body.get("action", {}), min(10.0, float(body.get("delay", 0))))
             return self._json({"ok": ok})
@@ -282,7 +288,7 @@ def serve(port: int = PORT, open_browser: bool = False):
     if open_browser:
         import webbrowser
         webbrowser.open(url)
-    ENGINE.apply(ENGINE.studio, persist=False)  # arranca el motor si lo guardado está en modo inteligente
+    ENGINE.apply(ENGINE.studio, persist=False)  # el motor arranca siempre: el docker y la app son uno
     make_server(port).serve_forever()
 
 

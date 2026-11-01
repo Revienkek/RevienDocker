@@ -2,8 +2,8 @@
 studio_app.py — RevienDocker como aplicación de escritorio (sin navegador).
 
   • Ventana propia sin marco de Windows (WebView2), con su barra de título y botones.
-  • Icono en la bandeja: en modo Inteligente, cerrar la ventana la oculta y el motor sigue activo.
-    En modo Directo no hace falta motor, así que cerrar sale del todo.
+  • Icono en la bandeja: cerrar la ventana la oculta y el motor sigue activo (el docker lo necesita).
+    Solo «Salir» de la bandeja cierra del todo.
   • Una sola instancia (el puerto local actúa de cerrojo).
   • `--minimized` arranca directamente en la bandeja (para ponerlo en «Inicio» de Windows).
 
@@ -68,7 +68,7 @@ def main():
         if not activate_existing_instance():
             ctypes.windll.user32.MessageBoxW(0, "RevienDocker ya está en marcha: búscalo en la bandeja del sistema (junto al reloj).", TITLE, 0x40)
         return
-    ENGINE.apply(ENGINE.studio, persist=False)  # reanuda el modo inteligente si estaba activo
+    ENGINE.apply(ENGINE.studio, persist=False)  # el motor arranca siempre: el docker y la app son uno
     threading.Thread(target=server.serve_forever, daemon=True, name="studio-http").start()
 
     window = webview.create_window(TITLE, f"http://127.0.0.1:{PORT}/index.html", width=1040, height=720, min_size=(820, 560),

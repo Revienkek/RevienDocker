@@ -63,6 +63,46 @@ class ResolveTests(unittest.TestCase):
             self.assertEqual(se.load_studio(p)["layers"][1]["exes"], ["obs64.exe"])
 
 
+MODOS = [{"name": "Música", "icon": "music", "actions": {"KEY_1": K(0, 0x05), "KNOB_CW": K(0, 0x06)}}, None, None]
+
+
+class ModeTests(unittest.TestCase):
+    def setUp(self):
+        self.s = se.normalize_studio({**STUDIO, "modes": MODOS})
+
+    def test_normalize_siempre_tres_huecos(self):
+        self.assertEqual(len(self.s["modes"]), 3)
+        self.assertIsNone(self.s["modes"][1])
+        self.assertEqual(se.normalize_studio({"modes": "x"})["modes"], [None, None, None])
+
+    def test_modo_activo_sustituye_a_directo_y_hereda_lo_que_no_define(self):
+        a, origin = se.resolve(self.s, "KEY_1", "x.exe", False, 0)
+        self.assertEqual((origin, a["code"]), ("mode:0", 0x05))
+        a, origin = se.resolve(self.s, "KEY_2", "x.exe", False, 0)    # el modo no define KEY_2 → Directo
+        self.assertEqual((origin, a["code"]), ("base", 0x28))
+
+    def test_la_regla_de_la_app_gana_al_modo(self):
+        self.assertEqual(se.resolve(self.s, "KEY_1", "obs64.exe", True, 0)[1], "obs")
+        self.assertEqual(se.resolve(self.s, "KEY_1", "obs64.exe", False, 0)[1], "mode:0")
+        self.assertEqual(se.resolve(self.s, "KEY_2", "obs64.exe", True, 0)[1], "base")   # app sin KEY_2 y modo sin KEY_2
+
+    def test_alt_shift_cambia_de_modo_y_repetir_vuelve_a_directo(self):
+        with tempfile.TemporaryDirectory() as d:
+            e = se.StudioEngine(simulate=True, path=Path(d) / "s.json")
+            e.studio = self.s
+            e.foreground = lambda: "x.exe"
+            e.handle("KEY_1", False, True)
+            self.assertEqual(e.active_mode, 0)
+            e.handle("KEY_1", False)
+            self.assertEqual(e.executed[-1][1], "mode:0")
+            e.handle("KEY_2", False, True)            # hueco vacío: no cambia nada
+            self.assertEqual(e.active_mode, 0)
+            e.handle("KEY_1", False, True)
+            self.assertIsNone(e.active_mode)
+            self.assertEqual(e.status()["active_mode"], -1)
+            e.handle("KNOB_CW", False, True)          # el acorde solo vale con los botones 1–3
+            self.assertEqual(e.last["layer"], "base")
+
 @unittest.skipUnless(se.IS_WIN, "hook de teclado solo en Windows")
 class HookTests(unittest.TestCase):
     def test_f13_con_shift_ejecuta_capa_de_app_y_se_traga(self):

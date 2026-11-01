@@ -1,6 +1,6 @@
 # Guía de usuario — RevienDocker
 
-Documento vivo: cada función nueva del proyecto se añade aquí. Última revisión: 2026-10-31.
+Documento vivo: cada función nueva del proyecto se añade aquí. Última revisión: 2026-11-01.
 
 ## 1. Qué es
 
@@ -43,16 +43,16 @@ Abre `http://127.0.0.1:8765/index.html`. También vale abrir `index.html` con do
 Qué pasa por dentro: el motor es un hook de teclado que solo reacciona a F13–F18 y no consume nada mientras no pulsas. La acción se ejecuta con Shift/Ctrl/Alt «soltado» y se restaura al terminar, para que la app no vea Shift+tu atajo.
 
 ### OBS Studio (acciones nativas)
-Activa en OBS: Herramientas → Ajustes del servidor WebSocket → Habilitar. Pon host, puerto y contraseña en «Elegir a mano → OBS → Conexión». Acciones: escena siguiente/anterior, ir a una escena, mostrar/ocultar una fuente de la escena actual (ej. «Fondo negro»), silenciar un micro, subir/bajar su volumen (la velocidad son dB por clic) e iniciar/parar grabación o directo. La plantilla «OBS Studio» y la receta «Volumen del micro (OBS)» lo dejan listo con la entrada `Mic/Aux`; cambia el nombre si tu micro se llama distinto.
+Activa en OBS: Herramientas → Ajustes del servidor WebSocket → Habilitar. Pon host, puerto y contraseña en «Acciones de OBS → Conexión a OBS». Acciones: escena siguiente/anterior, ir a una escena, mostrar/ocultar una fuente de la escena actual (ej. «Fondo negro»), silenciar un micro, subir/bajar su volumen (la velocidad son dB por clic) e iniciar/parar grabación o directo. La plantilla «OBS Studio» y la receta «Volumen del micro (OBS)» lo dejan listo con la entrada `Mic/Aux`; cambia el nombre si tu micro se llama distinto.
 
 ## 3. La pantalla
 
 La pantalla es una sola columna que se lee de arriba abajo: el **selector Directo / Inteligente** y el **teclado** en el centro (**① elige un botón**). Al seleccionar un control aparece debajo **② qué hace**; se puede cerrar con la cruz. Las opciones secundarias están en secciones plegables. Al elegir la rueda se abren sus recetas solas.
 
-### Cabecera
-- **Píldora del teclado:** ámbar = simulador; verde = teclado real conectado. En modo Inteligente aparece otra con el estado del motor.
+### Cabecera y acciones laterales del visor
+- **Píldoras de estado:** ámbar = simulador; verde = teclado real conectado y estado del motor.
 - **Enchufe:** busca el teclado de nuevo.
-- **Aplicar cambios** (en modo Inteligente, «Preparar teclado»): escribe en el teclado lo que ves en pantalla. Un **punto rojo** significa que hay cambios sin aplicar. Al lado aparece **↶ Descartar** para volver a lo último que aplicaste (el teclado no se puede leer, así que RevienDocker recuerda lo último que le escribió). Si aún no has aplicado nada desde la app, la barra superior avisa de que no sabe qué lleva dentro el teclado.
+- **Columna derecha del visor (`✓` / `×`):** pegada a la derecha del dibujo del docker sin desplazar su centro. El botón **`✓`** escribe/aplica los cambios y se ilumina en **rojo completo** cuando hay cambios sin aplicar o el teclado no está preparado; debajo aparece **`×`** para descartar los cambios pendientes.
 - **Minimizar / maximizar / cerrar:** la ventana es propia (solo en el programa de escritorio).
 - **Redimensionar:** en el programa de escritorio, arrastra cualquier borde o esquina de la ventana (el cursor cambia a flecha de redimensionar). Tamaño mínimo 820 × 560; con ventana maximizada no se redimensiona.
 
@@ -63,23 +63,25 @@ La pantalla es una sola columna que se lee de arriba abajo: el **selector Direct
 - **KEY 1/2/3:** las tres teclas mecánicas. Muestran la acción asignada (ej. `Ctrl+Shift+F13`).
 - **↺ / ↻:** giro de la rueda a izquierda / derecha.
 - **Círculo central:** clic del pomo.
-- Pulsa cualquiera para seleccionarla y abrir su editor debajo del teclado.
+- **Clic directo en una pieza:** abre directamente la ventana de **Grabación** para asignarle una tecla, combinación o botón del ratón al vuelo.
+- **Icono de lápiz (`✎`) debajo de cada pieza (Tecla 1, Tecla 2, Tecla 3 y Rueda):** único botón que abre o cierra debajo el panel **② Elige qué hace** para editar esa pieza en detalle. Si ningún lápiz está activo, el panel ② permanece oculto.
+- **Menús plegados por defecto:** todos los desplegables arrancan cerrados y se cierran al cambiar entre **Directo**, **Inteligente** y **Modos** (o al cambiar de app o de hueco de modo), abriéndose solo lo que selecciones.
 - **Plantillas:** elige una tarjeta para revisar los seis controles antes de confirmar. Hay opciones para música, WoW Forever, navegación, reuniones, edición, trabajo diario y OBS. Las teclas fantasma F13–F18 sirven para asignar acciones en otros programas; no hacen nada por sí solas.
 - **Diagnóstico:** contiene el registro técnico USB, separado de las plantillas.
 - **Luz del teclado** (botón de bombilla y paleta junto al selector de modo): interruptor y tres modos: **Apagada**; **Al pulsar** (cada pulsación enciende la tecla con el siguiente color de la serie azul, rojo, verde…); **Ciclo** (una pulsación lanza un ciclo de colores por las teclas 1, 2 y 3). Se aplica al instante y queda en el teclado, sin pulsar «Aplicar cambios». El color no se puede elegir: lo decide cada modo.
 
-### ② Qué hace
-Al elegir un botón del panel izquierdo solo se selecciona; no empieza a grabar. Aquí ves qué tiene asignado y decides cómo cambiarlo.
+### ② Elige qué hace (icono de lápiz)
+Se abre únicamente al pulsar el lápiz (`✎`) debajo de una tecla o de la rueda. Cuando editas la rueda, arriba aparece un selector compacto (`↺ Izq. | ● Pulsar | ↻ Der.`) para inspeccionar, probar o borrar cada parte.
 
 - **Asignado ahora:** la acción actual en chips (`Ctrl + Shift + Z`), con su tipo y el contador `n / 3 teclas`. Si lleva velocidad, aparece un selector.
-- **⏺ Grabar con mi teclado y ratón:** abre una ventana de grabación. Pulsa la combinación, haz clic con cualquier botón del ratón (izquierdo, derecho, central, atrás, adelante) o mueve la rueda. Se guarda sola al soltar. Se puede combinar con Ctrl/Shift/Alt/Win (ej. Ctrl + clic derecho, Ctrl + rueda).
+- **Grabación directa (pulsando la pieza en el visor ①):** abre la ventana de grabación. Pulsa la combinación, haz clic con cualquier botón del ratón (izquierdo, derecho, central, atrás, adelante) o mueve la rueda. Se guarda sola al soltar. Se puede combinar con Ctrl/Shift/Alt/Win (ej. Ctrl + clic derecho, Ctrl + rueda).
   - En el programa de escritorio la captura de teclado la hace el motor nativo (hook de Windows): Alt+Tab, Win y similares se graban sin que el PC los ejecute. Tiene un tiempo máximo de 20 s por seguridad. Para salir sin guardar: «Cancelar».
   - En un navegador (desarrollo) se usa pantalla completa + bloqueo de teclado como alternativa menos fiable.
   - **Ctrl+Alt+Supr es imposible de capturar** (lo trata el propio Windows). Para eso y para los demás atajos del sistema están los «Atajos del sistema».
 - **Límite:** 1 tecla, o combinación de 2 o 3 en total, contando los modificadores. Ctrl+C = 2, Ctrl+Shift+F13 = 3. Una combinación es modificadores + una sola tecla normal (o un botón/rueda del ratón).
-- **Atajos listos:** Alt+Tab, Win+Tab, Alt+F4, Win+D, Win+L, Win+E, Win+V, Win+Shift+S, Ctrl+Alt+Supr, Ctrl+Shift+Esc, Win+., Alt+Esc. Un clic y se asignan sin grabar.
-- **Elegir a mano:** pestañas Teclado (lista completa), Ratón (los 5 botones y rueda ↑/↓) y Multimedia, con los modificadores arriba.
-- **Borrar:** deja el botón sin asignar.
+- **Atajos del sistema:** Alt+Tab, Win+Tab, Alt+F4, Win+D, Win+L, Win+E, Win+V, Win+Shift+S, Ctrl+Alt+Supr, Ctrl+Shift+Esc, Win+., Alt+Esc. Un clic y se asignan sin grabar.
+- **Acciones de OBS:** escenas, fuentes, micrófono y conexión WebSocket con OBS Studio.
+- **Probar / Borrar:** prueba la acción tras 3 segundos o deja el botón sin asignar.
 - **Consola de tramas:** el paquete de cada cambio y de cada flasheo. Lo más reciente va arriba.
 
 ### Recetas de rueda
@@ -145,6 +147,7 @@ _(vacío; se rellena al probar con el hardware)_
 
 | Fecha | Cambio |
 |---|---|
+| 2026-11-01 | Unificación de **Directo / Inteligente / Modos** (3 huecos con plantillas y cambio rápido con `Alt+Shift+1/2/3` + overlay compacto). Limpieza visual del visor: sin barra informativa bajo las pestañas, botón de aplicar/descartar (`✓` / `×`) a la derecha del visor con aviso en rojo completo, clic directo en cada pieza para grabar al vuelo, icono de lápiz (`✎`) bajo cada pieza para abrir el menú 2, eliminación de «Elegir a mano» y menús plegados por defecto. |
 | 2026-11-01 | Control de instancia única por mutex nativo y HTTP: evita iconos duplicados en la bandeja al abrir y minimizar. Nueva 3ª opción «Modos» (placeholder con icono Lucide Shapes) en el selector de la cabecera. |
 | 2026-11-01 | Rediseño de uso: una columna central con el selector de modo sobre el teclado, secciones plegables de una en una con más aire y subtítulos, pestañas «Atajos para» por app con detección de la app real y atajo «Crear atajos para…», regla visual `Shift + Botón → App`. |
 | 2026-11-01 | «Flashear» pasa a «Aplicar cambios» con «Descartar», aviso de teclado desconocido y luz con los 3 modos reales (comprobados en el teclado y en el programa del fabricante). |
