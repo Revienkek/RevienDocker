@@ -3,6 +3,18 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versiones `0.x.y`: una por tanda de trabajo.
 La versión actual está en `src/version.py` y en el nombre de la etiqueta de GitHub (`v0.x.y`). Producto y estilo: [PRODUCT.md](PRODUCT.md).
 
+## [0.1.4] · 2026-11-02 · Perfiles en el lateral y solo en la bandeja
+
+### Añadido
+- Los tres huecos de la izquierda en Directo son accesos a tres perfiles: un clic usa el perfil al momento, se marca el activo y un hueco libre abre la lista para elegir. Cada perfil tiene icono propio (selector como en Mis modos) y tres marcas 1/2/3 para ponerlo o quitarlo de un hueco. Un perfil nuevo ocupa el primer hueco libre.
+
+### Cambiado
+- Minimizar manda la ventana a la bandeja, siempre. La app ya no tiene botón en la barra de tareas ni en Alt+Tab: solo se ve en la bandeja del sistema.
+- Los perfiles guardados antes reciben identificador e icono sin perder nada.
+
+### Corregido
+- Al abrir, la ventana ya no parpadea en otra esquina antes de colocarse: nace fuera de pantalla y solo se muestra ya colocada, sobre la barra de tareas. Arrancar en la bandeja (`--minimized`) deja la ventana oculta.
+
 ## [0.1.3] · 2026-11-02 · Hover en teclas y rueda
 
 ### Corregido

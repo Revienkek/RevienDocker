@@ -43,6 +43,7 @@ STUDIO_FILE = DATA_DIR / "studio.json"
 
 SLOTS = ("KEY_1", "KEY_2", "KEY_3", "KNOB_CCW", "KNOB_CW", "KNOB_PRESS")
 MODE_SLOTS = 3
+DIRECT_SLOTS = 3  # accesos a perfiles en el carril de Directo
 MY_MODES_MAX = 3  # «Mis modos»: modos propios guardados, reutilizables en cualquier hueco
 MODE_KEYS = ("KEY_1", "KEY_2", "KEY_3")   # con Ctrl+Shift activan el modo 1, 2 o 3
 GHOST_VK = {0x7C: "KEY_1", 0x7D: "KEY_2", 0x7E: "KEY_3", 0x7F: "KNOB_CCW", 0x80: "KNOB_CW", 0x81: "KNOB_PRESS"}
@@ -66,6 +67,7 @@ DEFAULT_STUDIO = {
     "modes": [None, None, None],
     "library": [],
     "profiles": [],
+    "direct_slots": [None, None, None],
     "layers": [{"id": "base", "name": "Base", "exes": [], "actions": {}}],
     "obs": {"host": "127.0.0.1", "port": 4455, "password": ""},
 }
@@ -147,6 +149,22 @@ def _clean_modes(raw, library_ids=()):
     return out
 
 
+def _clean_profiles(raw):
+    """Perfiles de Directo {id, name, icon, actions}. Los anteriores a 0.1.4 no traen id ni icono: se les da."""
+    out, seen = [], set()
+    for i, p in enumerate((raw if isinstance(raw, list) else [])[:100]):
+        name = str(p.get("name", "")).strip()[:12] if isinstance(p, dict) else ""
+        if not name:
+            continue
+        pid, n = _clean_id(p.get("id")), i + 1
+        while not pid or pid in seen:
+            pid, n = f"p{n}", n + 1
+        seen.add(pid)
+        icon = re.sub(r"[^a-z0-9-]", "", str(p.get("icon", "")).lower())[:30] or "sliders-horizontal"
+        out.append({"id": pid, "name": name, "icon": icon, "actions": _clean_actions(p.get("actions"))})
+    return out
+
+
 def normalize_studio(d):
     """Devuelve una configuración válida (descarta lo que no encaja) sin lanzar excepciones."""
     d = d if isinstance(d, dict) else {}
@@ -158,9 +176,13 @@ def normalize_studio(d):
     out.pop("applied", None)
     out["library"] = _clean_library(d.get("library"))
     out["modes"] = _clean_modes(d.get("modes"), {m["id"] for m in out["library"]})
-    profiles = d.get("profiles") if isinstance(d.get("profiles"), list) else []
-    out["profiles"] = [{"name": str(p.get("name", "")).strip()[:12], "actions": _clean_actions(p.get("actions"))}
-                       for p in profiles[:100] if isinstance(p, dict) and str(p.get("name", "")).strip()]
+    out["profiles"] = _clean_profiles(d.get("profiles"))
+    ids = {p["id"] for p in out["profiles"]}
+    slots = d.get("direct_slots") if isinstance(d.get("direct_slots"), list) else []
+    out["direct_slots"] = []   # tres huecos del carril de Directo: vacío o el id de un perfil, sin repetir
+    for i in range(DIRECT_SLOTS):
+        pid = _clean_id(slots[i]) if i < len(slots) and isinstance(slots[i], str) else ""
+        out["direct_slots"].append(pid if pid in ids and pid not in out["direct_slots"] else None)
     o = d.get("obs") if isinstance(d.get("obs"), dict) else {}
     out["obs"] = {"host": str(o.get("host", "127.0.0.1"))[:100] or "127.0.0.1",
                   "port": _int(o.get("port"), 1, 65535, 4455), "password": str(o.get("password", ""))[:200]}

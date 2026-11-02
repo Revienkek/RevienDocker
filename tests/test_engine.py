@@ -83,6 +83,18 @@ class ModeTests(unittest.TestCase):
         self.assertNotIn("from", s["modes"][1])   # m4 no cabe en Mis modos: el enlace se descarta
         self.assertEqual(se.normalize_studio({})["library"], [])
 
+    def test_perfiles_de_directo_con_id_icono_y_tres_huecos(self):
+        profs = [{"name": "Antiguo", "actions": {"KEY_1": K(0, 0x05)}},   # anterior a 0.1.4: sin id ni icono
+                 {"id": "rapido", "name": "Rápido", "icon": "Zap!", "actions": {}},
+                 {"id": "rapido", "name": "Repetido", "actions": {}}]
+        s = se.normalize_studio({"profiles": profs, "direct_slots": ["rapido", "rapido", "no-existe", "p1"]})
+        ids = [p["id"] for p in s["profiles"]]
+        self.assertEqual(len(set(ids)), 3)
+        self.assertEqual(s["profiles"][0]["icon"], "sliders-horizontal")
+        self.assertEqual(s["profiles"][1]["icon"], "zap")
+        self.assertEqual(s["direct_slots"], ["rapido", None, None])   # sin repetir, sin ids desconocidos y siempre tres
+        self.assertEqual(se.normalize_studio({})["direct_slots"], [None, None, None])
+
     def test_modo_activo_sustituye_a_directo_y_hereda_lo_que_no_define(self):
         a, origin = se.resolve(self.s, "KEY_1", "x.exe", False, 0)
         self.assertEqual((origin, a["code"]), ("mode:0", 0x05))

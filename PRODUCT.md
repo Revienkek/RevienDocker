@@ -25,7 +25,7 @@ Un docker físico con tres formas de uso sobre el mismo aparato y la misma panta
 
 ## Operating Context
 
-- El motor (`src/studio_engine.py`, gancho de teclado de Windows, teclas fantasma F13–F18) debe estar en marcha; cerrar la ventana la oculta en la bandeja.
+- El motor (`src/studio_engine.py`, gancho de teclado de Windows, teclas fantasma F13–F18) debe estar en marcha; cerrar la ventana la oculta en la bandeja y minimizar también: la app solo existe en la bandeja, sin botón en la barra de tareas ni en Alt+Tab.
 - El usuario sabe qué modo está activo por un **aviso nativo breve** abajo a la derecha, sobre la bandeja, no por la app.
 - Configuración en `%APPDATA%\RevienDocker\studio.json`. Solo escucha en `127.0.0.1`.
 - Se compila a `dist\RevienDocker.exe` y se abre desde el acceso directo del escritorio. Recompilar tras cada tanda.
@@ -42,7 +42,7 @@ Idéntica en Directo, Inteligente y Modos; no se inventan variantes por modo:
 
 ### Ventana (Decisión)
 - **Tamaño fijo, 720 × 420.** No se redimensiona, no se maximiza, no se expande ni se colapsa. Sin botón de maximizar; el doble clic en la barra y el arrastre de bordes no hacen nada. Minimizar y cerrar se mantienen.
-- **Posición inicial:** esquina inferior derecha del área útil (sobre la barra de tareas, 12 px de margen). Después se puede arrastrar; se recoloca solo al abrir.
+- **Posición inicial:** esquina inferior derecha del área útil (sobre la barra de tareas, 12 px de margen). Después se puede arrastrar; se recoloca solo al abrir. La ventana nace fuera de pantalla y solo se muestra ya colocada (sin parpadeo en otra esquina).
 - Sin margen muerto: el contenido llena el marco. Espacios verticales compactos entre barra, selector, docker y mensaje.
 - Los menús son **capas superpuestas** sobre el docker, nunca debajo ni en flujo; deben caber en la ventana y, si algo no cabe, desplazan por dentro.
 - Los menús terminan donde acaba el docker y no tapan el mensaje de abajo.
@@ -51,7 +51,7 @@ Idéntica en Directo, Inteligente y Modos; no se inventan variantes por modo:
 La rueda dentada, a la derecha de la ×, despliega **hacia arriba y en vertical** tres iconos: teclado (estado), rayo (motor, estado) y enchufe (buscar el teclado). Solo iconos, sin texto (nombre en tooltip y para lectores de pantalla). Los puntos de estado ámbar/verde/rojo viven dentro del menú; la rueda lleva su propio punto **solo si algo no va bien** (ámbar: sin teclado o motor arrancando; rojo: motor caído). Se cierra al pulsar fuera, con Esc o tras buscar el teclado; seleccionada = borde blanco con halo y giro de 60°.
 
 ### Directo (Decisión: de momento no se toca)
-Perfiles guardables desde «+» junto a Directo. Los tres huecos del carril izquierdo son marcadores desactivados hasta que tengan función.
+Perfiles guardables desde «+» junto a Directo, cada uno con nombre e icono. Los tres huecos del carril izquierdo son accesos a perfiles (0.1.4): vacío = «+» discontinuo que abre la lista; con perfil = su icono, un clic lo usa y el que coincide con las teclas se marca en blanco. Un perfil ocupa un solo hueco; el nuevo va al primero libre.
 
 ### Inteligente (Decisión)
 - Cada botón cambia según la app en primer plano. El icono de capas abre «Atajos para» (apps y sus ajustes) como capa superpuesta.

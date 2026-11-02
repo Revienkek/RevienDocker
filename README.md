@@ -3,7 +3,7 @@
 <p align="center"><b>Tres teclas, una rueda y la acción justa en cada momento.</b></p>
 
 <p align="center">
-  Versión 0.1.3 · <a href="https://github.com/Revienkek/RevienDocker/releases/latest">Descargar <code>RevienDocker.exe</code></a> · <a href="CHANGELOG.md">Historial de cambios</a> · <a href="PRODUCT.md">Producto y estilo</a> · <a href="docs/GUIA_USUARIO.md">Guía de uso</a>
+  Versión 0.1.4 · <a href="https://github.com/Revienkek/RevienDocker/releases/latest">Descargar <code>RevienDocker.exe</code></a> · <a href="CHANGELOG.md">Historial de cambios</a> · <a href="PRODUCT.md">Producto y estilo</a> · <a href="docs/GUIA_USUARIO.md">Guía de uso</a>
 </p>
 
 ![RevienDocker](docs/captura.png)
@@ -19,7 +19,7 @@ Hay tres formas de usarlo. Comparten pantalla y controles: lo que aprendes en un
 
 - Cada tecla escribe una letra, lanza una combinación (Ctrl+Shift+…), pausa la música o salta de canción.
 - La rueda son tres botones: giro a la izquierda, giro a la derecha y pulsar. Para el volumen, el zoom o desplazarte por una página.
-- Guarda perfiles y cambia de uno a otro cuando quieras.
+- Guarda perfiles con icono y cambia entre tres de ellos con un clic desde el lateral.
 
 ### Inteligente
 *La misma tecla, distinta según la app que tengas delante.*
@@ -54,7 +54,7 @@ En los tres: teclado, multimedia y desplazamiento del ratón; cada giro de la ru
 
 ## Ventana
 
-- La ventana tiene tamaño fijo: no se redimensiona ni se maximiza. Al abrirse aparece en la esquina inferior derecha, sobre la barra de tareas.
+- La ventana tiene tamaño fijo: no se redimensiona ni se maximiza. Al abrirse aparece en la esquina inferior derecha, sobre la barra de tareas. Solo vive en la bandeja del sistema: minimizar la guarda ahí y no ocupa la barra de tareas.
 - Abajo a la derecha están minimizar, cerrar y los ajustes (rueda dentada: estado del teclado y del motor, y buscar el teclado). No hay barra de título: la ventana se mueve arrastrando cualquier zona que no sea un botón o un campo.
 
 ## Estructura del repositorio

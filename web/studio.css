@@ -294,6 +294,14 @@ details[open] > summary .chev { transform: rotate(180deg); }
 .profile-list:empty { margin-top: 0; }
 .profile-select { flex: 1; min-width: 0; justify-content: flex-start; overflow: hidden; text-overflow: ellipsis; }
 .profile-delete .ic, .profile-create .ic { width: 16px; height: 16px; }
+/* 0.1.4: cada perfil lleva icono y tres marcas 1/2/3 con el hueco del carril que ocupa */
+.profile-item { display: grid; gap: 6px; }
+.profile-row { align-items: center; }
+.profile-slots { flex: none; display: inline-flex; gap: 4px; }
+.profile-slot { width: 28px; height: 28px; padding: 0; font: 600 0.68rem var(--mono); color: var(--muted); background: transparent; border-radius: 4px; }
+.profile-slot.active { color: var(--text); border-color: #fff; background: var(--panel-3); }
+.profile-list .muted { margin: 0; font-size: 0.74rem; }
+.profile-list .mode-menu-sub { padding: 2px 2px 0; }
 @media (max-width: 700px) { .mode-controls { gap: 5px; } .modes button { padding: 10px 10px; } }
 
 /* Editor superpuesto para mantener estable la vista Directo. */
@@ -345,7 +353,6 @@ details[open] > summary .chev { transform: rotate(180deg); }
 .mode-icon-btn[aria-expanded="true"] { background: var(--panel-3); border-color: var(--line-2); color: var(--text); }
 @media (hover: hover) and (pointer: fine) { .mode-icon-btn:hover { background: var(--panel-2); color: var(--text); } }
 .mode-rail-btn .rail-key { font: 600 0.64rem var(--mono); letter-spacing: -0.01em; }
-.mode-rail-btn.placeholder { border-style: dashed; border-color: var(--line-2); background: transparent; color: var(--muted); opacity: 0.5; cursor: default; }
 
 /* Referencia: el docker en pequeño dentro de cada menú superpuesto, para ver qué cubre la capa y qué cambia. */
 .mini-ref { display: flex; align-items: center; gap: 14px; min-width: 0; }

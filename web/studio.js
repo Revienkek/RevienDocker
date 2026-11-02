@@ -100,8 +100,9 @@ const TRIGGERS = { shift: "Shift", ctrl: "Ctrl", alt: "Alt" };
 
 // ---------- Estado ----------
 const defaultBase = () => ({ KEY_1: K(0, kc("F13")), KEY_2: K(0, kc("F14")), KEY_3: K(0, kc("F15")), KNOB_CCW: M(0xEA), KNOB_PRESS: M(0xE2), KNOB_CW: M(0xE9) });
-const defaultState = () => ({ mode: "direct", trigger: "shift", led_mode: 1, flashed: "", modes: [null, null, null], library: [], profiles: [], obs: { host: "127.0.0.1", port: 4455, password: "" },
+const defaultState = () => ({ mode: "direct", trigger: "shift", led_mode: 1, flashed: "", modes: [null, null, null], library: [], profiles: [], direct_slots: [null, null, null], obs: { host: "127.0.0.1", port: 4455, password: "" },
   layers: [{ id: "base", name: "Base", exes: [], actions: defaultBase() }] });
+const PROFILE_ICON = "sliders-horizontal";
 const MY_MAX = 3;   // «Mis modos»: tantos modos propios como huecos
 const LS_KEY = "botonera.studio.v2";
 let S = defaultState();
@@ -140,7 +141,15 @@ function fixState(s) {
     if (seen.has(m.from)) mode.from = m.from;   // enlace con su copia en Mis modos; si ya no existe, se pierde
     return mode;
   });
-  s.profiles = Array.isArray(s.profiles) ? s.profiles.filter(p => p && typeof p.name === "string" && p.actions && typeof p.actions === "object").map(p => ({name: p.name.slice(0, 12), actions: p.actions})) : [];
+  const pids = new Set();   // perfiles de Directo {id, name, icon, actions}; los anteriores a 0.1.4 reciben id e icono
+  s.profiles = (Array.isArray(s.profiles) ? s.profiles : []).filter(p => p && typeof p.name === "string" && p.actions && typeof p.actions === "object").map((p, i) => {
+    let id = String(p.id || "").replace(/[^a-z0-9_-]/g, "").slice(0, 40);
+    for (let n = i + 1; !id || pids.has(id); n++) id = "p" + n;
+    pids.add(id);
+    return { id, name: p.name.slice(0, 12), icon: String(p.icon || PROFILE_ICON).replace(/[^a-z0-9-]/g, "").slice(0, 30) || PROFILE_ICON, actions: p.actions };
+  });
+  const used = new Set();   // tres huecos del carril de Directo: cada uno vacío o con el id de un perfil (sin repetir)
+  s.direct_slots = [0, 1, 2].map(i => { const id = Array.isArray(s.direct_slots) ? s.direct_slots[i] : null; if (!pids.has(id) || used.has(id)) return null; used.add(id); return id; });
   s.obs = { ...d.obs, ...(s.obs || {}) };
   s.layers = Array.isArray(s.layers) && s.layers.length ? s.layers : d.layers;
   if (s.layers[0].id !== "base") s.layers.unshift(d.layers[0]);
@@ -270,7 +279,7 @@ function refreshUI(opts = {}) {
   if (S.mode === "direct") layerId = "base";
   else if (smart && layerId === "base" && S.layers.length > 1) layerId = S.layers[1].id;
   $("profileWrap").hidden = S.mode !== "direct";
-  if (S.mode !== "direct") { $("profilePanel").hidden = true; $("profileToggle").setAttribute("aria-expanded", "false"); }
+  if (S.mode !== "direct") showProfilePanel(false);
   $("smartToggle").hidden = !smart;
   $("modeNow").hidden = !modes;
   if (!smart) showSmartPanel(false);
@@ -448,9 +457,9 @@ const APP_ICON_PICKS = [["wow", "WoW"], ["spotify", "Spotify"], ["obs", "OBS"], 
   ["brave", "Brave"], ["google", "Google"], ["claude", "Claude"], ["chatgpt", "ChatGPT"], ["office", "Microsoft 365"], ["word", "Word"],
   ["excel", "Excel"], ["powerpoint", "PowerPoint"], ["notion", "Notion"], ["obsidian", "Obsidian"], ["vscode", "VS Code"], ["adobe", "Adobe"],
   ["figma", "Figma"], ["davinci", "DaVinci Resolve"], ["blender", "Blender"]];
-function iconPicker(current, onPick) {
+function iconPicker(current, onPick, label = "Icono del modo") {
   const box = el("div", "icon-picker-wrap"), main = el("div", "icon-picker"), extra = el("div", "icon-picker icon-extra");
-  box.setAttribute("role", "radiogroup"); box.setAttribute("aria-label", "Icono del modo");
+  box.setAttribute("role", "radiogroup"); box.setAttribute("aria-label", label);
   const opt = ([name, label]) => {
     const b = el("button", "icon-opt" + (name === current ? " active" : "")); b.type = "button";
     b.setAttribute("role", "radio"); b.setAttribute("aria-checked", String(name === current)); b.title = label; b.setAttribute("aria-label", label);
@@ -497,13 +506,18 @@ function renderRail() {
   const rail = $("modeRail"), mode = S.mode;
   rail.querySelectorAll(".mode-rail-btn").forEach(n => n.remove());
   rail.removeAttribute("aria-hidden");
-  if (mode === "direct") { rail.removeAttribute("role"); rail.removeAttribute("aria-label"); rail.setAttribute("aria-hidden", "true"); }
+  if (mode === "direct") { rail.setAttribute("role", "radiogroup"); rail.setAttribute("aria-label", "Perfiles de Directo"); }
   else { rail.setAttribute("role", "radiogroup"); rail.setAttribute("aria-label", mode === "smart" ? "Tecla de activación" : "Modos de trabajo"); }
-  if (mode === "direct") {   // Directo reserva el mismo sitio: sus iconos llegarán más adelante
-    for (let i = 0; i < 3; i++) {
-      const b = el("button", "mode-rail-btn placeholder"); b.type = "button"; b.disabled = true; b.tabIndex = -1; b.title = "Próximamente";
-      b.innerHTML = ic("minus"); rail.appendChild(b);
-    }
+  if (mode === "direct") {   // Directo: tres accesos a perfiles guardados; el activo es el que coincide con las teclas
+    S.direct_slots.forEach((id, i) => {
+      const p = profileById(id), on = !!p && profileActive(p), b = el("button", "mode-rail-btn" + (on ? " active" : "") + (p ? "" : " empty"));
+      b.type = "button"; b.setAttribute("role", "radio"); b.setAttribute("aria-checked", String(on));
+      b.innerHTML = `<kbd>${i + 1}</kbd>` + ic(p ? p.icon : "plus");
+      const label = p ? `${p.name}: usar este perfil` : `Hueco libre ${i + 1}: elegir un perfil`;
+      b.title = label; b.setAttribute("aria-label", label);
+      b.addEventListener("click", () => { if (p) useProfile(p); else showProfilePanel(true, i); });
+      rail.appendChild(b);
+    });
     return renderMenu();
   }
   if (mode === "smart") {   // Inteligente: la tecla de activación, una sola, vive en el carril
@@ -686,31 +700,80 @@ function setAction(a) { layer().actions[currentTarget] = a; persist(); refreshUI
 })();
 
 // ---------- Perfiles de Directo ----------
+// Un perfil es una copia confirmada de las asignaciones de Directo con nombre e icono. Los tres huecos del carril apuntan a
+// perfiles de la lista (el menú «+» es la biblioteca): un clic en un hueco usa ese perfil al instante.
+let profilePick = -1, profileIconId = "";   // hueco libre que pidió elegir perfil · perfil cuyo selector de icono está abierto
+const profileById = id => S.profiles.find(p => p.id === id);
+const profileActive = p => JSON.stringify(canon(p.actions)) === JSON.stringify(canon(S.layers[0].actions));
+const newProfileId = () => "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+function showProfilePanel(show, pick = -1) {
+  const panel = $("profilePanel");
+  if (panel.hidden === !show && profilePick === (show ? pick : -1)) return;
+  panel.hidden = !show; profilePick = show ? pick : -1; profileIconId = "";
+  $("profileToggle").setAttribute("aria-expanded", String(show));
+  if (show) renderProfiles();
+}
+function useProfile(profile) {
+  if (profileActive(profile)) return true;
+  if (savedSnap && JSON.stringify(canon(S.layers[0].actions)) !== JSON.stringify(canon(JSON.parse(savedSnap).layers[0].actions)) && !window.confirm("Hay cambios sin confirmar. ¿Cambiar de perfil?")) return false;
+  S.layers[0].actions = clone(profile.actions);
+  try { const snap = JSON.parse(savedSnap); snap.layers[0].actions = clone(profile.actions); savedSnap = JSON.stringify(snap); } catch (_) {}   // un perfil ya es una copia confirmada
+  persist(); closeEditorUI(); refreshUI(); toast(`Perfil: ${profile.name}`);
+  return true;
+}
+function toggleProfileSlot(profile, i) {
+  if (S.direct_slots[i] === profile.id) S.direct_slots[i] = null;
+  else { S.direct_slots = S.direct_slots.map(id => id === profile.id ? null : id); S.direct_slots[i] = profile.id; }
+  persist(); renderProfiles(); renderRail();
+}
 function renderProfiles() {
   const list = $("profileList"); list.innerHTML = "";
+  if (profilePick >= 0) list.appendChild(el("div", "mode-menu-sub", `Hueco ${profilePick + 1} · elige un perfil`));
+  if (!S.profiles.length) list.appendChild(el("p", "muted", "Aún no tienes perfiles. Pon nombre a lo que tienes ahora y guárdalo."));
   S.profiles.forEach((profile, index) => {
-    const row = el("div", "profile-row"), select = el("button", "profile-select", profile.name), remove = el("button", "profile-delete");
-    select.title = `Seleccionar ${profile.name}`;
+    const item = el("div", "profile-item"), row = el("div", "profile-row");
+    const icon = el("button", "mode-icon-btn"); icon.type = "button"; icon.innerHTML = ic(profile.icon);
+    icon.title = "Cambiar el icono"; icon.setAttribute("aria-label", `Cambiar el icono de ${profile.name}`); icon.setAttribute("aria-expanded", String(profileIconId === profile.id));
+    icon.addEventListener("click", () => { profileIconId = profileIconId === profile.id ? "" : profile.id; renderProfiles(); });
+    const select = el("button", "profile-select", profile.name);
+    select.title = profilePick >= 0 ? `Poner ${profile.name} en el hueco ${profilePick + 1}` : `Usar ${profile.name}`;
     select.addEventListener("click", () => {
-      if (savedSnap && JSON.stringify(S.layers[0].actions) !== JSON.stringify(JSON.parse(savedSnap).layers[0].actions) && !window.confirm("Hay cambios sin confirmar. ¿Cambiar de perfil?")) return;
-      S.layers[0].actions = JSON.parse(JSON.stringify(profile.actions)); persist(); closeEditorUI(); refreshUI();
-      $("profilePanel").hidden = true; $("profileToggle").setAttribute("aria-expanded", "false"); toast(`Perfil: ${profile.name}`);
+      const i = profilePick;
+      if (!useProfile(profile)) return;
+      if (i >= 0 && S.direct_slots[i] !== profile.id) toggleProfileSlot(profile, i);
+      showProfilePanel(false);
     });
-    remove.type = "button"; remove.innerHTML = ic("trash-2"); remove.title = `Eliminar ${profile.name}`; remove.setAttribute("aria-label", remove.title);
-    remove.addEventListener("click", () => { if (!window.confirm(`¿Eliminar el perfil «${profile.name}»?`)) return; S.profiles.splice(index, 1); persist(); renderProfiles(); });
-    row.append(select, remove); list.appendChild(row);
+    const slots = el("span", "profile-slots");
+    for (let i = 0; i < 3; i++) {
+      const on = S.direct_slots[i] === profile.id, b = el("button", "profile-slot" + (on ? " active" : ""), String(i + 1)); b.type = "button";
+      b.title = on ? `Quitar ${profile.name} del hueco ${i + 1}` : `Poner ${profile.name} en el hueco ${i + 1}`; b.setAttribute("aria-label", b.title); b.setAttribute("aria-pressed", String(on));
+      b.addEventListener("click", () => toggleProfileSlot(profile, i));
+      slots.appendChild(b);
+    }
+    const remove = el("button", "profile-delete"); remove.type = "button"; remove.innerHTML = ic("trash-2"); remove.title = `Eliminar ${profile.name}`; remove.setAttribute("aria-label", remove.title);
+    remove.addEventListener("click", () => {
+      if (!window.confirm(`¿Eliminar el perfil «${profile.name}»?`)) return;
+      S.profiles.splice(index, 1); S.direct_slots = S.direct_slots.map(id => id === profile.id ? null : id);
+      persist(); renderProfiles(); renderRail();
+    });
+    row.append(icon, select, slots, remove); item.appendChild(row);
+    if (profileIconId === profile.id) item.appendChild(iconPicker(profile.icon, name => { profile.icon = name; persist(); renderRail(); icon.innerHTML = ic(name); }, "Icono del perfil"));
+    list.appendChild(item);
   });
 }
-$("profileToggle").addEventListener("click", () => { const panel = $("profilePanel"); panel.hidden = !panel.hidden; $("profileToggle").setAttribute("aria-expanded", String(!panel.hidden)); if (!panel.hidden) renderProfiles(); });
+$("profileToggle").addEventListener("click", () => showProfilePanel($("profilePanel").hidden));
 $("profileSave").addEventListener("click", () => {
   const name = $("profileName").value.trim().slice(0, 12);
   if (!name) return toast("Escribe un nombre para el perfil", true);
   if (S.profiles.some(p => p.name.toLocaleLowerCase() === name.toLocaleLowerCase())) return toast("Ya existe un perfil con ese nombre", true);
   const confirmed = savedSnap && JSON.parse(savedSnap).layers[0].actions;
   if (!confirmed || JSON.stringify(confirmed) !== JSON.stringify(S.layers[0].actions)) return toast("Confirma primero los cambios con el botón ✓", true);
-  S.profiles.push({name, actions: JSON.parse(JSON.stringify(confirmed))}); $("profileName").value = ""; persist(); renderProfiles(); toast("Perfil guardado");
+  const profile = { id: newProfileId(), name, icon: PROFILE_ICON, actions: clone(confirmed) }, free = profilePick >= 0 && !S.direct_slots[profilePick] ? profilePick : S.direct_slots.indexOf(null);
+  S.profiles.push(profile);
+  if (free >= 0) S.direct_slots[free] = profile.id;   // el perfil nuevo ocupa el hueco que se pidió o, si no, el primer hueco libre
+  profilePick = -1; $("profileName").value = ""; persist(); renderProfiles(); renderRail(); toast(free >= 0 ? `Perfil guardado en el hueco ${free + 1}` : "Perfil guardado");
 });
-document.addEventListener("click", e => { if (!$("profileWrap").contains(e.target) && !$("profilePanel").contains(e.target)) { $("profilePanel").hidden = true; $("profileToggle").setAttribute("aria-expanded", "false"); } });
+document.addEventListener("click", e => { if (e.target.isConnected && !$("profileWrap").contains(e.target) && !$("profilePanel").contains(e.target) && !$("modeRail").contains(e.target)) showProfilePanel(false); });
 
 function showSmartPanel(show) {
   if (show) closeEditorUI();

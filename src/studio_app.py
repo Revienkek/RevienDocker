@@ -2,8 +2,8 @@
 studio_app.py — RevienDocker como aplicación de escritorio (sin navegador).
 
   • Ventana propia sin marco de Windows (WebView2), con su barra de título y botones.
-  • Icono en la bandeja: cerrar la ventana la oculta y el motor sigue activo (el docker lo necesita).
-    Solo «Salir» de la bandeja cierra del todo.
+  • Vive en la bandeja del sistema, sin botón en la barra de tareas: minimizar la oculta ahí y cerrarla también
+    (el motor sigue activo, el docker lo necesita). Solo «Salir» de la bandeja cierra del todo.
   • Una sola instancia (el puerto local actúa de cerrojo).
   • `--minimized` arranca directamente en la bandeja (para ponerlo en «Inicio» de Windows).
 
@@ -36,6 +36,7 @@ TITLE = "RevienDocker"
 # Ventana de tamaño fijo (PRODUCT.md): no se redimensiona ni se maximiza.
 WIN_W, WIN_H = 720, 420
 CORNER_MARGIN = 12   # px entre la ventana y los bordes del área útil al abrir
+OFFSCREEN = -32000   # la ventana nace fuera de pantalla y solo se muestra ya colocada: sin parpadeo en otra esquina
 MUTEX_NAME = "Local\\RevienDocker_SingleInstance_Mutex"
 ERROR_ALREADY_EXISTS = 183
 
@@ -79,8 +80,8 @@ def main():
     threading.Thread(target=server.serve_forever, daemon=True, name="studio-http").start()
 
     webview.settings["DRAG_REGION_DIRECT_TARGET_ONLY"] = True   # arrastra solo desde el propio elemento marcado (ver studio.js)
-    window = webview.create_window(TITLE, f"http://127.0.0.1:{PORT}/index.html", width=WIN_W, height=WIN_H, resizable=False,
-                                   frameless=True, easy_drag=False, background_color="#08090c", hidden="--minimized" in sys.argv)
+    window = webview.create_window(TITLE, f"http://127.0.0.1:{PORT}/index.html", width=WIN_W, height=WIN_H, x=OFFSCREEN, y=OFFSCREEN,
+                                   resizable=False, frameless=True, easy_drag=False, background_color="#08090c", hidden="--minimized" in sys.argv)
     state = {"quit": False, "hidden": "--minimized" in sys.argv, "minimized": False}
     tray = None
 
@@ -97,10 +98,8 @@ def main():
             tray.update_menu()
 
     def set_minimized():
-        state["minimized"] = True
-        notify_visibility(False)
-        if tray:
-            tray.update_menu()
+        state["minimized"] = True   # Win+Abajo, «Mostrar escritorio»…: sin botón en la barra de tareas, también va a la bandeja
+        hide_to_tray()
 
     window.events.restored += set_restored
 
@@ -127,13 +126,11 @@ def main():
     class RECT(ctypes.Structure):
         _fields_ = [(n, ctypes.c_long) for n in ("left", "top", "right", "bottom")]
 
-    class MONITORINFO(ctypes.Structure):
-        _fields_ = [("cbSize", ctypes.c_ulong), ("rcMonitor", RECT), ("rcWork", RECT), ("dwFlags", ctypes.c_ulong)]
-
     placed = []
 
     def place_corner():
-        """Posición inicial: esquina inferior derecha del área útil (justo sobre la barra de tareas). Solo al abrir."""
+        """Posición inicial: esquina inferior derecha del área útil del monitor principal (justo sobre la barra de tareas).
+        Solo al abrir; la ventana nace fuera de pantalla y esta es la primera vez que se ve."""
         if placed:
             return
         placed.append(True)
@@ -141,20 +138,38 @@ def main():
         hwnd = user32.FindWindowW(None, TITLE)
         if not hwnd:
             return
-        rect = RECT()
-        info = MONITORINFO()
-        info.cbSize = ctypes.sizeof(info)
+        rect, work = RECT(), RECT()
         user32.GetWindowRect(hwnd, ctypes.byref(rect))
-        if not user32.GetMonitorInfoW(user32.MonitorFromWindow(hwnd, 2), ctypes.byref(info)):  # 2 = MONITOR_DEFAULTTONEAREST
+        if not user32.SystemParametersInfoW(0x0030, 0, ctypes.byref(work), 0):  # SPI_GETWORKAREA
             return
-        x = info.rcWork.right - (rect.right - rect.left) - CORNER_MARGIN
-        y = info.rcWork.bottom - (rect.bottom - rect.top) - CORNER_MARGIN
+        x = work.right - (rect.right - rect.left) - CORNER_MARGIN
+        y = work.bottom - (rect.bottom - rect.top) - CORNER_MARGIN
         user32.SetWindowPos(hwnd, 0, x, y, 0, 0, 0x0001 | 0x0004 | 0x0010)  # sin cambiar tamaño, orden ni foco
+
+    def tray_only():
+        """Sin botón en la barra de tareas ni en Alt+Tab (ventana de herramientas): la app solo se ve en la bandeja."""
+        user32 = ctypes.windll.user32
+        hwnd = user32.FindWindowW(None, TITLE)
+        if not hwnd:
+            return
+        ex = user32.GetWindowLongW(hwnd, -20)  # GWL_EXSTYLE
+        new = (ex | 0x80) & ~0x40000           # WS_EX_TOOLWINDOW sí, WS_EX_APPWINDOW no
+        if new == ex:
+            return
+        visible = user32.IsWindowVisible(hwnd)
+        if visible:
+            user32.ShowWindow(hwnd, 0)         # SW_HIDE: el cambio solo se aplica con la ventana oculta
+        user32.SetWindowLongW(hwnd, -20, new)
+        if visible:
+            user32.ShowWindow(hwnd, 4)         # SW_SHOWNOACTIVATE
 
     def on_loaded():
         notify_visibility(not state["hidden"] and not state["minimized"])
-        fit_client()
+        fit_client()   # redimensionar muestra la ventana (SWP_SHOWWINDOW): si arranca en la bandeja, se vuelve a ocultar ya
+        if state["hidden"]:
+            window.hide()
         no_maximize()
+        tray_only()
         place_corner()
 
     window.events.loaded += on_loaded
@@ -196,7 +211,7 @@ def main():
 
     def control(action):
         if action == "minimize":
-            window.minimize()
+            hide_to_tray()  # minimizar es ir a la bandeja: no hay botón en la barra de tareas
         elif action == "close":
             if ENGINE.hook is not None:
                 hide_to_tray()  # el motor inteligente sigue en la bandeja
