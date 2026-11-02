@@ -52,7 +52,7 @@ button:focus-visible, .keycap:focus-visible, .enc-dir:focus-visible, .knob:focus
   button:hover, .mod-btn:hover { border-color: var(--line-2); background: var(--panel-3); }
   .keycap:hover, .enc-dir:hover, .knob:hover { border-color: var(--line-2); }
   .winctl button:hover { background: var(--panel-3); }
-  .winctl button.close:hover { background: #e5484d; color: #fff; }
+  .winctl button.close:hover { background: #e5484d; border-color: #e5484d; color: #fff; }
 }
 button.primary { background: #fff; border-color: #fff; color: #0a0a0c; }
 @media (hover: hover) and (pointer: fine) { button.primary:hover { background: #dfe3ea; border-color: #dfe3ea; } }
@@ -71,13 +71,7 @@ label { font-size: 0.74rem; color: var(--muted); font-weight: 600; }
 .seg button.active { background: var(--panel-3); border-color: var(--line-2); }
 kbd { font: 700 0.72rem var(--mono); background: var(--panel-3); border: 1px solid var(--line-2); border-bottom-width: 2px; border-radius: 4px; padding: 1px 6px; }
 
-/* ---------- Barra de título ---------- */
-.titlebar { height: 50px; flex: none; display: flex; align-items: center; gap: 8px; padding: 0 0 0 58px; background: var(--panel); border-bottom: 1px solid var(--line); position: relative; }
-.tb-brand { position: absolute; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 8px; flex: none; }
-/* Título: vector (assets/wordmark.svg), con el degradado metálico y el filete fino dentro del propio SVG */
-.tb-brand .wordmark { height: 24px; width: auto; display: block; shape-rendering: geometricPrecision; }
-.logo { width: 46px; height: 34px; object-fit: contain; display: block; image-rendering: -webkit-optimize-contrast; image-rendering: high-quality; }
-.tb-drag { flex: 1; height: 100%; min-width: 12px; }
+/* ---------- Estado del teclado y del motor (menú de ajustes) ---------- */
 .pill { display: inline-flex; align-items: center; gap: 7px; font-size: 0.72rem; font-weight: 600; padding: 5px 9px; height: 32px; box-sizing: border-box; border-radius: 4px; background: var(--panel-2); border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
 .pill .ic { width: 14px; height: 14px; }
 .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--amber); }
@@ -85,15 +79,12 @@ kbd { font: 700 0.72rem var(--mono); background: var(--panel-3); border: 1px sol
 .pill.bad .dot { background: var(--red); }
 .pill.ok { color: var(--text); }
 
-.winctl { display: flex; align-self: stretch; margin-left: auto; position: relative; z-index: 46; }
-.winctl button { border: 0; border-radius: 3px; width: 46px; padding: 0; background: transparent; color: var(--muted); }
+.winctl { display: flex; position: relative; z-index: 46; }
+.winctl button { border-radius: 4px; color: var(--muted); }
 .winctl button:active { transform: none; }
 
 /* ---------- Layout: una sola columna central ---------- */
 .stage { width: 100%; max-width: 780px; margin: 0 auto; display: flex; flex-direction: column; gap: 6px; padding: 0; }
-@media (max-width: 700px) {
-  .tb-brand .wordmark, #deviceText, #engineText { display: none; }
-}
 .mode-block { display: flex; flex-direction: column; align-items: center; gap: 8px; }
 .mode-controls { display: flex; align-items: center; gap: 10px; }
 .mode-block { position: relative; }
@@ -300,7 +291,6 @@ details[open] > summary .chev { transform: rotate(180deg); }
 @media (max-width: 700px) { .mode-controls { gap: 5px; } .modes button { padding: 10px 10px; } }
 
 /* Editor superpuesto para mantener estable la vista Directo. */
-.tb-brand .wordmark { max-width: 215px; height: 20px; }
 .cur-head .close-editor { margin-left: auto; color: var(--muted); min-width: 36px; min-height: 36px; }
 .editor-overlay { position: fixed; z-index: 40; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(620px, calc(100vw - 32px)); max-height: calc(100vh - 24px); overflow-y: auto; background: var(--panel); border: 1px solid var(--line-2); box-shadow: 0 18px 55px #000c; }
 #obsConnection { border-top: 1px solid var(--line); padding-top: 12px; }
@@ -312,8 +302,7 @@ details[open] > summary .chev { transform: rotate(180deg); }
 .deck-drawer > * { min-width: 0; }
 .deck-drawer:not(:has(> :not([hidden]))) { display: none; }
 /* Ancladas arriba, no centradas: al crecer una vista previa, lo que ya estaba pulsado no salta de sitio. */
-.deck-drawer { top: 116px; transform: translateX(-50%); max-height: calc(100vh - 124px); }
-.deck-drawer:has(> .mode-menu.tpl:not([hidden])) { top: 58px; max-height: calc(100vh - 66px); }
+.deck-drawer { transform: translateX(-50%); }
 
 /* Atajos de Inteligente en un panel compacto sobre el Docker. */
 .smart-panel { width: 100%; padding: 20px; display: flex; flex-direction: column; gap: 14px; background: var(--panel); border: 1px solid var(--line-2); border-radius: 8px; box-shadow: 0 18px 55px #000c; }
@@ -370,8 +359,6 @@ details[open] > summary .chev { transform: rotate(180deg); }
 @media (max-width: 700px) { .icon-picker { grid-template-columns: repeat(4, 1fr); } .mini-ref { flex-wrap: wrap; } }
 
 /* ---------- Ventana fija (PRODUCT.md): todo compacto, sin margen muerto ---------- */
-.winctl { align-self: center; margin-right: 58px; gap: 4px; }
-.winctl button { width: 34px; height: 30px; }
 .chip-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 6px; }
 .chip-grid .layer-tab.icon-only { min-width: 0; }
 .chip-grid .tab-name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -408,7 +395,7 @@ details[open] > summary .chev { transform: rotate(180deg); }
   #btnDiscard:hover { border-color: var(--red); background: rgba(248, 113, 113, 0.1); }
 }
 /* El editor de una tecla (lápiz) también se ancla arriba y es compacto: sin subtítulos largos en sus desplegables. */
-.editor-overlay { top: 58px; transform: translateX(-50%); max-height: calc(100vh - 66px); gap: 8px; }
+.editor-overlay { transform: translateX(-50%); gap: 8px; }
 .acc { gap: 6px; }
 .acc .fold { padding: 0 14px; }
 .acc .fold > summary { min-height: 40px; padding: 6px 0; }
@@ -424,4 +411,39 @@ details[open] > summary .chev { transform: rotate(180deg); }
   .deck-drawer > :not([hidden]), .editor-overlay:not([hidden]) { animation: none; }
 }
 
-
+/* ---------- 0.0.8: logo en el lateral, sin barra superior, controles abajo ---------- */
+:root { --rail: 80px; }
+.app { flex-direction: row; }
+.brand-rail { flex: none; width: var(--rail); display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 4px 10px; background: #000; border-right: 1px solid var(--line); overflow: hidden; }
+.brand-rail img { pointer-events: none; user-select: none; }
+/* El título va en vector (assets/wordmark.svg), girado: así siempre dice RevienDocker. El dibujo es el interruptor de la imagen definitiva. */
+.brand-word { position: relative; flex: 1; width: 100%; min-height: 0; }
+.brand-word img { position: absolute; top: 50%; left: 50%; width: 262px; transform: translate(-50%, -50%) rotate(-90deg); }
+.brand-switch { display: block; flex: none; width: 100%; height: auto; }
+.app-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.scroll { padding-top: 18px; }
+.stage { gap: 10px; }
+.foot { flex: none; height: 36px; display: flex; align-items: center; gap: 4px; padding: 0 12px 4px; }
+.foot-drag { flex: 1; align-self: stretch; }
+.foot .winctl { align-self: auto; margin: 0; gap: 4px; }
+.foot button { width: 30px; height: 26px; padding: 0; border-color: var(--line); background: transparent; color: var(--muted); }
+.foot button .ic { width: 15px; height: 15px; }
+.sys-wrap { position: relative; }
+.sys-btn { position: relative; }
+.sys-btn .ic { transition: transform 220ms var(--ease-out); }
+.sys-btn[aria-expanded="true"] { color: #fff; border-color: rgba(255, 255, 255, 0.7); box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.07); }
+.sys-btn[aria-expanded="true"] .ic { transform: rotate(60deg); }
+.sys-dot { position: absolute; top: -3px; right: -3px; box-shadow: 0 0 0 2px var(--bg); }
+.dot.bad { background: var(--red); }
+.sys-menu { position: absolute; right: 0; bottom: calc(100% + 8px); z-index: 50; display: flex; flex-direction: column; gap: 4px; padding: 4px; background: var(--panel); border: 1px solid var(--line-2); border-radius: 6px; box-shadow: 0 12px 32px #000a; transform-origin: 100% 100%; animation: layer-in 160ms var(--ease-out); }
+.sys-menu .pill, .sys-menu button { position: relative; width: 34px; height: 34px; padding: 0; justify-content: center; }
+.sys-menu .pill .ic, .sys-menu button .ic { width: 16px; height: 16px; }
+.sys-menu .pill .dot { position: absolute; top: 5px; right: 5px; }
+@media (hover: hover) and (pointer: fine) { .sys-btn:hover { color: var(--text); } }
+/* Las capas se centran sobre el contenido, no sobre la ventana entera, y terminan sobre la barra de abajo. */
+.deck-drawer, .editor-overlay { left: calc(50% + var(--rail) / 2); width: min(620px, calc(100vw - var(--rail) - 24px)); }
+.deck-drawer { top: 72px; max-height: calc(100vh - 112px); }
+.deck-drawer:has(> .mode-menu.tpl:not([hidden])) { top: 10px; max-height: calc(100vh - 50px); }
+.editor-overlay { top: 10px; max-height: calc(100vh - 50px); }
+.toast { left: calc(50% + var(--rail) / 2); }
+@media (prefers-reduced-motion: reduce) { .sys-menu { animation: none; } .sys-btn .ic { transition: none; } }

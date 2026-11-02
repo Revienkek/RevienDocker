@@ -2,7 +2,7 @@
 
 Programa de escritorio para Windows que configura el macropad de 3 teclas y 1 rueda (chip WCH CH57x) desde tu PC.
 
-**Versión 0.0.7** · [Descargar `RevienDocker.exe`](https://github.com/Revienkek/RevienDocker/releases/latest) · [Historial de cambios](CHANGELOG.md) · [Producto y estilo](PRODUCT.md) · [Guía de uso](docs/GUIA_USUARIO.md)
+**Versión 0.0.8** · [Descargar `RevienDocker.exe`](https://github.com/Revienkek/RevienDocker/releases/latest) · [Historial de cambios](CHANGELOG.md) · [Producto y estilo](PRODUCT.md) · [Guía de uso](docs/GUIA_USUARIO.md)
 
 ![RevienDocker](docs/captura.jpg)
 
@@ -15,7 +15,7 @@ Programa de escritorio para Windows que configura el macropad de 3 teclas y 1 ru
 ## Cómo empezar
 
 1. Abre **RevienDocker** (el acceso directo del escritorio o `dist\RevienDocker.exe`).
-2. Pulsa el enchufe de la cabecera para buscar el teclado. La píldora «Simulador» pasa a verde cuando lo detecta.
+2. Abre los ajustes (la rueda dentada, abajo a la derecha) y pulsa el enchufe para buscar el teclado. El punto del teclado pasa a verde cuando lo detecta.
 3. Elige un botón en el teclado (panel 1) y decide qué hace en el panel 2.
 4. Pulsa **Aplicar cambios**. Eso escribe la configuración dentro del teclado.
 
@@ -29,12 +29,12 @@ El teclado se prepara para comunicarse con el motor de RevienDocker, que ejecuta
 - **Modos:** hasta tres configuraciones independientes. Se activan con **Ctrl+Shift+1/2/3** (repetirlo vuelve a Directo). Los menús de Directo, Inteligente y Modos se abren como capa superpuesta sobre el docker. A la izquierda del docker, un icono por hueco: pulsa uno para ver su menú (nombre, icono, plantilla, vaciar); un hueco vacío abre directamente las plantillas, en chips con icono y nombre. «Nuevo modo» es una plantilla más: eliges nombre e icono y empieza de cero. La vista previa de cada plantilla lleva un mini docker, y al cambiar de modo sale un aviso nativo abajo a la derecha, sobre la bandeja.
 - **Misma estructura en los tres modos:** arriba, botón contextual + selector Directo / Inteligente / Modos + luz; debajo, iconos a la izquierda + docker + iconos a la derecha (✓ y ×); debajo, un mensaje informativo centrado. En Directo los tres huecos de la izquierda son marcadores; en Inteligente son la tecla de activación (Shift, Ctrl o Alt, una sola).
 
-Selecciona la sección en la cabecera. El lápiz de cada control abre sus ajustes.
+Elige el modo en el selector de arriba. El lápiz de cada control abre sus ajustes.
 
 ## Ventana
 
 - La ventana tiene tamaño fijo: no se redimensiona ni se maximiza.
-- Los botones de la esquina superior derecha minimizan o cierran.
+- Abajo a la derecha están minimizar, cerrar y los ajustes (rueda dentada: estado del teclado y del motor, y buscar el teclado). No hay barra de título: la ventana se mueve arrastrando el lateral con el logotipo o la franja de abajo.
 
 ## Estructura del repositorio
 

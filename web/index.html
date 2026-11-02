@@ -9,17 +9,8 @@
 </head>
 <body>
 <div class="app">
-  <header class="titlebar">
-    <span class="pill" id="devicePill" title="Estado del teclado"><i data-ic="keyboard"></i><i class="dot"></i><span id="deviceText" class="sr-only">Simulador</span></span>
-    <span class="pill" id="enginePill" title="El docker y la app funcionan juntos: si el motor se detiene, los botones no hacen nada"><i data-ic="zap"></i><i class="dot"></i><span id="engineText" class="sr-only">Motor…</span></span>
-    <button id="btnConnect" class="icon-btn" title="Buscar el teclado"><i data-ic="plug"></i></button>
-    <div class="tb-brand pywebview-drag-region"><img class="wordmark" src="assets/wordmark.svg" alt="RevienDocker" /></div>
-    <div class="tb-drag pywebview-drag-region"></div>
-    <div class="winctl" id="winctl" hidden>
-      <button data-win="minimize" title="Minimizar"><i data-ic="minus"></i></button>
-      <button data-win="close" class="close" id="winClose" title="Cerrar"><i data-ic="x"></i></button>
-    </div>
-  </header>
+  <aside class="brand-rail pywebview-drag-region"><div class="brand-word"><img src="assets/wordmark.svg" alt="RevienDocker" draggable="false" /></div><img class="brand-switch" src="assets/logo-switch.jpg" alt="" draggable="false" /></aside>
+  <div class="app-main">
   <div class="scroll">
   <main class="stage">
 
@@ -164,6 +155,22 @@
       </div>
     </section>
   </main>
+  </div>
+  <footer class="foot">
+    <div class="foot-drag pywebview-drag-region"></div>
+    <div class="winctl" id="winctl" hidden>
+      <button data-win="minimize" title="Minimizar" aria-label="Minimizar"><i data-ic="minus"></i></button>
+      <button data-win="close" class="close" id="winClose" title="Cerrar" aria-label="Cerrar"><i data-ic="x"></i></button>
+    </div>
+    <div class="sys-wrap" id="sysWrap">
+      <button id="btnSys" class="sys-btn" title="Ajustes" aria-label="Ajustes" aria-expanded="false" aria-controls="sysMenu"><i data-ic="settings"></i><i class="dot sys-dot" id="sysDot" hidden></i></button>
+      <div class="sys-menu" id="sysMenu" hidden>
+        <span class="pill" id="devicePill" title="Teclado"><i data-ic="keyboard"></i><i class="dot"></i><span id="deviceText" class="sr-only">Simulador</span></span>
+        <span class="pill" id="enginePill" title="Motor"><i data-ic="zap"></i><i class="dot"></i><span id="engineText" class="sr-only">Motor…</span></span>
+        <button id="btnConnect" class="icon-btn" title="Buscar el teclado" aria-label="Buscar el teclado"><i data-ic="plug"></i></button>
+      </div>
+    </div>
+  </footer>
   </div>
 </div>
 

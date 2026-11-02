@@ -671,7 +671,7 @@ function closeEditorUI() {
   $("selectedLabel").textContent = "";
 }
 $("closeEditor").addEventListener("click", closeEditorUI);
-document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("editor").hidden) { closeEditorUI(); } else if (e.key === "Escape" && !$("smartPanel").hidden && !$("addOverlay").classList.contains("show")) { showSmartPanel(false); $("smartToggle").focus(); } else if (e.key === "Escape") closeModeMenu(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("sysMenu").hidden) { setSys(false); $("btnSys").focus(); } else if (e.key === "Escape" && !$("editor").hidden) { closeEditorUI(); } else if (e.key === "Escape" && !$("smartPanel").hidden && !$("addOverlay").classList.contains("show")) { showSmartPanel(false); $("smartToggle").focus(); } else if (e.key === "Escape") closeModeMenu(); });
 function showLighting(show) {
   $("lightingPanel").hidden = !show;
   $("btnLighting").setAttribute("aria-expanded", String(show));
@@ -839,7 +839,7 @@ function updateEngineUI(st) {
   else if (st && st.running) { cls = "ok"; text = "Motor activo" + (liveMode >= 0 && S.modes[liveMode] ? " · " + S.modes[liveMode].name : ""); }
   else if (!st) { cls = ""; text = "Iniciando…"; }
   else text = "Motor detenido";
-  pill.className = "pill " + cls; $("engineText").textContent = text;
+  pill.className = "pill " + cls; $("engineText").textContent = text; pill.title = text; updateSys();
   const err = $("engineErr"); err.hidden = !(st && st.error); err.textContent = st && st.error ? st.error : "";
   if (st && st.active_exe !== undefined) {
     const exe = st.active_exe || "";
@@ -969,7 +969,19 @@ function framesToFlash() {
   frames.push(["LED", msg(0xA1, 1)], ["LED", msg(0xB0, 0x18, S.led_mode)], ["LED", msg(0xAA, 0xA1)]);
   return frames;
 }
-function devicePill(connected, text) { deviceConnected = connected; $("devicePill").classList.toggle("ok", connected); $("deviceText").textContent = text; refreshUI({ quiet: true }); }
+function devicePill(connected, text) { deviceConnected = connected; $("devicePill").classList.toggle("ok", connected); $("deviceText").textContent = text; $("devicePill").title = text; updateSys(); refreshUI({ quiet: true }); }
+
+// ---------- Ajustes (rueda dentada): estado del teclado y del motor, y buscar el teclado ----------
+// El punto de la rueda avisa solo si algo no va bien (ámbar: sin teclado o arrancando; rojo: motor caído).
+function updateSys() {
+  const eng = $("enginePill").classList, dev = $("devicePill").classList, d = $("sysDot");
+  const level = eng.contains("bad") ? "bad" : (!eng.contains("ok") || !dev.contains("ok")) ? "warn" : "";
+  d.hidden = !level; d.classList.toggle("bad", level === "bad");
+}
+function setSys(open) { $("sysMenu").hidden = !open; $("btnSys").setAttribute("aria-expanded", String(open)); $("btnSys").classList.toggle("active", open); }
+$("btnSys").addEventListener("click", () => setSys($("sysMenu").hidden));
+document.addEventListener("click", e => { if (!$("sysMenu").hidden && !$("sysWrap").contains(e.target)) setSys(false); });
+$("sysMenu").addEventListener("click", e => { if (e.target.closest("#btnConnect")) setSys(false); });
 async function probeDevice(manual) {
   try {
     const r = await api("/api/device");

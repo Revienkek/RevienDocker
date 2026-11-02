@@ -34,7 +34,8 @@ Un docker físico con tres formas de uso sobre el mismo aparato y la misma panta
 
 ### Estructura canónica (Decisión)
 Idéntica en Directo, Inteligente y Modos; no se inventan variantes por modo:
-1. **Barra superior:** botones de estado (teclado, rayo, enchufe) a la izquierda; wordmark centrado; minimizar y cerrar a la derecha. Los grupos laterales se recogen **hacia el centro** y quedan alineados con las columnas del contenido, no pegados a las esquinas.
+- **Lateral izquierdo (0.0.8):** el logotipo definitivo a toda la altura (título «REVIENDOCKER» en vector, girado, y el dibujo del interruptor). Sustituye a la barra superior, que **ya no existe**. Es también zona de arrastre de la ventana.
+- **Franja inferior (0.0.8):** minimizar, cerrar y la rueda dentada de **ajustes**, discretos, abajo a la derecha. El hueco libre de la franja también arrastra la ventana.
 2. **Selector:** botón contextual + selector Directo / Inteligente / Modos + luz y paleta.
 3. **Fila del docker:** tres iconos a la izquierda + docker (3 teclas y rueda, un lápiz bajo cada pieza) + ✓ y × a la derecha. El carril izquierdo y la botonera derecha están **a la misma distancia** del docker.
 4. **Mensaje informativo centrado** debajo.
@@ -44,6 +45,9 @@ Idéntica en Directo, Inteligente y Modos; no se inventan variantes por modo:
 - Sin margen muerto: el contenido llena el marco. Espacios verticales compactos entre barra, selector, docker y mensaje.
 - Los menús son **capas superpuestas** sobre el docker, nunca debajo ni en flujo; deben caber en la ventana y, si algo no cabe, desplazan por dentro.
 - Los menús terminan donde acaba el docker y no tapan el mensaje de abajo.
+
+### Ajustes (Decisión, 0.0.8)
+La rueda dentada, a la derecha de la ×, despliega **hacia arriba y en vertical** tres iconos: teclado (estado), rayo (motor, estado) y enchufe (buscar el teclado). Solo iconos, sin texto (nombre en tooltip y para lectores de pantalla). Los puntos de estado ámbar/verde/rojo viven dentro del menú; la rueda lleva su propio punto **solo si algo no va bien** (ámbar: sin teclado o motor arrancando; rojo: motor caído). Se cierra al pulsar fuera, con Esc o tras buscar el teclado; seleccionada = borde blanco con halo y giro de 60°.
 
 ### Directo (Decisión: de momento no se toca)
 Perfiles guardables desde «+» junto a Directo. Los tres huecos del carril izquierdo son marcadores desactivados hasta que tengan función.
@@ -68,7 +72,7 @@ Estructura: `src/` (Python), `web/` (interfaz y assets), `docs/`, `tools/`, `tes
 
 ## Brand Commitments
 
-- **Nombre:** RevienDocker. Wordmark «REVIENDOCKER» en vector (`assets/wordmark.svg`), Doris PP, mayúsculas con R y D más altas, degradado metálico solo de opacidades de blanco.
+- **Nombre:** RevienDocker. Wordmark «REVIENDOCKER» en vector (`assets/wordmark.svg`), Doris PP, mayúsculas con R y D más altas, degradado metálico solo de opacidades de blanco. Va girado en el lateral izquierdo, junto al dibujo del interruptor (`assets/logo-switch.jpg`, recorte de `docs/LOGO_DEFINITIVO_LATERAL.jpg`). El texto de esa imagen sale mal escrito («Revbcker»), por eso el título se pone siempre con el vector.
 - **Icono:** `assets/Icon_definitivo.jpg` → `studio_icon.py` genera `icon.ico`, `icon.png` y `brand-icon.png`. Dibujo sobre negro, sin marco blanco.
 - **Voz:** español de España, tuteo, frases cortas, sin tecnicismos de más.
 - **Concepto:** macropad como **mecanismo de relojería**: teclas de cera negra, base translúcida. Blanco y negro limpio sobre negro profundo.
@@ -113,7 +117,7 @@ Doris PP solo en el wordmark (vector). Expressway para toda la interfaz (cae a I
 Ninguna esquina a 90º ni radio 0. Controles, paneles, teclas y píldoras 4 px; contenedores `--r` 6 px; botones de ventana 3 px; perilla y puntos 50 %.
 
 ### Superficies y capas
-Menús = capa superpuesta sobre el docker (`.deck-drawer`, fija, anclada arriba y centrada en horizontal, z-index 40) con cierre en su cabecera; las plantillas y el editor de tecla se anclan más arriba para caber enteros. Un menú abierto a la vez. Sin sombras de neón ni degradados de color.
+Menús = capa superpuesta sobre el docker (`.deck-drawer`, fija, anclada arriba y centrada sobre el área de contenido, a la derecha del lateral, z-index 40) con cierre en su cabecera; las plantillas y el editor de tecla se anclan más arriba para caber enteros. Un menú abierto a la vez. Sin sombras de neón ni degradados de color.
 
 ### Movimiento
 Curvas `--ease-out: cubic-bezier(0.23,1,0.32,1)`, `--ease-in-out: cubic-bezier(0.77,0,0.175,1)`. Solo `transform` y `opacity` (más color y borde). Feedback de botón 100–160 ms; capas y menús 160–220 ms al entrar y más rápido al salir; las capas nacen desde `scale(0.97)` + `opacity 0`, nunca desde 0. Nada se anima con atajos de teclado. Hover solo bajo `@media (hover: hover) and (pointer: fine)`. `prefers-reduced-motion`: se conservan opacidad y color, desaparece el movimiento.

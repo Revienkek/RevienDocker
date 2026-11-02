@@ -3,6 +3,20 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versiones `0.0.x`: una por tanda de trabajo.
 La versión actual está en `src/version.py` y en el nombre de la etiqueta de GitHub (`v0.0.x`). Producto y estilo: [PRODUCT.md](PRODUCT.md).
 
+## [0.0.8] · 2026-11-02 · Logotipo lateral y ajustes en la rueda dentada
+
+### Añadido
+- Lateral izquierdo con el logotipo definitivo a toda la altura: título «REVIENDOCKER» en vector, girado, y el dibujo del interruptor. Original en `docs/LOGO_DEFINITIVO_LATERAL.jpg`.
+- Rueda dentada de **ajustes** abajo a la derecha, tras la ×. Despliega en vertical teclado, motor y enchufe, solo con iconos. Lleva un punto propio únicamente si el teclado o el motor no están bien; se cierra al pulsar fuera, con Esc o tras buscar el teclado.
+
+### Cambiado
+- La barra superior desaparece. Minimizar, cerrar y ajustes pasan a una franja discreta abajo a la derecha; la ventana se arrastra desde el lateral o la franja.
+- Menús y editor se centran sobre el área de contenido y terminan sobre la franja inferior.
+- Captura del `README` actualizada.
+
+### Eliminado
+- Los tres iconos de estado de la izquierda de la barra de título y el título centrado.
+
 ## [0.0.7] · 2026-11-02 · Reorganización del repositorio
 
 Sin cambios visibles ni de funcionamiento en la app.

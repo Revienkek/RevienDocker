@@ -8,7 +8,7 @@ Un programador para el macropad de 3 teclas + 1 rueda (chip WCH CH57x). El tecla
 
 ## 2. Arrancar
 
-**Como programa (recomendado):** abre el acceso directo «RevienDocker» del escritorio (o `dist\RevienDocker.exe`). Es una ventana propia, sin marco de Windows: arriba tiene su minimizar y cerrar. Su tamaño es fijo.
+**Como programa (recomendado):** abre el acceso directo «RevienDocker» del escritorio (o `dist\RevienDocker.exe`). Es una ventana propia, sin marco de Windows: abajo a la derecha tiene minimizar, cerrar y los ajustes (rueda dentada). Para moverla, arrastra el lateral con el logotipo o la franja de abajo. Su tamaño es fijo.
 - RevienDocker debe estar abierto o en la bandeja para que el motor ejecute las acciones de los controles.
 - En modo **Inteligente**, cerrar la oculta en la bandeja (junto al reloj) y el motor sigue activo. Salir del todo: clic derecho en su icono → Salir.
 - En el menú del icono de la bandeja puedes elegir **Minimizar a la bandeja** o **Mostrar RevienDocker**, según esté visible u oculta. El motor continúa activo mientras la app esté en la bandeja.
@@ -49,11 +49,11 @@ Activa en OBS: Herramientas → Ajustes del servidor WebSocket → Habilitar. Se
 
 El selector de modo encabeza la pantalla y el Docker aparece debajo. Pulsa el lápiz de un control para editarlo: se abre un panel superpuesto con una cruz para cerrarlo en cualquiera de los tres modos. En Inteligente y Modos, las opciones de aplicación o modo siguen al Docker.
 
-### Cabecera y acciones laterales del visor
-- **Píldoras de estado:** ámbar = simulador; verde = teclado real conectado y estado del motor.
+### Ajustes y acciones laterales del visor
+- **Rueda dentada** (abajo a la derecha): despliega en vertical el teclado, el rayo (motor) y el enchufe. Los dos primeros llevan un punto de estado: ámbar = simulador o motor arrancando; verde = teclado real conectado o motor en marcha; rojo = motor caído. La propia rueda lleva un punto solo cuando algo no va bien. Se cierra al pulsar fuera o con Esc.
 - **Enchufe:** busca el teclado de nuevo.
 - **Columna derecha del visor (`✓` / `×`):** pegada a la derecha del dibujo del docker sin desplazar su centro. El botón **`✓`** escribe/aplica los cambios y se ilumina en **rojo completo** cuando hay cambios sin aplicar o el teclado no está preparado; debajo aparece **`×`** para descartar los cambios pendientes.
-- **Minimizar / cerrar:** la ventana es propia (solo en el programa de escritorio).
+- **Minimizar / cerrar:** junto a la rueda dentada; la ventana es propia (solo en el programa de escritorio).
 - **Tamaño fijo (720 × 420):** no se redimensiona ni se maximiza. Los menús se abren como capa sobre el docker y caben dentro de la ventana.
 
 ### ① El teclado (centro)
@@ -118,7 +118,7 @@ Slots: KEY_1 `01`, KEY_2 `02`, KEY_3 `03`, rueda izq. `0D`, clic `0E`, rueda der
 
 1. Elige un preset o ajusta botón a botón.
 2. Revisa las tramas en la consola.
-3. Con el teclado: pulsa el enchufe para detectarlo y «Aplicar cambios».
+3. Con el teclado: abre los ajustes (rueda dentada) y pulsa el enchufe para detectarlo y «Aplicar cambios».
 4. Prueba pulsando las teclas en un editor de texto.
 
 ## 6. Primer uso con el teclado real (mañana)
