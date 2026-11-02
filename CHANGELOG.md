@@ -3,6 +3,12 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versiones `0.x.y`: una por tanda de trabajo.
 La versión actual está en `src/version.py` y en el nombre de la etiqueta de GitHub (`v0.x.y`). Producto y estilo: [PRODUCT.md](PRODUCT.md).
 
+## [0.1.5] · 2026-11-02 · Clic fiable en la bandeja
+
+### Corregido
+- Al pulsar el icono de la bandeja la ventana ya no aparecía detrás de otras ni había que hacer dos o tres clics: se sube al frente aunque Windows no le dé el foco, y si ya está visible pero tapada por otra ventana, el clic la sube en vez de ocultarla. Solo se oculta si está a la vista.
+- Un aviso de «minimizada» que llegaba justo al mostrarla la volvía a ocultar al instante; ahora se ignora.
+
 ## [0.1.4] · 2026-11-02 · Perfiles en el lateral y solo en la bandeja
 
 ### Añadido

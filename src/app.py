@@ -179,7 +179,7 @@ ENGINE.mode_light = MODE_LIGHT
 BASE_DIR = RESOURCE_DIR
 PORT = 8765
 # Acciones permitidas en /api/window (las resuelve studio_app.py; cualquier otra se rechaza).
-WINDOW_ACTIONS = ("minimize", "maximize", "close", "show", "restore", "corner",
+WINDOW_ACTIONS = ("minimize", "maximize", "close", "show", "restore", "corner", "toggle",
                   "resize-n", "resize-s", "resize-e", "resize-w",
                   "resize-ne", "resize-nw", "resize-se", "resize-sw")
 

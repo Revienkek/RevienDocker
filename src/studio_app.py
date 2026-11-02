@@ -11,9 +11,11 @@ Se empaqueta con `build_exe.ps1` → dist/RevienDocker.exe
 """
 
 import ctypes
+import ctypes.wintypes
 import os
 import sys
 import threading
+import time
 
 # Declarar Per-Monitor V2 DPI awareness antes de inicializar ningún control WinForms / WebView2
 try:
@@ -98,7 +100,11 @@ def main():
             tray.update_menu()
 
     def set_minimized():
-        state["minimized"] = True   # Win+Abajo, «Mostrar escritorio»…: sin botón en la barra de tareas, también va a la bandeja
+        # Win+Abajo, «Mostrar escritorio»…: sin botón en la barra de tareas, también va a la bandeja. Un aviso de minimizado que
+        # llega mientras se está mostrando la ventana es un eco del estado anterior y no debe volver a ocultarla.
+        if time.monotonic() - state.get("shown_at", 0) < 1.5:
+            return
+        state["minimized"] = True
         hide_to_tray()
 
     window.events.restored += set_restored
@@ -182,25 +188,54 @@ def main():
         if tray:
             tray.update_menu()
 
+    def bring_to_front(hwnd):
+        """Windows solo deja pasar al frente a quien acaba de recibir una pulsación; al hacer clic en el icono de la bandeja
+        eso no está garantizado, y la ventana aparecía detrás de otras. Pasar un instante por «siempre visible» la sube
+        sin necesitar ese permiso."""
+        user32 = ctypes.windll.user32
+        user32.ShowWindow(hwnd, 9 if user32.IsIconic(hwnd) else 5)  # SW_RESTORE / SW_SHOW
+        flags = 0x0001 | 0x0002 | 0x0040                              # sin mover, sin redimensionar, mostrar
+        user32.SetWindowPos(hwnd, ctypes.c_void_p(-1), 0, 0, 0, 0, flags)   # HWND_TOPMOST
+        user32.SetWindowPos(hwnd, ctypes.c_void_p(-2), 0, 0, 0, 0, flags)   # HWND_NOTOPMOST: queda arriba, sin quedarse fija
+        user32.SetForegroundWindow(hwnd)
+
+    def is_on_top(hwnd):
+        """¿Se ve entera, sin otra ventana encima del centro? (la prueba de que un clic en la bandeja debe ocultarla)"""
+        user32 = ctypes.windll.user32
+        rect = RECT()
+        user32.GetWindowRect(hwnd, ctypes.byref(rect))
+        point = ctypes.wintypes.POINT((rect.left + rect.right) // 2, (rect.top + rect.bottom) // 2)
+        user32.WindowFromPoint.restype = ctypes.c_void_p
+        top = user32.WindowFromPoint(point)
+        user32.GetAncestor.restype = ctypes.c_void_p
+        return bool(top) and user32.GetAncestor(ctypes.c_void_p(top), 2) == hwnd   # GA_ROOT
+
     def show_window():
+        state["shown_at"] = time.monotonic()
         window.show()
-        if state["minimized"]:
+        hwnd = ctypes.windll.user32.FindWindowW(None, TITLE)
+        if hwnd and ctypes.windll.user32.IsIconic(hwnd):
             window.restore()
         state["hidden"] = False
         state["minimized"] = False
         notify_visibility(True)
         if tray:
             tray.update_menu()
-        hwnd = ctypes.windll.user32.FindWindowW(None, TITLE)
         if hwnd:
-            ctypes.windll.user32.ShowWindow(hwnd, 9)  # SW_RESTORE
-            ctypes.windll.user32.SetForegroundWindow(hwnd)
+            bring_to_front(hwnd)
 
     def toggle_window():
-        if state["hidden"] or state["minimized"]:
+        """Clic en el icono de la bandeja: oculta → muestra y sube; visible pero tapada por otra → sube; a la vista → oculta."""
+        user32 = ctypes.windll.user32
+        hwnd = user32.FindWindowW(None, TITLE)
+        shown = bool(hwnd) and user32.IsWindowVisible(hwnd) and not user32.IsIconic(hwnd) and not state["hidden"]
+        if not shown:
             show_window()
-        else:
+        elif is_on_top(hwnd):
             hide_to_tray()
+        else:
+            state["shown_at"] = time.monotonic()
+            bring_to_front(hwnd)
 
     def quit_app():
         state["quit"] = True
@@ -219,6 +254,8 @@ def main():
                 quit_app()
         elif action in ("show", "restore"):
             show_window()
+        elif action == "toggle":
+            toggle_window()  # lo mismo que un clic en el icono de la bandeja
         elif action == "corner":
             place_corner(force=True)  # clic derecho en una zona de arrastre: vuelve a su sitio de siempre
 
