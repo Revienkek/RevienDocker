@@ -82,7 +82,8 @@ def _run():
         get_style = user32.GetWindowLongW
         set_style = user32.SetWindowLongW
         set_style(hwnd, -20, get_style(hwnd, -20) | 0x08000000 | 0x00000080)  # NOACTIVATE | TOOLWINDOW
-        until = [0.0]
+        hide_timer = [None]
+        latest = [None]
 
         def volume_view(on):
             for item in (track, level, label):
@@ -90,12 +91,8 @@ def _run():
             for item in (title, hint):
                 canvas.itemconfigure(item, state="hidden" if on else "normal")
 
-        def poll():
-            import time
-            try:
-                item = _values.get_nowait()
-            except queue.Empty:
-                item = None
+        def render_notice(_event=None):
+            item = latest[0]
             if item is not None:
                 if item[0] == "volume":
                     volume_view(True)
@@ -110,13 +107,25 @@ def _run():
                 # Abajo a la derecha, sobre la bandeja, sin robar el foco a juegos ni editores.
                 x, y = notice_origin(_work_area(user32, (0, 0, root.winfo_screenwidth(), root.winfo_screenheight())), W, H)
                 user32.SetWindowPos(hwnd, -1, x, y, W, H, 0x0010 | 0x0040)  # NOACTIVATE | SHOWWINDOW
-                until[0] = time.monotonic() + 1.8
-            elif until[0] and time.monotonic() >= until[0]:
-                user32.ShowWindow(hwnd, 0)
-                until[0] = 0.0
-            root.after(40, poll)
+                if hide_timer[0] is not None:
+                    root.after_cancel(hide_timer[0])
+                hide_timer[0] = root.after(1800, hide_notice)
 
-        root.after(40, poll)
+        def hide_notice():
+            user32.ShowWindow(hwnd, 0)
+            hide_timer[0] = None
+
+        def dispatch():
+            # Tk procesa el evento en su hilo; el motor solo escribe en la cola.
+            while True:
+                latest[0] = _values.get()
+                try:
+                    root.event_generate("<<DockerNotice>>", when="tail")
+                except (RuntimeError, tk.TclError):
+                    return
+
+        root.bind("<<DockerNotice>>", render_notice)
+        root.after(0, lambda: threading.Thread(target=dispatch, name="notice-dispatch", daemon=True).start())
         root.mainloop()
     except Exception:
         # El indicador es opcional: un fallo visual no debe romper el audio.

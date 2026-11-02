@@ -84,13 +84,21 @@ def main():
     state = {"quit": False, "hidden": "--minimized" in sys.argv, "minimized": False}
     tray = None
 
+    def notify_visibility(visible):
+        try:
+            window.evaluate_js(f"window.setDesktopVisible && window.setDesktopVisible({str(visible).lower()})")
+        except Exception:
+            pass  # el documento puede estar cargando o cerrándose
+
     def set_restored():
         state["minimized"] = False
+        notify_visibility(not state["hidden"])
         if tray:
             tray.update_menu()
 
     def set_minimized():
         state["minimized"] = True
+        notify_visibility(False)
         if tray:
             tray.update_menu()
 
@@ -144,6 +152,7 @@ def main():
         user32.SetWindowPos(hwnd, 0, x, y, 0, 0, 0x0001 | 0x0004 | 0x0010)  # sin cambiar tamaño, orden ni foco
 
     def on_loaded():
+        notify_visibility(not state["hidden"] and not state["minimized"])
         fit_client()
         no_maximize()
         place_corner()
@@ -152,6 +161,7 @@ def main():
     window.events.minimized += set_minimized
 
     def hide_to_tray():
+        notify_visibility(False)
         window.hide()
         state["hidden"] = True
         if tray:
@@ -163,6 +173,7 @@ def main():
             window.restore()
         state["hidden"] = False
         state["minimized"] = False
+        notify_visibility(True)
         if tray:
             tray.update_menu()
         hwnd = ctypes.windll.user32.FindWindowW(None, TITLE)

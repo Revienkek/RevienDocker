@@ -3,6 +3,14 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versiones `0.0.x`: una por tanda de trabajo.
 La versión actual está en `src/version.py` y en el nombre de la etiqueta de GitHub (`v0.0.x`). Producto y estilo: [PRODUCT.md](PRODUCT.md).
 
+## [0.0.82] · 2026-11-02 · Reposo y eficiencia
+
+### Cambiado
+- El indicador nativo de volumen y modos espera eventos: deja de sondear cada 40 ms incluso después de ocultarse.
+- La ventana deja de programar consultas de estado al minimizarse o pasar a la bandeja y se actualiza al volver.
+- Una sola consulta de estado en curso y sin repintado si la respuesta no cambia.
+- Se conserva la interfaz y el motor de acciones de 0.0.81.
+
 ## [0.0.81] · 2026-11-02 · Posición inicial
 
 ### Cambiado

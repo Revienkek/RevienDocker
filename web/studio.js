@@ -854,10 +854,24 @@ function updateEngineUI(st) {
     renderSuggest();
   } else if (!API.ok) $("activeApp").textContent = "—";
 }
-setInterval(() => {
-  if (!API.ok || document.hidden) return;
-  api("/api/status").then(updateEngineUI).catch(() => { API.ok = false; updateEngineUI(null); });
-}, 1500);
+// Una sola consulta en curso; ninguna alarma cuando la ventana está oculta.
+let statusTimer = null, statusBusy = false, desktopVisible = true, lastStatus = "";
+function scheduleStatus(delay = 1500) {
+  clearTimeout(statusTimer); statusTimer = null;
+  if (API.ok && desktopVisible && !document.hidden) statusTimer = setTimeout(pollStatus, delay);
+}
+async function pollStatus() {
+  if (statusBusy || !API.ok || !desktopVisible || document.hidden) return;
+  statusBusy = true;
+  try {
+    const st = await api("/api/status"), signature = JSON.stringify(st);
+    if (signature !== lastStatus) { lastStatus = signature; updateEngineUI(st); }
+  } catch (_) { API.ok = false; updateEngineUI(null); }
+  finally { statusBusy = false; scheduleStatus(); }
+}
+window.setDesktopVisible = visible => { desktopVisible = visible; scheduleStatus(0); };
+document.addEventListener("visibilitychange", () => scheduleStatus(0));
+scheduleStatus();
 
 // ---------- Grabación real (teclado + ratón) ----------
 // En la app de escritorio el teclado lo captura el motor nativo (hook de Windows: sirve Alt+Tab, Win, Esc…) y llega por /api/record.
@@ -1042,5 +1056,5 @@ $("btnFlashAll").addEventListener("click", async () => {
 });
 
 hydrateIcons();
-load().then(() => { refreshUI(); if (API.ok) probeDevice(false); if (API.ok) api("/api/status").then(updateEngineUI).catch(() => {}); else updateEngineUI(null); });
+load().then(() => { scheduleStatus(); refreshUI(); if (API.ok) probeDevice(false); if (API.ok) api("/api/status").then(updateEngineUI).catch(() => {}); else updateEngineUI(null); });
 })();
