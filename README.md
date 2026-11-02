@@ -2,9 +2,9 @@
 
 Programa de escritorio para Windows que configura el macropad de 3 teclas y 1 rueda (chip WCH CH57x) desde tu PC.
 
-**Versión 0.0.6** · [Descargar `RevienDocker.exe`](https://github.com/Revienkek/RevienDocker/releases/latest) · [Historial de cambios](CHANGELOG.md) · [Producto y estilo](PRODUCT.md)
+**Versión 0.0.7** · [Descargar `RevienDocker.exe`](https://github.com/Revienkek/RevienDocker/releases/latest) · [Historial de cambios](CHANGELOG.md) · [Producto y estilo](PRODUCT.md) · [Guía de uso](docs/GUIA_USUARIO.md)
 
-![Icono de RevienDocker](assets/icon.png)
+![RevienDocker](docs/captura.jpg)
 
 ## Qué necesitas
 
@@ -36,9 +36,19 @@ Selecciona la sección en la cabecera. El lápiz de cada control abre sus ajuste
 - La ventana tiene tamaño fijo: no se redimensiona ni se maximiza.
 - Los botones de la esquina superior derecha minimizan o cierran.
 
+## Estructura del repositorio
+
+```
+src/     motor, servidor local y ventana de escritorio (Python)
+web/     interfaz (index.html, studio.css, studio.js, iconos) y sus assets
+docs/    guía de uso
+tools/   compilación del .exe y generación de iconos
+tests/   pruebas automáticas
+```
+
 ## Guía completa
 
-La guía paso a paso (modo Inteligente, capas por app, OBS, recetas de rueda y problemas conocidos) está en [GUIA_USUARIO.md](GUIA_USUARIO.md). El producto y el estilo oficial están en [PRODUCT.md](PRODUCT.md).
+La guía paso a paso (modo Inteligente, capas por app, OBS, recetas de rueda y problemas conocidos) está en [docs/GUIA_USUARIO.md](docs/GUIA_USUARIO.md). El producto y el estilo oficial están en [PRODUCT.md](PRODUCT.md).
 
 ## Compilar el ejecutable
 
@@ -46,7 +56,7 @@ Solo si quieres generar tu propio `.exe`:
 
 ```bash
 pip install -r requirements.txt -r requirements-dev.txt
-powershell -ExecutionPolicy Bypass -File build_exe.ps1
+powershell -ExecutionPolicy Bypass -File toolsuild_exe.ps1
 ```
 
 El resultado queda en `dist\RevienDocker.exe`.
@@ -55,12 +65,12 @@ Para ejecutarlo desde el código sin compilar:
 
 ```bash
 pip install -r requirements.txt
-python studio_app.py
+python src/studio_app.py
 ```
 
 ## Datos y privacidad
 
-- Con el `.exe`, tu configuración se guarda en `%APPDATA%\RevienDocker\studio.json`. Desde el código, en `studio.json` junto a los archivos.
+- Con el `.exe`, tu configuración se guarda en `%APPDATA%\RevienDocker\studio.json`. Desde el código, en `studio.json` en la raíz del repositorio.
 - El programa solo escucha en tu propio PC (`127.0.0.1`). Otras webs no pueden usarlo para pulsar teclas.
 
 ## Pruebas

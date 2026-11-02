@@ -30,9 +30,11 @@ from pathlib import Path
 
 IS_WIN = sys.platform == "win32"
 FROZEN = getattr(sys, "frozen", False)
-RESOURCE_DIR = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent))  # index.html, css, js
+ROOT_DIR = Path(__file__).resolve().parent.parent
+# Interfaz (index.html, css, js, assets): carpeta web/ del repositorio o, empaquetado, web/ dentro del .exe
+RESOURCE_DIR = (Path(sys._MEIPASS) / "web") if hasattr(sys, "_MEIPASS") else ROOT_DIR / "web"
 # Empaquetado como .exe, la configuración vive en %APPDATA% (junto al .exe no hay permiso de escritura asegurado)
-DATA_DIR = (Path(os.environ.get("APPDATA", Path.home())) / "RevienDocker") if FROZEN else Path(__file__).resolve().parent
+DATA_DIR = (Path(os.environ.get("APPDATA", Path.home())) / "RevienDocker") if FROZEN else ROOT_DIR
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 _OLD = Path(os.environ.get("APPDATA", Path.home())) / "BotoneraStudio" / "studio.json"  # nombre anterior del proyecto
 if FROZEN and _OLD.exists() and not (DATA_DIR / "studio.json").exists():

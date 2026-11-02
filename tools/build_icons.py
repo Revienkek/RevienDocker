@@ -17,7 +17,7 @@ arrow-right sparkles ghost code-xml sliders-horizontal lightbulb terminal panel-
 command monitor-up circle-help cable save pointer bolt gamepad-2 layout-grid hash plug-zap flame wand-sparkles circle-alert shapes pencil globe bot message-circle notebook-pen file-text arrow-big-up chevron-up option arrow-left""".split()
 
 ROOT = Path(subprocess.check_output("npm root -g", shell=True, text=True).strip()) / "lucide-static" / "icons"
-OUT = Path(__file__).resolve().parent.parent / "studio_icons.js"
+OUT = Path(__file__).resolve().parent.parent / "web" / "studio_icons.js"
 
 icons, missing = {}, []
 for n in NAMES:

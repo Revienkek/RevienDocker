@@ -1,7 +1,7 @@
-"""Genera assets/wordmark.svg: «REVIENDOCKER» en vector, con las letras de Doris PP convertidas a trazos.
+"""Genera web/assets/wordmark.svg: «REVIENDOCKER» en vector, con las letras de Doris PP convertidas a trazos.
 
-    python studio_wordmark.py                      # usa Doris PP instalada en Windows
-    python studio_wordmark.py ruta\\DorisPP.ttf    # o una ruta concreta
+    python src/studio_wordmark.py                  # usa Doris PP instalada en Windows
+    python src/studio_wordmark.py ruta\\DorisPP.ttf    # o una ruta concreta
 """
 
 import sys
@@ -11,7 +11,7 @@ from fontTools.pens.svgPathPen import SVGPathPen
 from fontTools.pens.transformPen import TransformPen
 from fontTools.ttLib import TTFont
 
-ASSETS = Path(__file__).resolve().parent / "assets"
+ASSETS = Path(__file__).resolve().parent.parent / "web" / "assets"
 DEFAULT_FONT = Path.home() / "AppData" / "Local" / "Microsoft" / "Windows" / "Fonts" / "DorisPP.ttf"
 TEXT = "REVIENDOCKER"
 TRACKING = 0.06  # em, igual que el interletrado del título en CSS

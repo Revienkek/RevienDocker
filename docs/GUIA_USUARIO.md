@@ -17,17 +17,17 @@ Un programador para el macropad de 3 teclas + 1 rueda (chip WCH CH57x). El tecla
 **En desarrollo:**
 
 ```bash
-python start_studio.py
+python src/start_studio.py
 ```
 
-Abre `http://127.0.0.1:8765/index.html`. También vale abrir `index.html` con doble clic (sin backend Python).
+Abre `http://127.0.0.1:8765/index.html`. También vale abrir `web/index.html` con doble clic (sin backend Python).
 
 ## 2b. Los dos modos
 
 | | 🎯 Directo | 🧠 Inteligente |
 |---|---|---|
 | Dónde vive la lógica | Dentro del teclado (EEPROM) | En este programa, en tu PC |
-| Necesita el programa abierto | No | Sí (`python start_studio.py`) |
+| Necesita el programa abierto | No | Sí (`python src/start_studio.py`) |
 | Qué flasheas | Tus atajos | Teclas fantasma F13–F18 (una sola vez) |
 | Qué puedes hacer | Teclas, ratón, multimedia | Todo lo anterior + OBS + **capas por app** |
 
@@ -145,7 +145,7 @@ _(vacío; se rellena al probar con el hardware)_
 
 ## 9. Historial
 
-El historial de versiones y cambios está en [CHANGELOG.md](CHANGELOG.md).
+El historial de versiones y cambios está en [CHANGELOG.md](../CHANGELOG.md).
 
 
 ## Perfiles de Directo

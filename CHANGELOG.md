@@ -1,7 +1,19 @@
 # Historial de cambios
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versiones `0.0.x`: una por tanda de trabajo.
-La versión actual está en `version.py` y en el nombre de la etiqueta de GitHub (`v0.0.x`). Producto y estilo: [PRODUCT.md](PRODUCT.md).
+La versión actual está en `src/version.py` y en el nombre de la etiqueta de GitHub (`v0.0.x`). Producto y estilo: [PRODUCT.md](PRODUCT.md).
+
+## [0.0.7] · 2026-11-02 · Reorganización del repositorio
+
+Sin cambios visibles ni de funcionamiento en la app.
+
+### Cambiado
+- Raíz limpia: `src/` (motor, servidor y ventana), `web/` (interfaz y assets), `docs/` (guía de uso), `tools/` (compilación e iconos) y `tests/`. Los ficheros se movieron con `git mv`, así que conservan su historial.
+- La compilación del `.exe` pasa a `tools/build_exe.ps1`; se ejecuta igual desde cualquier carpeta.
+- Descripción y etiquetas del repositorio en GitHub actualizadas; captura de la ventana en el `README`.
+
+### Eliminado
+- `assets/icon.svg`, que ya no se usaba.
 
 ## [0.0.6] · 2026-11-02 · Ventana fija y menús compactos
 

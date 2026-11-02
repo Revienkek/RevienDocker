@@ -4,7 +4,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageOps
 
-ASSETS = Path(__file__).resolve().parent / "assets"
+ASSETS = Path(__file__).resolve().parent.parent / "web" / "assets"
 SOURCE = ASSETS / "Icon_definitivo.jpg"
 ICO_SIZES = [16, 24, 32, 48, 64, 128, 256]
 

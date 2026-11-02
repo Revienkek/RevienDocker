@@ -25,7 +25,7 @@ Un docker físico con tres formas de uso sobre el mismo aparato y la misma panta
 
 ## Operating Context
 
-- El motor (`studio_engine.py`, gancho de teclado de Windows, teclas fantasma F13–F18) debe estar en marcha; cerrar la ventana la oculta en la bandeja.
+- El motor (`src/studio_engine.py`, gancho de teclado de Windows, teclas fantasma F13–F18) debe estar en marcha; cerrar la ventana la oculta en la bandeja.
 - El usuario sabe qué modo está activo por un **aviso nativo breve** abajo a la derecha, sobre la bandeja, no por la app.
 - Configuración en `%APPDATA%\RevienDocker\studio.json`. Solo escucha en `127.0.0.1`.
 - Se compila a `dist\RevienDocker.exe` y se abre desde el acceso directo del escritorio. Recompilar tras cada tanda.
@@ -61,10 +61,10 @@ Perfiles guardables desde «+» junto a Directo. Los tres huecos del carril izqu
 - El editor de una tecla (lápiz) usa el mismo formato de chips; «Atajos del sistema» deja de ser un acordeón pesado.
 
 ### Aviso nativo de modo
-`volume_overlay.py`: 280 × 56 px, siempre visible, sin foco, fuera de la barra de tareas, esquina inferior derecha del área útil con 16 px de margen, 1,8 s. Icono y nombre. No es una notificación del Centro de actividades.
+`src/volume_overlay.py`: 280 × 56 px, siempre visible, sin foco, fuera de la barra de tareas, esquina inferior derecha del área útil con 16 px de margen, 1,8 s. Icono y nombre. No es una notificación del Centro de actividades.
 
 ### Técnicas
-Estático, sin build ni dependencias de front. Ventana de escritorio fija de 720 × 420 (`WIN_W, WIN_H` en `studio_app.py`). Iconos Lucide generados (`tools/build_icons.py`, 64 iconos). Estado `S` en `localStorage` `botonera.studio.v2` y `studio.json`. Los originales y datos de cada persona no salen del PC.
+Estructura: `src/` (Python), `web/` (interfaz y assets), `docs/`, `tools/`, `tests/`. Interfaz estática, sin build ni dependencias de front. Ventana de escritorio fija de 720 × 420 (`WIN_W, WIN_H` en `src/studio_app.py`). Iconos Lucide generados (`tools/build_icons.py`, 68 iconos). Estado `S` en `localStorage` `botonera.studio.v2` y `studio.json`. Los originales y datos de cada persona no salen del PC.
 
 ## Brand Commitments
 
@@ -121,7 +121,7 @@ Curvas `--ease-out: cubic-bezier(0.23,1,0.32,1)`, `--ease-in-out: cubic-bezier(0
 ## Evidence on Hand
 
 - Capturas anotadas por Revien (2026-11-02): ventana a tamaño fijo y huecos a recortar, Añadir app a chips, tecla de activación al carril.
-- `GUIA_USUARIO.md` (uso e historial), `README.md` (instalación), 20 pruebas del motor en `tests/`.
+- `docs/GUIA_USUARIO.md` (uso), `CHANGELOG.md` (historial), `README.md` (instalación), 30 pruebas automáticas en `tests/`.
 - Sin pruebas con usuarios ajenos ni métricas de uso: no se inventan.
 
 ## Product Principles
