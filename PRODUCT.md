@@ -61,9 +61,10 @@ Perfiles guardables desde «+» junto a Directo. Los tres huecos del carril izqu
 ### Modos (Decisión)
 - Tres huecos, cada uno con nombre e icono elegidos por el usuario (16 iconos). Ctrl+Shift+1/2/3 activa; repetir vuelve a Directo.
 - **Confirmación física (0.1.0):** la pulsación de cambio de modo enciende brevemente la tecla del macropad (unos 450 ms), incluso con luz Apagada; después se restaura la preferencia. Es un aviso de entrada/salida, no un indicador permanente. En Al pulsar se conserva el efecto nativo. Cambiar el hueco desde la interfaz no genera un aviso físico: el firmware recuerda la última tecla del aparato, no una selección por software.
-- **Una sola puerta a las plantillas:** los tres iconos del carril seleccionan el hueco; el botón «+» superior abre su menú (nombre, icono, Plantilla, Vaciar), o las plantillas si está vacío.
-- **Plantillas como chips** con icono y nombre; la descripción va en una línea al elegir, no en cada tarjeta. «Nuevo modo» es una plantilla más (nombre + icono) y hereda de Directo lo que no defina.
-- **Vista previa compacta** (mini docker + «Usar en este modo»), sin empujar la rejilla. El mini docker aparece solo aquí.
+- **Una sola puerta a plantillas y Mis modos:** los tres iconos del carril seleccionan el hueco; el botón «+» superior abre su menú (nombre, icono, Guardar en Mis modos, Quitar del hueco), o las plantillas y Mis modos si está libre.
+- **Plantillas como chips** con icono y nombre; la descripción va en una línea al elegir, no en cada tarjeta.
+- **Mis modos (0.1.1, Decisión):** hasta **3 modos propios** guardados, en chips bajo las plantillas. «Nuevo modo» (nombre + icono) crea y guarda; hereda de Directo lo que no defina. Usar una plantilla o un modo guardado **copia** al hueco: editar el hueco nunca cambia la plantilla ni lo guardado; «Guardar cambios» actualiza lo guardado (el hueco recuerda su origen con `from`). Se borra desde un hueco libre. Con 3 guardados, «Nuevo modo» queda desactivado. Quitar del hueco solo pide confirmación si se pierde algo.
+- **Vista previa compacta** (mini docker + «Usar en este hueco»), sin empujar la rejilla. El mini docker aparece solo aquí.
 - El editor de opciones se abre desde la grabación y conserva recetas de rueda y OBS. Los atajos se graban con las teclas, sin catálogo predefinido.
 
 ### Aviso nativo de modo
@@ -107,7 +108,7 @@ Un solo vocabulario en toda la app, para que el usuario lea el estado sin pensar
 | Foco de teclado | Anillo blanco 2 px, separado 2 px |
 | **✓ Aplicar** | Reposo: tick verde con borde verde tenue. **Con cambios pendientes: verde sólido** (`--green`, texto oscuro) con halo verde |
 | **× Cancelar** | Solo aparece con cambios sin aplicar: tick y borde rojo tenue; en hover, fondo rojo tenue. Descarta |
-| Peligro (Vaciar, borrar) | Texto `--red`, borde rojo tenue en hover |
+| Peligro (Quitar del hueco, borrar) | Texto `--red`, borde rojo tenue en hover |
 | Desactivado / marcador | Borde discontinuo, opacidad 0,5, sin hover |
 
 El rojo ya no se usa para el ✓ pendiente: el rojo significa siempre «quitar».
@@ -147,7 +148,7 @@ Foco visible en todo. Etiquetas en español (`aria-label`) en iconos sin texto; 
 1. Icono negro: se funde con una barra de tareas oscura. ¿Se deja?
 2. Licencia de Doris PP para el wordmark vectorial y fuentes sin embeber (Expressway solo Rg; 600/700 sintetizados).
 3. Directo e Inteligente tendrán iconos propios en el carril izquierdo en el futuro; hoy son marcadores (Directo) y tecla de activación (Inteligente).
-4. Si «Vaciar» sobre el hueco activo debe devolver el motor a Directo (hoy el motor puede quedar apuntando a un hueco vacío).
+4. Si «Quitar del hueco» sobre el hueco activo debe devolver el motor a Directo (hoy el motor puede quedar apuntando a un hueco vacío).
 
 ### Giros de rueda (0.0.11)
 Dos pastillas independientes de 56 × 30 px separadas por un icono de rueda. Cada pastilla graba su propio giro. Texto en una línea con elipsis y asignación completa en tooltip y nombre accesible. Se retiran los lápices y la lista de atajos predefinidos; las opciones de la grabación conservan velocidad, recetas y OBS.
