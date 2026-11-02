@@ -14,22 +14,20 @@ Programa de escritorio para Windows que configura el macropad de 3 teclas y 1 ru
 
 ## Cómo empezar
 
-1. Abre **RevienDocker** (el acceso directo del escritorio o `dist\RevienDocker.exe`).
-2. Abre los ajustes (la rueda dentada, abajo a la derecha) y pulsa el enchufe para buscar el teclado. El punto del teclado pasa a verde cuando lo detecta.
-3. Elige un botón en el teclado (panel 1) y decide qué hace en el panel 2.
-4. Pulsa **Aplicar cambios**. Eso escribe la configuración dentro del teclado.
+1. Conecta el macropad por USB y abre **RevienDocker**.
+2. En los ajustes, pulsa el enchufe para detectar el teclado.
+3. Elige **Directo**, **Inteligente** o **Modos**. Pulsa una tecla o un sentido de la rueda en pantalla y después la tecla que quieras asignarle.
+4. Pulsa **Aplicar** para guardar los cambios en el macropad.
 
-El teclado se prepara para comunicarse con el motor de RevienDocker, que ejecuta las acciones configuradas.
+Para usar **Inteligente** y **Modos**, deja RevienDocker abierto o minimízalo a la bandeja. Así podrá reconocer la aplicación activa y los cambios de modo.
 
 ## Formas de uso
 
-- **Directo:** asignaciones que se usan en cualquier aplicación; puedes guardarlas como perfiles.
-- **Inteligente:** cada botón cambia según la app que tengas en primer plano (por ejemplo, otro atajo en OBS que en el navegador). Necesita RevienDocker en marcha; cerrar la ventana la oculta en la bandeja y el motor sigue activo.
+- **Directo:** configura qué hace cada botón y cada giro de la rueda. La asignación vale en cualquier aplicación: por ejemplo, 1 escribe una letra, 2 hace una combinación de teclas y la rueda controla el volumen. Guarda perfiles para cambiar rápidamente entre distintas configuraciones.
+- **Inteligente:** los mismos controles pueden hacer cosas distintas según la aplicación que estés usando. Configura, por ejemplo, copiar y pegar en el trabajo, controles de OBS al emitir y acciones multimedia en otra app. Elige un modificador para cada aplicación: al mantenerlo, los botones usan sus acciones alternativas; sin él, conservan las acciones normales de Directo.
+- **Modos:** guarda hasta tres configuraciones para cambiar de tarea sin abrir RevienDocker. Pulsa **Ctrl+Shift+1**, **2** o **3** en el macropad para activar el modo correspondiente; repite la combinación para volver al uso anterior. Por ejemplo, activa Música para controlar Spotify mientras trabajas y vuelve después a tus asignaciones habituales. Empieza con una plantilla o crea un modo desde cero.
 
-- **Modos:** hasta tres configuraciones independientes. Se activan con **Ctrl+Shift+1/2/3** (repetirlo vuelve a Directo). Los menús de Directo, Inteligente y Modos se abren como capa superpuesta sobre el docker. A la izquierda del docker, un icono por hueco: pulsa uno para seleccionarlo y después el «+» superior para abrir su menú (nombre, icono, plantilla, vaciar); si el hueco está vacío, el «+» abre las plantillas. «Nuevo modo» es una plantilla más: eliges nombre e icono y empieza de cero. La vista previa de cada plantilla lleva un mini docker, y al cambiar de modo sale un aviso nativo abajo a la derecha, sobre la bandeja.
-- **Misma estructura en los tres modos:** arriba, botón contextual + selector Directo / Inteligente / Modos + luz; debajo, iconos a la izquierda + docker + iconos a la derecha (✓ y ×); debajo, un mensaje informativo centrado. En Directo los tres huecos de la izquierda son marcadores; en Inteligente son la tecla de activación (Shift, Ctrl o Alt, una sola).
-
-Elige el modo en el selector de arriba. Pulsa cada control para grabar su asignación; la rueda tiene una pastilla independiente por sentido.
+En los tres casos puedes asignar acciones de teclado, multimedia o ratón. Cada sentido de la rueda se configura por separado; también puede controlar el volumen general o el de Spotify sin cambiar el otro.
 
 ## Ventana
 
