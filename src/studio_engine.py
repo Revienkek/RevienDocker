@@ -81,10 +81,14 @@ def _clean_action(a):
     if not isinstance(a, dict):
         return None
     t = a.get("type")
-    if t not in ("keyboard", "media", "mouse", "obs"):
+    if t not in ("keyboard", "media", "mouse", "obs", "app_volume"):
         return None
     out = {"type": t, "mod": _int(a.get("mod"), 0, 15), "code": _int(a.get("code"), 0, 0xFFFF),
            "wheel": _int(a.get("wheel"), -1, 1), "speed": _int(a.get("speed"), 1, 10, 1)}
+    if t == "app_volume":
+        if out["code"] not in (0xE9, 0xEA, 0xE2):
+            return None
+        out["target"] = "spotify.exe"
     if t == "obs":
         op = a.get("op")
         if op not in OBS_OPS:
@@ -155,6 +159,12 @@ def normalize_studio(d):
         base = {"id": "base", "name": "Base", "exes": [], "actions": {}}
     base["exes"] = []
     out["layers"] = [base] + [L for L in layers if L["id"] != "base"]
+    # Recupera configuraciones Spotify creadas antes de separar su sesión de audio.
+    for group in out["layers"][1:] + [m for m in out["modes"] if m]:
+        if group["name"].strip().casefold() == "spotify" or "spotify.exe" in group.get("exes", []):
+            for action in group["actions"].values():
+                if action["type"] == "media" and action["code"] in (0xE9, 0xEA, 0xE2):
+                    action.update(type="app_volume", target="spotify.exe")
     return out
 
 
@@ -340,12 +350,42 @@ if IS_WIN:
             endpoint = device.EndpointVolume
             current = round(endpoint.GetMasterVolumeLevelScalar() * 100)
             target = max(0, min(100, current + (step if code == 0xE9 else -step)))
+            # La pulsación estándar despierta el OSD de Windows. Esperamos a que
+            # el shell la procese y después fijamos el paso exacto solicitado.
+            run_media(code, 1)
+            for _ in range(30):
+                if round(endpoint.GetMasterVolumeLevelScalar() * 100) != current:
+                    break
+                time.sleep(0.005)
             endpoint.SetMasterVolumeLevelScalar(target / 100.0, None)
             del endpoint, device
         finally:
             comtypes.CoUninitialize()
-        from volume_overlay import show_volume
-        show_volume(target)
+
+
+    def adjust_spotify_volume(code, step):
+        """Controla todas las sesiones de Spotify sin cambiar el volumen maestro."""
+        import comtypes
+        from pycaw.pycaw import AudioUtilities
+        comtypes.CoInitialize()
+        try:
+            controls = []
+            for session in AudioUtilities.GetAllSessions():
+                process = session.Process
+                if process and process.name().lower() == "spotify.exe":
+                    controls.append(session.SimpleAudioVolume)
+            if not controls:
+                raise RuntimeError("Spotify no tiene una sesión de audio. Reproduce algo en Spotify.")
+            mute = not controls[0].GetMute() if code == 0xE2 else None
+            for control in controls:
+                if mute is not None:
+                    control.SetMute(mute, None)
+                else:
+                    current = round(control.GetMasterVolume() * 100)
+                    target = max(0, min(100, current + (step if code == 0xE9 else -step)))
+                    control.SetMasterVolume(target / 100.0, None)
+        finally:
+            comtypes.CoUninitialize()
 
     _MOUSE_FLAGS = {1: (0x0002, 0x0004, 0), 2: (0x0008, 0x0010, 0), 4: (0x0020, 0x0040, 0),
                     8: (0x0080, 0x0100, 1), 16: (0x0080, 0x0100, 2)}
@@ -724,6 +764,8 @@ class StudioEngine:
         try:
             if t == "keyboard":
                 run_keyboard(a["mod"], a["code"])
+            elif t == "app_volume":
+                adjust_spotify_volume(a["code"], a["speed"])
             elif t == "media":
                 if a["code"] in (0xE9, 0xEA):
                     adjust_system_volume(a["code"], a["speed"])

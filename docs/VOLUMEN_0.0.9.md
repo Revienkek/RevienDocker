@@ -1,7 +1,17 @@
-# Volumen para la futura 0.0.9
+# Volumen · 0.0.9
 
-- El volumen general se ajusta en `adjust_system_volume` mediante `IAudioEndpointVolume` para conservar pasos exactos de 1, 2, 3 o 5 puntos. Esta ruta ya no envía teclas multimedia de volumen; en el equipo del usuario no aparece el indicador nativo de Windows.
-- `show_volume` intenta mostrar un indicador propio con Tk. El informe de PyInstaller de la compilación local 0.0.82 indica `missing module named tkinter`; debe verificarse en una compilación funcional antes de depender de él. Este indicador propio no equivale al solicitado de Windows.
-- En el código estable 0.0.82, la plantilla de Spotify asigna acciones multimedia genéricas de volumen y el motor no contiene una acción de volumen por sesión. Esto contradice el comportamiento independiente previamente confirmado por el usuario y necesita recuperación.
-- Objetivo: indicador nativo de Windows para volumen general sin perder pasos exactos; Spotify debe controlar solo su sesión de audio. No enviar una tecla multimedia adicional sin comprobar sus efectos, ya que podría alterar el volumen dos veces o mostrar un nivel distinto.
-- Pendiente: identificar y validar el mecanismo nativo en el Windows real, además de probar ambos controles con el macropad y Spotify. Reservado para la futura 0.0.9; no publicado como versión.
+## Volumen general
+
+`adjust_system_volume` envía una pulsación multimedia estándar para activar el indicador de Windows, espera su procesamiento (máximo 150 ms) y fija el valor absoluto solicitado mediante Core Audio. Ya no solicita el indicador propio de Tk para el volumen general.
+
+Prueba con el dispositivo de audio real: desde 50, los pasos ±1, ±2, ±3 y ±5 acabaron exactamente en 51/49, 52/48, 53/47 y 55/45 tras esperar 300 ms. Se restauró el nivel original. El usuario no estaba mirando durante la prueba: la aparición visual del OSD sigue pendiente de confirmación del usuario.
+
+## Spotify
+
+La acción `app_volume` ajusta solo las sesiones de Spotify, incluido el silencio. La plantilla Spotify utiliza esta acción y se migran automáticamente las capas de spotify.exe y los modos guardados con nombre Spotify que aún tenían volumen multimedia general. No se modifica el volumen maestro ni se emite la tecla de volumen del sistema desde esta ruta.
+
+Pruebas controladas: paso exacto de sesión, exclusión de otras sesiones, ausencia de llamadas al volumen maestro y migración de configuración. No había sesión Spotify activa durante la comprobación real; abre Spotify y reproduce audio antes de comprobarlo con el gadget.
+
+## Modos
+
+Los tres iconos laterales seleccionan el hueco. El «+» superior abre su menú; un hueco vacío abre las plantillas. La activación del motor se conserva mediante Ctrl+Shift+1/2/3.

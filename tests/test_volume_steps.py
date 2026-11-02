@@ -12,7 +12,8 @@ class VolumeStepTests(unittest.TestCase):
         endpoint = MagicMock()
         device = MagicMock()
         device.EndpointVolume = endpoint
-        with patch("comtypes.CoInitialize"), patch("comtypes.CoUninitialize"), \
+        with patch.object(engine, "run_media"), patch.object(engine.time, "sleep"), \
+                patch("comtypes.CoInitialize"), patch("comtypes.CoUninitialize"), \
                 patch("pycaw.pycaw.AudioUtilities.GetSpeakers", return_value=device):
             for code, start, step, expected in ((0xE9, .40, 1, .41), (0xE9, .40, 2, .42),
                                                 (0xEA, .40, 3, .37), (0xEA, .40, 5, .35),

@@ -3,6 +3,15 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versiones `0.0.x`: una por tanda de trabajo.
 La versión actual está en `src/version.py` y en el nombre de la etiqueta de GitHub (`v0.0.x`). Producto y estilo: [PRODUCT.md](PRODUCT.md).
 
+## [0.0.9] · 2026-11-02 · Volumen y selección de modos
+
+### Corregido
+- Volumen general con pulsación multimedia nativa para el indicador de Windows y ajuste final exacto de ±1, ±2, ±3 o ±5.
+- Spotify vuelve a controlar solo su sesión de audio; se recuperan las configuraciones guardadas con su nombre.
+
+### Cambiado
+- Los iconos laterales seleccionan el hueco; el «+» superior abre sus opciones o plantillas.
+
 ## [0.0.82] · 2026-11-02 · Reposo y eficiencia
 
 ### Cambiado

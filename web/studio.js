@@ -67,16 +67,17 @@ const SPEEDS = [[1, "Fino"], [2, "Normal"], [3, "Rápido"], [5, "Turbo"]];
 // ---------- Acciones: { type, mod, code, wheel (-1/0/1), speed [, op, target] } ----------
 const K  = (mod, code) => ({ type: "keyboard", mod, code, wheel: 0, speed: 1 });
 const M  = (code, speed = 1) => ({ type: "media", mod: 0, code, wheel: 0, speed });
+const AV = (code, speed = 1) => ({ ...M(code, speed), type: "app_volume", target: "spotify.exe" });
 const Ms = (mod, btn, wheel = 0, speed = 1) => ({ type: "mouse", mod, code: btn, wheel, speed });
 const O  = (op, target = "", speed = 1) => ({ type: "obs", mod: 0, code: 0, wheel: 0, speed, op, target });
 const EMPTY = K(0, 0);
 const popcount = m => MOD_BITS.filter(x => m & x.bit).length;
 const hasMain = a => a.type === "keyboard" ? !!a.code : a.type === "mouse" ? !!(a.code || a.wheel) : true;
-const countOf = a => (a.type === "media" || a.type === "obs") ? 1 : popcount(a.mod) + (hasMain(a) ? 1 : 0);
-const speedApplies = a => (a.type === "media" && (a.code === 0xE9 || a.code === 0xEA)) || (a.type === "mouse" && !!a.wheel) ||
+const countOf = a => ((a.type === "media" || a.type === "app_volume") || a.type === "obs") ? 1 : popcount(a.mod) + (hasMain(a) ? 1 : 0);
+const speedApplies = a => ((a.type === "media" || a.type === "app_volume") && (a.code === 0xE9 || a.code === 0xEA)) || (a.type === "mouse" && !!a.wheel) ||
   (a.type === "obs" && !!(OBS_BY_OP[a.op] || {}).speed);
 const sameAction = (a, b) => !!a && !!b && a.type === b.type && a.mod === b.mod && a.code === b.code && a.wheel === b.wheel && a.op === b.op;
-const modsOf = a => (a.type === "media" || a.type === "obs") ? 0 : a.mod;
+const modsOf = a => ((a.type === "media" || a.type === "app_volume") || a.type === "obs") ? 0 : a.mod;
 const speedOf = a => speedApplies(a) ? a.speed : 1;
 
 function describe(a) {
@@ -84,13 +85,13 @@ function describe(a) {
   let main = "", head = [];
   if (a.type === "keyboard") main = a.code ? SHORT_OF[a.code] : "";
   else if (a.type === "mouse") main = a.wheel ? (a.wheel > 0 ? "Rueda ↑" : "Rueda ↓") : (MOUSE_SHORT[a.code] || "");
-  else if (a.type === "media") main = MEDIA_SHORT[a.code] || "";
+  else if ((a.type === "media" || a.type === "app_volume")) main = MEDIA_SHORT[a.code] || "";
   else { head = ["OBS"]; const o = OBS_BY_OP[a.op]; main = o ? (typeof o.short === "function" ? o.short(a.target || "…") : o.short) : "?"; }
   return { parts: [...head, ...mods, ...(main ? [main] : [])], speed: speedApplies(a) && a.speed > 1 ? a.speed : 0,
-    volumeStep: a.type === "media" && (a.code === 0xE9 || a.code === 0xEA) };
+    volumeStep: (a.type === "media" || a.type === "app_volume") && (a.code === 0xE9 || a.code === 0xEA) };
 }
 const textOf = a => { const d = describe(a); return (d.parts.join(a.type === "obs" ? " · " : "+") + (d.speed ? (d.volumeStep ? ` · ${d.speed}%` : " ×" + d.speed) : "")) || "—"; };
-const TYPE_NAME = { keyboard: "Teclado", mouse: "Ratón", media: "Multimedia", obs: "OBS Studio" };
+const TYPE_NAME = { keyboard: "Teclado", mouse: "Ratón", media: "Multimedia", app_volume: "Volumen de Spotify", obs: "OBS Studio" };
 const TARGET_NAME = { KEY_1: "Tecla 1", KEY_2: "Tecla 2", KEY_3: "Tecla 3", KNOB_CCW: "Giro ↺ izquierda", KNOB_CW: "Giro ↻ derecha", KNOB_PRESS: "Pulsación del pomo" };
 const SLOT_ORDER = ["KEY_1", "KEY_2", "KEY_3", "KNOB_CCW", "KNOB_PRESS", "KNOB_CW"];
 const HW_SLOTS = { KEY_1: 0x01, KEY_2: 0x02, KEY_3: 0x03, KNOB_CCW: 0x0D, KNOB_PRESS: 0x0E, KNOB_CW: 0x0F };
@@ -198,14 +199,14 @@ function renderSeg(box, current, onPick, items = SPEEDS.map(([v, n]) => [v, `${n
 }
 
 // ---------- Paquetes ----------
-const isWheelVolume = (slot, a) => (slot === "KNOB_CCW" || slot === "KNOB_CW") && a && a.type === "media" && (a.code === 0xE9 || a.code === 0xEA);
+const isWheelVolume = (slot, a) => (slot === "KNOB_CCW" || slot === "KNOB_CW") && a && (a.type === "media" || a.type === "app_volume") && (a.code === 0xE9 || a.code === 0xEA);
 // El docker y la app son uno: el teclado solo manda F13–F18 y el motor decide qué hacer (Directo, Inteligente o Modos).
 const hwAction = slot => K(0, kc(GHOST[slot]));
 // Mismo protocolo que el backend (app.py): cada mensaje son 63 bytes tras el Report ID 0x03.
 function msg(...b) { const m = new Uint8Array(63); m.set(b.map(x => x & 0xFF)); return m; }
 function slotMessages(slot, a) {
   const id = HW_SLOTS[slot], out = [msg(0xFE, 1, 1, 1)];
-  if (a.type === "media") out.push(msg(id, 0x12, a.code & 0xFF, a.code >> 8));
+  if ((a.type === "media" || a.type === "app_volume")) out.push(msg(id, 0x12, a.code & 0xFF, a.code >> 8));
   else if (a.type === "mouse") out.push(msg(id, 0x13, a.code, 0, 0, a.wheel * a.speed, a.mod));
   else out.push(msg(id, 0x11, 1, 0, 0, 0), msg(id, 0x11, 1, 1, a.mod, a.code));
   out.push(msg(0xAA, 0xAA));
@@ -237,8 +238,8 @@ const TEMPLATES = [
   { name: "Navegador", exes: ["chrome.exe", "msedge.exe", "firefox.exe", "brave.exe"], desc: "Pestañas, reabrir y zoom con la rueda",
     actions: () => ({ KEY_1: K(3, kc("Tab")), KEY_2: K(1, kc("Tab")), KEY_3: K(3, kc("KeyT")),
       KNOB_CCW: Ms(1, 0, -1), KNOB_CW: Ms(1, 0, 1), KNOB_PRESS: K(1, kc("Digit0")) }) },
-  { name: "Spotify", exes: ["spotify.exe"], desc: "Pistas, play y volumen",
-    actions: () => ({ KEY_1: M(0xB6), KEY_2: M(0xCD), KEY_3: M(0xB5), KNOB_CCW: M(0xEA), KNOB_CW: M(0xE9), KNOB_PRESS: M(0xE2) }) },
+  { name: "Spotify", exes: ["spotify.exe"], desc: "Pistas y volumen solo de Spotify",
+    actions: () => ({ KEY_1: M(0xB6), KEY_2: M(0xCD), KEY_3: M(0xB5), KNOB_CCW: AV(0xEA), KNOB_CW: AV(0xE9), KNOB_PRESS: AV(0xE2) }) },
   { name: "WoW Forever", exes: ["wow.exe", "wowclassic.exe"], desc: "Mapa, misiones, personaje y cámara; revisa tus teclas en el juego",
     actions: () => ({ KEY_1: K(0, kc("KeyM")), KEY_2: K(0, kc("KeyL")), KEY_3: K(0, kc("KeyC")),
       KNOB_CCW: Ms(0, 0, -1), KNOB_CW: Ms(0, 0, 1), KNOB_PRESS: K(0, kc("KeyP")) }) }
@@ -295,7 +296,7 @@ function refreshUI(opts = {}) {
 
   const a = cur(), isKnob = currentTarget.startsWith("KNOB"), inherited = isApp() && !own(currentTarget);
   $("selectedLabel").textContent = $("editor").hidden ? "" : TARGET_NAME[currentTarget] + (S.mode !== "direct" ? ` · ${layerLabel()}` : "");
-  $("comboCount").textContent = (a.type === "media" || a.type === "obs") ? "" : `${countOf(a)} / ${MAX_KEYS} teclas`;
+  $("comboCount").textContent = ((a.type === "media" || a.type === "app_volume") || a.type === "obs") ? "" : `${countOf(a)} / ${MAX_KEYS} teclas`;
   $("curMeta").textContent = TYPE_NAME[a.type];
   $("curCard").classList.toggle("inherited", inherited);
   $("curLabel").textContent = inherited ? "Sin definir · usa Directo" : "Asignado";
@@ -306,7 +307,7 @@ function refreshUI(opts = {}) {
   $("speedRow").hidden = !speedApplies(a);
   const speedOptions = isWheelVolume(currentTarget, a) ? [[1, "±1 %"], [2, "±2 %"], [3, "±3 %"], [5, "±5 %"]] : SPEEDS;
   renderSeg($("speedSeg"), a.speed, v => {
-    const volume = x => x && x.type === "media" && (x.code === 0xE9 || x.code === 0xEA);
+    const volume = x => x && (x.type === "media" || x.type === "app_volume") && (x.code === 0xE9 || x.code === 0xEA);
     if (isKnob && volume(a) && volume(shown("KNOB_CCW")) && volume(shown("KNOB_CW"))) {
       ["KNOB_CCW", "KNOB_CW"].forEach(k => { layer().actions[k] = { ...shown(k), speed: v }; });
       knobSpeed = v; persist(); refreshUI();
@@ -746,6 +747,7 @@ $("btnDelLayer").addEventListener("click", () => {
 // ---------- Plantillas con vista previa ----------
 const F = n => K(0, kc("F" + n));
 const PRESETS = [
+  { id: "spotify", name: "Spotify", icon: "music", desc: "Reproducción y volumen solo de Spotify", actions: () => ({ KEY_1: M(0xB6), KEY_2: M(0xCD), KEY_3: M(0xB5), KNOB_CCW: AV(0xEA), KNOB_CW: AV(0xE9), KNOB_PRESS: AV(0xE2) }) },
   { id: "media", name: "Música y volumen", icon: "music", desc: "Controla la reproducción y el sonido.",
     actions: () => ({ KEY_1: M(0xB6), KEY_2: M(0xCD), KEY_3: M(0xB5), KNOB_CCW: M(0xEA), KNOB_PRESS: M(0xE2), KNOB_CW: M(0xE9) }) },
   { id: "wow", name: "WoW Forever", icon: "gamepad-2", desc: "Mapa, misiones y personaje; rueda para la cámara.",
