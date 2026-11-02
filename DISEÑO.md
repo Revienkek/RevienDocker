@@ -83,12 +83,12 @@ Regla: **ninguna esquina llega a 90º ni queda pura (radio 0)**.
 
 ## Perfiles de Directo
 
-El selector de perfiles se abre desde el icono «+» junto a Directo. Su panel se despliega encima del docker, nunca debajo. El panel compacto usa iconos para guardar y eliminar, y limita los nombres a 12 caracteres.
+El selector de perfiles se abre desde el icono «+» junto a Directo. Su panel es una capa superpuesta sobre el docker. El panel compacto usa iconos para guardar y eliminar, y limita los nombres a 12 caracteres.
 
 ## Jerarquía y edición
 
 El Docker precede a las opciones de app o modo. En los tres modos, el lápiz abre el editor superpuesto y conserva la altura de la vista. La cruz comparte la fila superior con la asignación. La conexión WebSocket aparece dentro de los ajustes de la app OBS.
 
-En Inteligente, el icono de capas abre las apps y sus ajustes en un cajón encima del docker, nunca debajo; la cruz comparte la cabecera con «Atajos para».
+En Inteligente, el icono de capas abre las apps y sus ajustes en una capa superpuesta sobre el docker; la cruz comparte la cabecera con «Atajos para».
 
-En Modos, los iconos del carril seleccionan cada hueco y abren su menú; el icono de ajustes abre el panel de plantillas. Ambos se despliegan encima del docker, nunca debajo, y tienen cierre en su cabecera. Los números de hueco son discretos (opacidad baja) para no competir con el dibujo.
+En Modos, los iconos del carril seleccionan cada hueco y abren su menú; el icono de ajustes abre el panel de plantillas. Ambos son capas superpuestas sobre el docker, y tienen cierre en su cabecera. Los números de hueco son discretos (opacidad baja) para no competir con el dibujo.

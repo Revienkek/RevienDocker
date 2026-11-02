@@ -58,7 +58,7 @@ El selector de modo encabeza la pantalla y el Docker aparece debajo. Pulsa el l�
 
 ### ① El teclado (centro)
 - **Directo / Inteligente** está justo encima: es el modo de trabajo (ver sección 2b).
-- En modo Inteligente, el botón de capas junto a los modos abre el panel **Atajos para:**, encima del docker, con un icono por cada app (su nombre aparece al pasar el ratón) y «Añadir app». A la derecha, la app que tienes en primer plano (ignora a RevienDocker: si vuelves a la ventana, sigue mostrando la última app real). Si esa app aún no tiene atajos, sale el botón **Crear atajos para <app>**: un clic y ya tiene su pestaña.
+- En modo Inteligente, el botón de capas junto a los modos abre el panel **Atajos para:**, superpuesto sobre el docker, con un icono por cada app (su nombre aparece al pasar el ratón) y «Añadir app». A la derecha, la app que tienes en primer plano (ignora a RevienDocker: si vuelves a la ventana, sigue mostrando la última app real). Si esa app aún no tiene atajos, sale el botón **Crear atajos para <app>**: un clic y ya tiene su pestaña.
 - Encima del teclado, una línea visual explica la regla de la pestaña elegida, por ejemplo `Shift + Botón → OBS Studio` («mantén Shift mientras pulsas, con esa app en primer plano») o `Botón → cualquier app` («pulsa el botón solo»). Ahí mismo eliges la tecla de activación (Shift, Ctrl o Alt) y, en las apps, sus ajustes (nombre, programas, quitar).
 - **KEY 1/2/3:** las tres teclas mecánicas. Muestran la acción asignada (ej. `Ctrl+Shift+F13`).
 - **↺ / ↻:** giro de la rueda a izquierda / derecha.
@@ -147,7 +147,7 @@ _(vacío; se rellena al probar con el hardware)_
 
 | Fecha | Cambio |
 |---|---|
-| 2026-11-02 | **Menús encima del docker.** Los paneles de Directo (perfiles), Inteligente (Atajos para) y Modos (plantillas y menú de cada hueco) se despliegan en un cajón justo encima del docker, nunca debajo. |
+| 2026-11-02 | **Menús superpuestos sobre el docker.** Los paneles de Directo (perfiles), Inteligente (Atajos para) y Modos (plantillas y menú de cada hueco) se abren como capa encima del docker, sin empujarlo. |
 | 2026-11-02 | **Modos con Ctrl+Shift** (antes Alt+Shift). Carril de iconos a la izquierda del docker, uno por hueco: su menú cambia el nombre, elige plantilla o vacía el hueco (la plantilla no se borra). El icono de ajustes de la cabecera sigue abriendo las plantillas. «Atajos para» muestra un icono por app en lugar de su nombre. Ancho mínimo 712 × 560: el docker nunca se apila; `✓` y `×` siempre a la derecha.
 | 2026-11-01 | Unificación de **Directo / Inteligente / Modos** (3 huecos con plantillas y cambio rápido con `Alt+Shift+1/2/3` + overlay compacto). Limpieza visual del visor: sin barra informativa bajo las pestañas, botón de aplicar/descartar (`✓` / `×`) a la derecha del visor con aviso en rojo completo, clic directo en cada pieza para grabar al vuelo, icono de lápiz (`✎`) bajo cada pieza para abrir el menú 2, eliminación de «Elegir a mano» y menús plegados por defecto. |
 | 2026-11-01 | Control de instancia única por mutex nativo y HTTP: evita iconos duplicados en la bandeja al abrir y minimizar. Nueva 3ª opción «Modos» (placeholder con icono Lucide Shapes) en el selector de la cabecera. |
@@ -172,7 +172,7 @@ En Directo, el botón «+» junto a los modos abre los perfiles. Confirma primer
 
 Con **Ctrl+Shift+1/2/3** cambias de hueco (repetirlo vuelve a Directo).
 
-- **Carril de iconos** a la izquierda del docker: un icono por hueco. Pulsa uno para seleccionarlo y abrir su menú, que se despliega encima del docker: nombre (se guarda al salir del campo), **Plantilla** y **Vaciar**.
+- **Carril de iconos** a la izquierda del docker: un icono por hueco. Pulsa uno para seleccionarlo y abrir su menú, superpuesto sobre el docker: nombre (se guarda al salir del campo), **Plantilla** y **Vaciar**.
 - **Vaciar** deja el hueco libre. La plantilla no se borra: sigue disponible en el panel de plantillas.
 - El **«+»** de un hueco vacío abre su menú; desde ahí, **Plantilla** abre el panel.
 - El icono de ajustes junto al selector abre el panel **Modos de trabajo**: plantillas, modo en blanco y «Activar ahora» para el hueco seleccionado.

@@ -24,7 +24,7 @@ El teclado se prepara para comunicarse con el motor de RevienDocker, que ejecuta
 - **Directo:** asignaciones que se usan en cualquier aplicación; puedes guardarlas como perfiles.
 - **Inteligente:** cada botón cambia según la app que tengas en primer plano (por ejemplo, otro atajo en OBS que en el navegador). Necesita RevienDocker en marcha; cerrar la ventana la oculta en la bandeja y el motor sigue activo.
 
-- **Modos:** hasta tres configuraciones independientes. Se activan con **Ctrl+Shift+1/2/3** (repetirlo vuelve a Directo). Los menús de Directo, Inteligente y Modos se despliegan encima del docker. A la izquierda del docker, un icono por hueco: pulsa uno para ver su menú (nombre, plantilla, vaciar); el «+» de un hueco vacío abre su menú para elegir plantilla.
+- **Modos:** hasta tres configuraciones independientes. Se activan con **Ctrl+Shift+1/2/3** (repetirlo vuelve a Directo). Los menús de Directo, Inteligente y Modos se abren como capa superpuesta sobre el docker. A la izquierda del docker, un icono por hueco: pulsa uno para ver su menú (nombre, plantilla, vaciar); el «+» de un hueco vacío abre su menú para elegir plantilla.
 
 Selecciona la sección en la cabecera. El lápiz de cada control abre sus ajustes.
 
