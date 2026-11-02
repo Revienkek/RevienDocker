@@ -12,6 +12,7 @@ La versión actual está en `src/version.py` y en el nombre de la etiqueta de Gi
 ### Cambiado
 - La barra superior desaparece. Minimizar, cerrar y ajustes pasan a una franja discreta abajo a la derecha; la ventana se arrastra desde cualquier zona no interactiva.
 - Menús y editor se centran sobre el área de contenido y terminan sobre la franja inferior.
+- Al abrir, la ventana aparece en la esquina inferior derecha del área útil, sobre la barra de tareas (12 px de margen).
 - La ventana se arrastra desde cualquier zona no interactiva, no solo desde el lateral y la franja.
 - Iluminación: solo la bombilla, mismo tamaño y aspecto que el ▶ de la izquierda (se quita el icono de paleta).
 - Captura del `README` actualizada.

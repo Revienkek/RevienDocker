@@ -33,7 +33,7 @@ Elige el modo en el selector de arriba. El lápiz de cada control abre sus ajust
 
 ## Ventana
 
-- La ventana tiene tamaño fijo: no se redimensiona ni se maximiza.
+- La ventana tiene tamaño fijo: no se redimensiona ni se maximiza. Al abrirse aparece en la esquina inferior derecha, sobre la barra de tareas.
 - Abajo a la derecha están minimizar, cerrar y los ajustes (rueda dentada: estado del teclado y del motor, y buscar el teclado). No hay barra de título: la ventana se mueve arrastrando cualquier zona que no sea un botón o un campo.
 
 ## Estructura del repositorio

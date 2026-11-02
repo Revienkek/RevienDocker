@@ -35,6 +35,7 @@ from version import __version__
 TITLE = "RevienDocker"
 # Ventana de tamaño fijo (PRODUCT.md): no se redimensiona ni se maximiza.
 WIN_W, WIN_H = 720, 420
+CORNER_MARGIN = 12   # px entre la ventana y los bordes del área útil al abrir
 MUTEX_NAME = "Local\\RevienDocker_SingleInstance_Mutex"
 ERROR_ALREADY_EXISTS = 183
 
@@ -115,8 +116,39 @@ def main():
         if hwnd:
             user32.SetWindowLongW(hwnd, -16, user32.GetWindowLongW(hwnd, -16) & ~0x10000)  # GWL_STYLE, WS_MAXIMIZEBOX
 
-    window.events.loaded += fit_client
-    window.events.loaded += no_maximize
+    class RECT(ctypes.Structure):
+        _fields_ = [(n, ctypes.c_long) for n in ("left", "top", "right", "bottom")]
+
+    class MONITORINFO(ctypes.Structure):
+        _fields_ = [("cbSize", ctypes.c_ulong), ("rcMonitor", RECT), ("rcWork", RECT), ("dwFlags", ctypes.c_ulong)]
+
+    placed = []
+
+    def place_corner():
+        """Posición inicial: esquina inferior derecha del área útil (justo sobre la barra de tareas). Solo al abrir."""
+        if placed:
+            return
+        placed.append(True)
+        user32 = ctypes.windll.user32
+        hwnd = user32.FindWindowW(None, TITLE)
+        if not hwnd:
+            return
+        rect = RECT()
+        info = MONITORINFO()
+        info.cbSize = ctypes.sizeof(info)
+        user32.GetWindowRect(hwnd, ctypes.byref(rect))
+        if not user32.GetMonitorInfoW(user32.MonitorFromWindow(hwnd, 2), ctypes.byref(info)):  # 2 = MONITOR_DEFAULTTONEAREST
+            return
+        x = info.rcWork.right - (rect.right - rect.left) - CORNER_MARGIN
+        y = info.rcWork.bottom - (rect.bottom - rect.top) - CORNER_MARGIN
+        user32.SetWindowPos(hwnd, 0, x, y, 0, 0, 0x0001 | 0x0004 | 0x0010)  # sin cambiar tamaño, orden ni foco
+
+    def on_loaded():
+        fit_client()
+        no_maximize()
+        place_corner()
+
+    window.events.loaded += on_loaded
     window.events.minimized += set_minimized
 
     def hide_to_tray():
