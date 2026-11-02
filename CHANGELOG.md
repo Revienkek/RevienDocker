@@ -3,6 +3,13 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versiones `0.0.x`: una por tanda de trabajo.
 La versión actual está en `src/version.py` y en el nombre de la etiqueta de GitHub (`v0.0.x`). Producto y estilo: [PRODUCT.md](PRODUCT.md).
 
+## [0.0.10] · 2026-11-02 · Acabado visual unificado
+
+### Cambiado
+- Etiquetas del Docker en Cascadia Code cursiva y gris suave en Directo, Inteligente y Modos.
+- Menús y controles con pesos y tonos más suaves; la herencia se indica mediante subrayado punteado.
+- Captura de la interfaz actualizada en el README.
+
 ## [0.0.9] · 2026-11-02 · Volumen y selección de modos
 
 ### Corregido

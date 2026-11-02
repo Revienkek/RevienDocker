@@ -112,7 +112,7 @@ Un solo vocabulario en toda la app, para que el usuario lea el estado sin pensar
 El rojo ya no se usa para el ✓ pendiente: el rojo significa siempre «quitar».
 
 ### Tipografía
-Doris PP solo en el wordmark (vector). Expressway para toda la interfaz (cae a Inter / Segoe UI). Mono (JetBrains Mono / Cascadia / Consolas) para teclas y códigos. Números que cambian: `tabular-nums`. No hay fuentes embebidas en el exe.
+Doris PP solo en el wordmark (vector). Expressway para toda la interfaz (cae a Inter / Segoe UI). Cascadia Code (respaldo JetBrains Mono / Consolas) para teclas y códigos. Las acciones del docker usan cursiva de peso 600 y gris claro suave en las tres vistas; la herencia se distingue con subrayado punteado, sin reducir la opacidad del texto. Los menús conservan Expressway con blanco suave y peso 600. Números que cambian: `tabular-nums`. No hay fuentes embebidas en el exe.
 
 ### Esquinas
 Ninguna esquina a 90º ni radio 0. Controles, paneles, teclas y píldoras 4 px; contenedores `--r` 6 px; botones de ventana 3 px; perilla y puntos 50 %.
