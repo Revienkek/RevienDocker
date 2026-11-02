@@ -71,7 +71,7 @@ Perfiles guardables desde «+» junto a Directo. Los tres huecos del carril izqu
 `src/volume_overlay.py`: 280 × 56 px, siempre visible, sin foco, fuera de la barra de tareas, esquina inferior derecha del área útil con 16 px de margen, 1,8 s. Icono y nombre. No es una notificación del Centro de actividades.
 
 ### Técnicas
-Estructura: `src/` (Python), `web/` (interfaz y assets), `docs/`, `tools/`, `tests/`. Interfaz estática, sin build ni dependencias de front. Ventana de escritorio fija de 720 × 420 (`WIN_W, WIN_H` en `src/studio_app.py`). Iconos Lucide generados (`tools/build_icons.py`, 68 iconos). Estado `S` en `localStorage` `botonera.studio.v2` y `studio.json`. Los originales y datos de cada persona no salen del PC.
+Estructura: `src/` (Python), `web/` (interfaz y assets), `docs/`, `tools/`, `tests/`. Interfaz estática, sin build ni dependencias de front. Ventana de escritorio fija de 720 × 420 (`WIN_W, WIN_H` en `src/studio_app.py`). Iconos Lucide generados (`tools/build_icons.py`, 68 iconos) más 34 propios de apps y suites (`tools/custom_icons.py`: dibujados a mano, sin copiar de ningún paquete). No se ofrecen para elegir: salen solos al detectar el programa (`APP_ICONS` en `web/studio.js`, gana la primera coincidencia). Estado `S` en `localStorage` `botonera.studio.v2` y `studio.json`. Los originales y datos de cada persona no salen del PC.
 
 ## Brand Commitments
 

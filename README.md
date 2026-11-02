@@ -34,7 +34,7 @@ Mantén **Shift** (o Ctrl o Alt, a tu elección) y pulsa un botón: hace lo que 
 
 Cámbialas con **Ctrl+Shift+1**, **2** o **3**; basta con que RevienDocker esté en la bandeja. Repite el atajo para volver a Directo. Un aviso en pantalla y un destello de la tecla te dicen en cuál estás.
 
-- **Plantillas listas:** Spotify, Música y volumen, WoW Forever, Navegación, Reuniones, Edición, Trabajo diario, OBS por atajos y Teclas fantasma (F13–F18, para asignarlas en cualquier otro programa).
+- **Plantillas listas:** Spotify, Música y volumen, WoW, Navegación, Reuniones, Edición, Trabajo diario, OBS por atajos y Teclas fantasma (F13–F18, para asignarlas en cualquier otro programa).
 - **Mis modos:** crea y guarda hasta tres propios, con nombre e icono. Usar una plantilla pone una copia: la cambias a tu gusto y la original no se toca.
 
 En los tres: teclado, multimedia y desplazamiento del ratón; cada giro de la rueda por separado; volumen general o solo el de Spotify.
@@ -108,4 +108,4 @@ La configuración de teclado y la grabación de atajos están probadas con simul
 
 ## Licencia
 
-Licencia MIT, ver [LICENSE](LICENSE). Los iconos de interfaz son de Lucide (licencia ISC).
+Licencia MIT, ver [LICENSE](LICENSE). Los iconos de interfaz son de Lucide (licencia ISC). Los iconos de aplicaciones y marcas (WoW, Spotify, OBS, Adobe, Google, Microsoft Office y otras) son dibujos propios que las evocan, no sus logotipos oficiales; los nombres y marcas pertenecen a sus propietarios.

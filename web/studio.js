@@ -247,7 +247,7 @@ const TEMPLATES = [
       KNOB_CCW: Ms(1, 0, -1), KNOB_CW: Ms(1, 0, 1), KNOB_PRESS: K(1, kc("Digit0")) }) },
   { name: "Spotify", exes: ["spotify.exe"], desc: "Pistas y volumen solo de Spotify",
     actions: () => ({ KEY_1: M(0xB6), KEY_2: M(0xCD), KEY_3: M(0xB5), KNOB_CCW: AV(0xEA), KNOB_CW: AV(0xE9), KNOB_PRESS: AV(0xE2) }) },
-  { name: "WoW Forever", exes: ["wow.exe", "wowclassic.exe"], desc: "Mapa, misiones, personaje y cámara; revisa tus teclas en el juego",
+  { name: "WoW", exes: ["wow.exe", "wowclassic.exe"], desc: "Mapa, misiones, personaje y cámara; revisa tus teclas en el juego",
     actions: () => ({ KEY_1: K(0, kc("KeyM")), KEY_2: K(0, kc("KeyL")), KEY_3: K(0, kc("KeyC")),
       KNOB_CCW: Ms(0, 0, -1), KNOB_CW: Ms(0, 0, 1), KNOB_PRESS: K(0, kc("KeyP")) }) }
 ];
@@ -372,9 +372,18 @@ function refreshUI(opts = {}) {
 function logHex(tag, bytes) { logLine(`[${new Date().toLocaleTimeString()}] ${tag}: 03 ${hexOf(bytes)} ...`); }
 
 // Icono Lucide según el programa de la capa (el nombre sigue en el título y para lectores de pantalla).
-const APP_ICONS = [[/whatsapp|telegram|discord|slack|teams/, "message-circle"], [/obs/, "clapperboard"], [/spotify/, "music"],
-  [/chrome|msedge|edge|firefox|brave|opera/, "globe"], [/claude|chatgpt|openai/, "bot"], [/notepad/, "notebook-pen"],
-  [/wow/, "gamepad-2"], [/word|excel|powerpoint|onenote|code|notion/, "file-text"]];
+// Gana la primera coincidencia: obsidian antes que obs, wow antes que battle.net, chrome antes que google. Los iconos de marca son propios (tools/custom_icons.py).
+const APP_ICONS = [
+  [/obsidian/, "obsidian"], [/wow/, "wow"], [/battle\.?net/, "battlenet"], [/spotify/, "spotify"], [/obs/, "obs"],
+  [/whatsapp/, "whatsapp"], [/telegram/, "telegram"], [/discord/, "discord"], [/slack/, "slack"], [/teams/, "teams"], [/zoom/, "zoom"],
+  [/chrome/, "chrome"], [/msedge|\bedge\b/, "edge"], [/firefox/, "firefox"], [/opera/, "opera"], [/brave/, "brave"],
+  [/claude/, "claude"], [/chatgpt|openai/, "chatgpt"], [/copilot|gemini|perplexity/, "bot"],
+  [/winword|\bword\b/, "word"], [/excel/, "excel"], [/powerpnt|powerpoint/, "powerpoint"], [/onenote|outlook|msaccess|visio|mspub|office/, "office"],
+  [/notion/, "notion"], [/notepad/, "notebook-pen"], [/vscode|\bcode\b|devenv/, "vscode"],
+  [/photoshop|illustrator|premiere|afterfx|after effects|indesign|lightroom|acrobat|audition|adobe/, "adobe"], [/figma/, "figma"],
+  [/resolve|davinci/, "davinci"], [/blender/, "blender"], [/google/, "google"],
+  [/steam/, "steam"], [/epic/, "epic"], [/minecraft/, "minecraft"], [/twitch/, "twitch"], [/vlc/, "vlc"],
+  [/signal|messenger|skype|viber/, "message-circle"]];
 function appIcon(l) {
   const text = [l.name, ...(l.exes || [])].join(" ").toLowerCase();
   const hit = APP_ICONS.find(([re]) => re.test(text));
@@ -792,10 +801,10 @@ $("btnDelLayer").addEventListener("click", () => {
 // ---------- Plantillas con vista previa ----------
 const F = n => K(0, kc("F" + n));
 const PRESETS = [
-  { id: "spotify", name: "Spotify", icon: "music", desc: "Reproducción y volumen solo de Spotify", actions: () => ({ KEY_1: M(0xB6), KEY_2: M(0xCD), KEY_3: M(0xB5), KNOB_CCW: AV(0xEA), KNOB_CW: AV(0xE9), KNOB_PRESS: AV(0xE2) }) },
+  { id: "spotify", name: "Spotify", icon: "spotify", desc: "Reproducción y volumen solo de Spotify", actions: () => ({ KEY_1: M(0xB6), KEY_2: M(0xCD), KEY_3: M(0xB5), KNOB_CCW: AV(0xEA), KNOB_CW: AV(0xE9), KNOB_PRESS: AV(0xE2) }) },
   { id: "media", name: "Música y volumen", icon: "music", desc: "Controla la reproducción y el sonido.",
     actions: () => ({ KEY_1: M(0xB6), KEY_2: M(0xCD), KEY_3: M(0xB5), KNOB_CCW: M(0xEA), KNOB_PRESS: M(0xE2), KNOB_CW: M(0xE9) }) },
-  { id: "wow", name: "WoW Forever", icon: "gamepad-2", desc: "Mapa, misiones y personaje; rueda para la cámara.",
+  { id: "wow", name: "WoW", icon: "wow", desc: "Mapa, misiones y personaje; rueda para la cámara.",
     note: "Usa M, L, C y P. Comprueba las teclas asignadas en el juego; la cámara usa la rueda del ratón.",
     actions: () => ({ KEY_1: K(0, kc("KeyM")), KEY_2: K(0, kc("KeyL")), KEY_3: K(0, kc("KeyC")), KNOB_CCW: Ms(0, 0, -1), KNOB_PRESS: K(0, kc("KeyP")), KNOB_CW: Ms(0, 0, 1) }) },
   { id: "browser", name: "Navegación", icon: "app-window", desc: "Pestañas y zoom del navegador.",
@@ -807,7 +816,7 @@ const PRESETS = [
     actions: () => ({ KEY_1: K(1, kc("KeyZ")), KEY_2: K(1, kc("KeyS")), KEY_3: K(1, kc("KeyY")), KNOB_CCW: Ms(1, 0, -1), KNOB_PRESS: K(1, kc("Digit0")), KNOB_CW: Ms(1, 0, 1) }) },
   { id: "dev", name: "Trabajo diario", icon: "code-xml", desc: "Copiar, pegar y desplazarte.",
     actions: () => ({ KEY_1: K(1, kc("KeyC")), KEY_2: K(1, kc("KeyV")), KEY_3: K(0, kc("Enter")), KNOB_CCW: Ms(0, 0, 1), KNOB_PRESS: K(0, kc("Space")), KNOB_CW: Ms(0, 0, -1) }) },
-  { id: "obs", name: "OBS por atajos", icon: "clapperboard", desc: "Atajos configurables para escenas y micrófono.",
+  { id: "obs", name: "OBS por atajos", icon: "obs", desc: "Atajos configurables para escenas y micrófono.",
     note: "Primero asigna Ctrl+Shift+F13/F14/F15 y Ctrl+M en los ajustes de atajos de OBS.",
     actions: () => ({ KEY_1: K(3, kc("F13")), KEY_2: K(3, kc("F14")), KEY_3: K(3, kc("F15")), KNOB_CCW: M(0xEA), KNOB_PRESS: K(1, kc("KeyM")), KNOB_CW: M(0xE9) }) },
   { id: "fkeys", name: "Teclas fantasma", icon: "ghost", desc: "F13–F18 para asignarlas en otras aplicaciones.",

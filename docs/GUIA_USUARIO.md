@@ -35,7 +35,7 @@ Abre `http://127.0.0.1:8765/index.html`. También vale abrir `web/index.html` co
 1. Pulsa la tarjeta «Inteligente». Aparece la barra de capas y los ajustes.
 2. Pulsa una vez «Preparar teclado». El teclado pasa a emitir F13–F18 y este programa las intercepta (ninguna app las ve).
 3. **Capa Base:** lo que hace cada botón sin tecla de activación.
-4. **＋ Añadir app:** elige entre los chips de plantillas (OBS Studio, Navegador, Spotify, WoW Forever), los de apps abiertas ahora (icono y nombre, con desplazamiento si hay muchas) o escribe el `.exe`. Esa capa se usa cuando mantienes **Shift** (o Ctrl/Alt, a tu elección) y pulsas un botón con esa app en primer plano.
+4. **＋ Añadir app:** elige entre los chips de plantillas (OBS Studio, Navegador, Spotify, WoW), los de apps abiertas ahora (icono y nombre, con desplazamiento si hay muchas) o escribe el `.exe`. Esa capa se usa cuando mantienes **Shift** (o Ctrl/Alt, a tu elección) y pulsas un botón con esa app en primer plano.
 5. Un botón vacío en una capa de app usa la acción de la Base. Una app sin capa también.
 6. «App en primer plano» muestra en vivo qué detecta el programa; la pestaña de la capa se enciende en verde al coincidir. Cambia de ventana y míralo.
 7. **▶ Probar** ejecuta la acción en este PC tras 3 segundos (cambia antes a la ventana donde quieras probarla). Sirve para ensayar sin el teclado.
@@ -66,7 +66,7 @@ El selector de modo encabeza la pantalla y el Docker aparece debajo. Pulsa un co
 - **Clic directo en una pieza:** abre directamente la ventana de **Grabación** para asignarle una tecla, combinación o botón del ratón al vuelo.
 - **Sin lápices:** pulsa una tecla, la rueda o una de sus dos pastillas para grabar. El botón de opciones de la grabación abre los ajustes detallados.
 - **Menús plegados por defecto:** todos los desplegables arrancan cerrados y se cierran al cambiar entre **Directo**, **Inteligente** y **Modos** (o al cambiar de app o de hueco de modo), abriéndose solo lo que selecciones.
-- **Plantillas:** elige un chip (icono y nombre) para revisar los seis controles antes de confirmar. Hay opciones para música, WoW Forever, navegación, reuniones, edición, trabajo diario y OBS. Las teclas fantasma F13–F18 sirven para asignar acciones en otros programas; no hacen nada por sí solas.
+- **Plantillas:** elige un chip (icono y nombre) para revisar los seis controles antes de confirmar. Hay opciones para música, WoW, navegación, reuniones, edición, trabajo diario y OBS. Las teclas fantasma F13–F18 sirven para asignar acciones en otros programas; no hacen nada por sí solas.
 - **Diagnóstico:** contiene el registro técnico USB, separado de las plantillas.
 - **Luz del teclado** (botón de bombilla y paleta junto al selector de modo): interruptor y tres modos: **Apagada**; **Al pulsar** (cada pulsación enciende la tecla con el siguiente color de la serie azul, rojo, verde…); **Ciclo** (una pulsación lanza un ciclo de colores por las teclas 1, 2 y 3). Se aplica al instante y queda en el teclado, sin pulsar «Aplicar cambios». El color no se puede elegir: lo decide cada modo.
 

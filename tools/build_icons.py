@@ -1,6 +1,6 @@
-"""Genera studio_icons.js con los iconos de Lucide que usa la interfaz (inline, sin red ni CDN).
+"""Genera studio_icons.js con los iconos que usa la interfaz (inline, sin red ni CDN).
 
-Fuente: paquete npm `lucide-static` (licencia ISC, https://lucide.dev).
+Fuente: paquete npm `lucide-static` (licencia ISC, https://lucide.dev), más los iconos propios de custom_icons.py.
     npm i -g lucide-static
     python tools/build_icons.py
 """
@@ -10,6 +10,8 @@ import os
 import re
 import subprocess
 from pathlib import Path
+
+from custom_icons import CUSTOM  # iconos propios (apps y suites); véase ese archivo
 
 NAMES = """keyboard mouse mouse-pointer-click music clapperboard zap plug brain target layers plus trash-2 play circle-dot minus x
 square copy rotate-ccw volume-2 scroll zoom-in app-window undo-2 skip-forward brush mic settings-2 chevron-right chevron-down
@@ -29,8 +31,10 @@ for n in NAMES:
     inner = re.search(r"<svg[^>]*>(.*)</svg>", inner, flags=re.S).group(1)
     icons[n] = re.sub(r"\s+", " ", inner).strip()
 
+icons.update(CUSTOM)
+
 OUT.write_text(
-    "/* Iconos Lucide (ISC) — generado por tools/build_icons.py */\n"
+    "/* Iconos Lucide (ISC) y propios (tools/custom_icons.py) — generado por tools/build_icons.py */\n"
     "window.ICONS = " + json.dumps(icons, ensure_ascii=False) + ";\n"
     "window.ic = (name, cls = '') => `<svg class=\"ic ${cls}\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" "
     "stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\">${ICONS[name] || ''}</svg>`;\n"

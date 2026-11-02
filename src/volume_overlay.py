@@ -14,6 +14,7 @@ GLYPHS = {"target": "\uE765", "music": "\uE8D6", "mic": "\uE720", "clapperboard"
           "brush": "\uE790", "code-xml": "\uE943", "gamepad-2": "\uE7FC", "pen-line": "\uE70F", "sliders-horizontal": "\uE713"}
 GLYPHS.update({name: chr(code) for name, code in {"globe": 0xE774, "film": 0xE714, "terminal": 0xE756, "zap": 0xE945,
                                                  "message-circle": 0xE8BD, "notebook-pen": 0xE70F, "volume-2": 0xE767, "sparkles": 0xE734}.items()})
+GLYPHS.update(spotify=GLYPHS["music"], wow=GLYPHS["gamepad-2"], obs=GLYPHS["clapperboard"])   # sin glifo de marca en Windows: el más parecido
 W, H = 280, 56
 MARGIN = 16
 
