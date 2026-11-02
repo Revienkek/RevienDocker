@@ -156,9 +156,9 @@ En Directo, el botón «+» junto a los modos abre los perfiles. Confirma primer
 
 Con **Ctrl+Shift+1/2/3** cambias de hueco (repetirlo vuelve a Directo).
 
-- **Carril de iconos** a la izquierda del docker: un icono por hueco. Pulsa uno para seleccionarlo y abrir su menú, superpuesto sobre el docker: nombre (se guarda al salir del campo), icono (pulsa el icono de la cabecera del menú y elige otro), **Plantilla** y **Vaciar**. La cabecera recuerda su atajo (Ctrl+Shift+1/2/3).
+- **Carril de iconos** a la izquierda del docker: un icono por hueco. Pulsa uno para seleccionarlo; el «+» superior abre su menú, superpuesto sobre el docker: nombre (se guarda al salir del campo), icono (pulsa el icono de la cabecera del menú y elige otro), **Plantilla** y **Vaciar**. La cabecera recuerda su atajo (Ctrl+Shift+1/2/3).
 - **Vaciar** deja el hueco libre. La plantilla no se borra: sigue disponible entre las plantillas.
-- Un hueco vacío (**«+»**) abre directamente las **plantillas**; en un hueco con modo, **Plantilla** las abre dentro del mismo menú (con una flecha para volver). Es la única puerta a las plantillas.
+- Al seleccionar un hueco vacío, el **«+» superior** abre directamente las **plantillas**; en un hueco con modo, **Plantilla** las abre dentro del mismo menú (con una flecha para volver). Es la única puerta a las plantillas.
 - Las plantillas son chips con icono y nombre. Al elegir uno, debajo aparece la vista previa (mini docker y descripción) y «Usar en este modo» la aplica y cierra el menú.
 - El botón de la izquierda del selector (▶) **activa el modo seleccionado ahora** (o vuelve a Directo si ya está activo), sin usar el teclado.
 - **Nuevo modo** es una plantilla más (el último chip): pide un nombre y un icono (16 a elegir en una fila) y «Crear modo» crea el modo vacío y cierra el menú. Lo que no definas en él hace lo de Directo.

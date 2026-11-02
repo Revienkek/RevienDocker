@@ -442,10 +442,9 @@ function fillMini(host, pick, caption) { host.replaceChildren(miniDocker(pick), 
 function renderModes() {
   renderRail();
   const m = slotMode();
-  const btn = $("modeNow"), on = liveMode === modeIdx, label = on ? "Volver a Directo" : "Activar este modo ahora";
-  btn.disabled = !API.ok || !m;
-  btn.innerHTML = ic(on ? "undo-2" : "play"); btn.title = label; btn.setAttribute("aria-label", label);
-  btn.classList.toggle("on", on);
+  const btn = $("modeNow");
+  btn.disabled = false;
+  btn.setAttribute("aria-expanded", String(modeMenuOpen));
 }
 function renderRail() {
   const rail = $("modeRail"), mode = S.mode;
@@ -483,13 +482,12 @@ function renderRail() {
   renderMenu();
 }
 function railClick(i) {
-  if (i === modeIdx) modeMenuOpen = !modeMenuOpen;
-  else { modeIdx = i; modeMenuOpen = true; }
-  menuView = S.modes[i] ? "main" : "tpl"; menuIconsOpen = false; selectedPreset = null;   // hueco libre: directo a las plantillas
+  modeIdx = i;
+  modeMenuOpen = false; menuIconsOpen = false; menuView = "main"; selectedPreset = null;
   closeEditorUI(); swapFx(); refreshUI();
 }
 let menuIconsOpen = false, menuView = "main";   // main: nombre, icono y acciones · tpl: plantillas
-function closeModeMenu() { if (!modeMenuOpen) return; modeMenuOpen = false; menuIconsOpen = false; menuView = "main"; selectedPreset = null; renderMenu(); }
+function closeModeMenu() { if (!modeMenuOpen) return; modeMenuOpen = false; menuIconsOpen = false; menuView = "main"; selectedPreset = null; $("modeNow").setAttribute("aria-expanded", "false"); renderMenu(); }
 function menuHead(title, lead) {
   const head = el("div", "mode-menu-head"), close = el("button", "close-editor", "×");
   close.type = "button"; close.setAttribute("aria-label", "Cerrar menú del modo"); close.addEventListener("click", closeModeMenu);
@@ -570,7 +568,7 @@ function applyPreset(p) {
   fillMode({ name, icon: p.blank ? blankIcon : p.icon, actions: p.actions() });
   toast(p.blank ? `Modo ${modeIdx + 1}: ${name}. Lo que no definas hace lo de Directo` : `Modo ${modeIdx + 1}: ${name}`);
 }
-document.addEventListener("click", e => { if (modeMenuOpen && e.target.isConnected && !$("modeRail").contains(e.target) && !$("modeMenu").contains(e.target)) closeModeMenu(); });
+document.addEventListener("click", e => { if (modeMenuOpen && e.target.isConnected && !$("modeRail").contains(e.target) && !$("modeMenu").contains(e.target) && !$("modeNow").contains(e.target)) closeModeMenu(); });
 // Con el docker bloqueado (sin plantilla o sin app), la pieza lleva a donde se resuelve.
 function lockedHint() {
   if (S.mode === "smart") return openAdd();
@@ -772,7 +770,7 @@ const PRESETS = [
 PRESETS.push({ id: "blank", name: "Nuevo modo", icon: "plus", desc: "Empieza de cero: lo que no definas hace lo de Directo.",
   note: "Elige nombre e icono. Después asigna cada botón con su lápiz.", blank: true, actions: () => ({}) });
 let selectedPreset = null, blankIcon = "sliders-horizontal", blankName = "";
-$("modeNow").addEventListener("click", () => api("/api/mode", { slot: modeIdx }).then(updateEngineUI).catch(() => toast("No se pudo cambiar de modo", true)));
+$("modeNow").addEventListener("click", () => { if (modeMenuOpen) return closeModeMenu(); modeMenuOpen = true; menuView = slotMode() ? "main" : "tpl"; menuIconsOpen = false; selectedPreset = null; closeEditorUI(); refreshUI(); });
 
 // ---------- Capas: añadir app ----------
 function slug(s) { return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 30) || "app"; }
