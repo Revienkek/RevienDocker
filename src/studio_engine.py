@@ -661,6 +661,7 @@ class StudioEngine:
         self.events = deque(maxlen=20)
         self.temp_hook = False
         self.cap_timer = None
+        self.mode_light = None             # conexión USB instalada por app.py
         self.active_mode = None            # índice 0–2 del modo activo; None = Directo (no se guarda: al arrancar, Directo)
 
     # -- ciclo de vida
@@ -672,12 +673,14 @@ class StudioEngine:
         self.start()                       # el docker y la app son uno: el motor siempre está activo
         return self.studio
 
-    def set_mode(self, index):
+    def set_mode(self, index, physical=False):
         """Ctrl+Shift+N: activa el modo N; repetirlo (o un hueco vacío) vuelve a Directo. Devuelve el índice activo o None."""
         m = self.studio["modes"][index] if 0 <= index < MODE_SLOTS else None
         if not m:
             return self.active_mode
         self.active_mode = None if self.active_mode == index else index
+        if physical and not self.simulate and self.mode_light is not None:
+            self.mode_light.pulse()
         if not self.simulate:
             try:
                 from volume_overlay import show_message
@@ -710,6 +713,8 @@ class StudioEngine:
         return True
 
     def stop(self):
+        if self.mode_light is not None:
+            self.mode_light.close()
         if self.hook:
             self.hook.stop()
             self.hook = None
@@ -738,7 +743,7 @@ class StudioEngine:
             if IS_WIN and not self.simulate:
                 key_down(0xFF)
                 key_up(0xFF)
-            self.set_mode(MODE_KEYS.index(slot))
+            self.set_mode(MODE_KEYS.index(slot), physical=True)
             self.last = {"slot": slot, "exe": "", "layer": "mode-switch", "trigger": False, "action": "mode",
                          "at": time.time()}
             return

@@ -163,3 +163,15 @@ Con **Ctrl+Shift+1/2/3** cambias de hueco (repetirlo vuelve a Directo).
 - **Nuevo modo** es una plantilla más (el último chip): pide un nombre y un icono (16 a elegir en una fila) y «Crear modo» crea el modo vacío y cierra el menú. Lo que no definas en él hace lo de Directo.
 - Al activar un modo (con Ctrl+Shift+1/2/3 o desde la app) o volver a Directo, sale un aviso nativo muy breve (icono y nombre) abajo a la derecha, justo encima de la barra de tareas y de la bandeja, sin quitar el foco a lo que estés haciendo. Así sabes qué modo está activo aunque la app esté minimizada.
 - En **Directo** e **Inteligente** el carril de la izquierda muestra tres huecos reservados (discontinuos y desactivados): la estructura de pantalla es la misma en los tres modos.
+
+## Confirmación luminosa de modos (0.1.0)
+
+Al pulsar **Ctrl+Shift + 1, 2 o 3 en el macropad**, la tecla confirma brevemente
+la entrada, cambio o salida del modo. También funciona con la iluminación
+**Apagada**: tras unos 450 ms vuelve a tu ajuste anterior. Si usas **Al pulsar**,
+se mantiene su efecto normal. Un hueco sin configurar no cambia de modo ni
+lanza este aviso.
+
+La luz confirma la pulsación; no permanece reservada como indicador de modo.
+El nombre del modo también se muestra en el aviso de pantalla. La confirmación
+física requiere RevienDocker abierto (puede estar en la bandeja).

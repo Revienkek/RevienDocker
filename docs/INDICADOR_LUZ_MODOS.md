@@ -1,9 +1,30 @@
 # Indicador físico de modo: investigación para 0.1.0
 
-Estado: pendiente de encontrar y validar control individual de LED. La versión
-estable sigue siendo 0.0.11; esta función todavía no está implementada.
+Estado: resuelto para la confirmación **breve** solicitada en 0.1.0.
+Revien aclaró que el objetivo es avisar al entrar/salir, no reservar una luz
+permanentemente. La interpretación inicial que figura abajo quedó descartada.
 
-## Comportamiento solicitado
+## Solución validada e implementada
+
+Con iluminación Apagada, Revien pulsó la tecla 1. Después se activó Al pulsar
+por USB, sin otra pulsación: confirmó que se encendió la luz 1. El firmware
+recuerda la última tecla física incluso con las luces apagadas.
+
+El motor aprovecha ese recuerdo inmediatamente después de Ctrl+Shift+1/2/3:
+activa Al pulsar y restaura la preferencia al cabo de 450 ms. En Al pulsar no
+necesita escribir: el teclado ya confirma la pulsación. No se simulan teclas
+ni se modifican asignaciones. No se promete un color o brillo concreto.
+
+`src/mode_light.py` cancela temporizadores antiguos para que no sobrescriban un
+nuevo aviso o un ajuste manual. Comparte el cerrojo USB con las escrituras de
+configuración. Salir restaura la preferencia si hay un aviso pendiente. No hay
+sondeo ni refresco continuo. Si otra tecla se pulsa durante el breve aviso,
+Al pulsar puede seguir esa tecla: no se trata de un LED reservado.
+
+La activación desde la interfaz no enciende una tecla física porque no permite
+elegir cuál recuerda el firmware. La reconexión no reproduce avisos antiguos.
+
+## Interpretación inicial (sustituida)
 
 Mientras esté activo un modo 1, 2 o 3, mantener iluminada su tecla física,
 independientemente de las pulsaciones posteriores y de la preferencia de luz
@@ -41,7 +62,7 @@ carezca de otras órdenes; demuestra que el mecanismo conocido no basta.
 No se cambiaron asignaciones, firmware ni configuración guardada. No se enviaron
 valores de iluminación desconocidos ni barridos de comandos.
 
-## Siguiente evidencia necesaria
+## Límite del control permanente (fuera del objetivo aclarado)
 
 Encontrar una orden validada para el PID 8890 que seleccione y mantenga una luz
 individual (por documentación del firmware o una captura de software que lo

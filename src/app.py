@@ -5,6 +5,8 @@ automático para trabajar en la interfaz antes de conectar el hardware físico.
 """
 
 import json
+from functools import wraps
+from mode_light import ModeLight
 import sys
 import threading
 import time
@@ -33,6 +35,17 @@ SLOTS = {
     "KNOB_PRESS": 0x0E,
     "KNOB_CW": 0x0F,
 }
+
+
+USB_LOCK = threading.RLock()
+
+
+def usb_serialized(fn):
+    @wraps(fn)
+    def wrapped(*args, **kwargs):
+        with USB_LOCK:
+            return fn(*args, **kwargs)
+    return wrapped
 
 
 class CH57xController:
@@ -120,6 +133,7 @@ class CH57xController:
                 ("LED", bytes([REPORT_ID, 0xB0, 0x18, mode & 0xFF]) + bytes(60)),
                 ("LED", bytes([REPORT_ID, 0xAA, 0xA1]) + bytes(61))]
 
+    @usb_serialized
     def set_led(self, mode: int) -> dict:
         """Cambia solo la luz, al instante. `sent` es False si no hay teclado (simulador)."""
         status = self.connect()
@@ -133,6 +147,7 @@ class CH57xController:
                 self.device = None
         return {"sent": bool(status.get("connected")), "logs": logs}
 
+    @usb_serialized
     def flash_mappings(self, mappings: dict, led_mode: int = 1) -> list:
         """Escribe todos los botones y la luz. Lanza OSError si el teclado rechaza algún mensaje."""
         status = self.connect()
@@ -157,6 +172,9 @@ class CH57xController:
         else:
             logs.append(f"[SIMULADOR] {tag}: {hex_preview} ...")
 
+
+MODE_LIGHT = ModeLight(CH57xController().set_led, lambda: ENGINE.studio["led_mode"], USB_LOCK)
+ENGINE.mode_light = MODE_LIGHT
 
 BASE_DIR = RESOURCE_DIR
 PORT = 8765
@@ -230,13 +248,17 @@ class StudioHandler(SimpleHTTPRequestHandler):
             return self._json({"ok": False, "error": "bad json"}, 400)
         if self.path == "/api/flash":
             try:
-                logs = self.controller.flash_mappings(body.get("mappings", {}), led_mode=int(body.get("led_mode", 1)))
+                with USB_LOCK:
+                    MODE_LIGHT.cancel()
+                    logs = self.controller.flash_mappings(body.get("mappings", {}), led_mode=int(body.get("led_mode", 1)))
             except OSError as exc:
                 return self._json({"ok": False, "error": str(exc)})
             return self._json({"ok": True, "logs": logs})
         if self.path == "/api/led":
             try:
-                res = self.controller.set_led(max(0, min(255, int(body.get("mode", 1)))))
+                with USB_LOCK:
+                    MODE_LIGHT.cancel()
+                    res = self.controller.set_led(max(0, min(255, int(body.get("mode", 1)))))
             except (OSError, ValueError) as exc:
                 return self._json({"ok": False, "error": str(exc)})
             return self._json({"ok": True, **res})

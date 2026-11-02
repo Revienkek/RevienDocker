@@ -60,6 +60,7 @@ Perfiles guardables desde «+» junto a Directo. Los tres huecos del carril izqu
 
 ### Modos (Decisión)
 - Tres huecos, cada uno con nombre e icono elegidos por el usuario (16 iconos). Ctrl+Shift+1/2/3 activa; repetir vuelve a Directo.
+- **Confirmación física (0.1.0):** la pulsación de cambio de modo enciende brevemente la tecla del macropad (unos 450 ms), incluso con luz Apagada; después se restaura la preferencia. Es un aviso de entrada/salida, no un indicador permanente. En Al pulsar se conserva el efecto nativo. Cambiar el hueco desde la interfaz no genera un aviso físico: el firmware recuerda la última tecla del aparato, no una selección por software.
 - **Una sola puerta a las plantillas:** los tres iconos del carril seleccionan el hueco; el botón «+» superior abre su menú (nombre, icono, Plantilla, Vaciar), o las plantillas si está vacío.
 - **Plantillas como chips** con icono y nombre; la descripción va en una línea al elegir, no en cada tarjeta. «Nuevo modo» es una plantilla más (nombre + icono) y hereda de Directo lo que no defina.
 - **Vista previa compacta** (mini docker + «Usar en este modo»), sin empujar la rejilla. El mini docker aparece solo aquí.

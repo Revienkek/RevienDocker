@@ -1,7 +1,14 @@
 # Historial de cambios
 
-Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versiones `0.0.x`: una por tanda de trabajo.
-La versión actual está en `src/version.py` y en el nombre de la etiqueta de GitHub (`v0.0.x`). Producto y estilo: [PRODUCT.md](PRODUCT.md).
+Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versiones `0.x.y`: una por tanda de trabajo.
+La versión actual está en `src/version.py` y en el nombre de la etiqueta de GitHub (`v0.x.y`). Producto y estilo: [PRODUCT.md](PRODUCT.md).
+
+## [0.1.0] · 2026-11-02 · Confirmación luminosa de modos
+
+### Añadido
+- Al entrar, cambiar o salir de un modo con Ctrl+Shift+1/2/3, la tecla física confirma la pulsación con luz durante aproximadamente 450 ms, incluso con iluminación Apagada.
+- Después del aviso se restaura la preferencia de iluminación. En «Al pulsar» se conserva el efecto normal del teclado.
+- Escrituras USB serializadas y cancelación del aviso al ajustar la luz, preparar el teclado o salir de la aplicación. Sin sondeo ni escrituras periódicas.
 
 ## [0.0.11] · 2026-11-02 · Pastillas de rueda
 
