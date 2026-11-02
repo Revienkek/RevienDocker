@@ -447,3 +447,12 @@ details[open] > summary .chev { transform: rotate(180deg); }
 .editor-overlay { top: 10px; max-height: calc(100vh - 50px); }
 .toast { left: calc(50% + var(--rail) / 2); }
 @media (prefers-reduced-motion: reduce) { .sys-menu { animation: none; } .sys-btn .ic { transition: none; } }
+
+/* Giros independientes: pastilla / rueda / pastilla, siempre una linea. */
+.encoder-ring { display: grid; grid-template-columns: 56px 16px 56px; gap: 4px; height: 30px; align-items: center; }
+.encoder-ring .enc-dir { width: 56px; min-width: 0; max-width: 56px; height: 30px; padding: 3px; display: flex; align-items: center; justify-content: center; gap: 3px; overflow: hidden; white-space: nowrap; }
+.enc-dir .ic { width: 12px; height: 12px; flex: none; }
+.wheel-label { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 10px; }
+.wheel-center { display: flex; align-items: center; justify-content: center; color: var(--muted); }
+.wheel-center .ic { width: 14px; height: 14px; }
+.rec-actions { display: flex; align-items: center; gap: 8px; }

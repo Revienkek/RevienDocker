@@ -2,7 +2,7 @@
 
 Programa de escritorio para Windows que configura el macropad de 3 teclas y 1 rueda (chip WCH CH57x) desde tu PC.
 
-**Versión 0.0.10** · [Descargar `RevienDocker.exe`](https://github.com/Revienkek/RevienDocker/releases/latest) · [Historial de cambios](CHANGELOG.md) · [Producto y estilo](PRODUCT.md) · [Guía de uso](docs/GUIA_USUARIO.md)
+**Versión 0.0.11** · [Descargar `RevienDocker.exe`](https://github.com/Revienkek/RevienDocker/releases/latest) · [Historial de cambios](CHANGELOG.md) · [Producto y estilo](PRODUCT.md) · [Guía de uso](docs/GUIA_USUARIO.md)
 
 ![RevienDocker](docs/captura.png)
 
@@ -29,7 +29,7 @@ El teclado se prepara para comunicarse con el motor de RevienDocker, que ejecuta
 - **Modos:** hasta tres configuraciones independientes. Se activan con **Ctrl+Shift+1/2/3** (repetirlo vuelve a Directo). Los menús de Directo, Inteligente y Modos se abren como capa superpuesta sobre el docker. A la izquierda del docker, un icono por hueco: pulsa uno para seleccionarlo y después el «+» superior para abrir su menú (nombre, icono, plantilla, vaciar); si el hueco está vacío, el «+» abre las plantillas. «Nuevo modo» es una plantilla más: eliges nombre e icono y empieza de cero. La vista previa de cada plantilla lleva un mini docker, y al cambiar de modo sale un aviso nativo abajo a la derecha, sobre la bandeja.
 - **Misma estructura en los tres modos:** arriba, botón contextual + selector Directo / Inteligente / Modos + luz; debajo, iconos a la izquierda + docker + iconos a la derecha (✓ y ×); debajo, un mensaje informativo centrado. En Directo los tres huecos de la izquierda son marcadores; en Inteligente son la tecla de activación (Shift, Ctrl o Alt, una sola).
 
-Elige el modo en el selector de arriba. El lápiz de cada control abre sus ajustes.
+Elige el modo en el selector de arriba. Pulsa cada control para grabar su asignación; la rueda tiene una pastilla independiente por sentido.
 
 ## Ventana
 

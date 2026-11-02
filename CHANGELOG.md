@@ -3,6 +3,13 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versiones `0.0.x`: una por tanda de trabajo.
 La versión actual está en `src/version.py` y en el nombre de la etiqueta de GitHub (`v0.0.x`). Producto y estilo: [PRODUCT.md](PRODUCT.md).
 
+## [0.0.11] · 2026-11-02 · Pastillas de rueda
+
+### Cambiado
+- Pastillas independientes de una línea para cada giro, separadas por un icono de rueda.
+- Sin lápices bajo los controles ni lista de atajos predefinidos; se graban pulsando cada control.
+- Opciones de velocidad, recetas y OBS accesibles desde la propia grabación.
+
 ## [0.0.10] · 2026-11-02 · Acabado visual unificado
 
 ### Cambiado

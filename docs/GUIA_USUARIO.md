@@ -43,11 +43,11 @@ Abre `http://127.0.0.1:8765/index.html`. También vale abrir `web/index.html` co
 Qué pasa por dentro: el motor es un hook de teclado que solo reacciona a F13–F18 y no consume nada mientras no pulsas. La acción se ejecuta con Shift/Ctrl/Alt «soltado» y se restaura al terminar, para que la app no vea Shift+tu atajo.
 
 ### OBS Studio (acciones nativas)
-Activa en OBS: Herramientas → Ajustes del servidor WebSocket → Habilitar. Selecciona OBS Studio en Inteligente y configura host, puerto y contraseña en «Ajustes de esta app → Conexión a OBS». Después, abre el lápiz de un control y elige su acción de OBS. Acciones: escena siguiente/anterior, ir a una escena, mostrar/ocultar una fuente de la escena actual (ej. «Fondo negro»), silenciar un micro, subir/bajar su volumen (la velocidad son dB por clic) e iniciar/parar grabación o directo. La plantilla «OBS Studio» y la receta «Volumen del micro (OBS)» lo dejan listo con la entrada `Mic/Aux`; cambia el nombre si tu micro se llama distinto.
+Activa en OBS: Herramientas → Ajustes del servidor WebSocket → Habilitar. Selecciona OBS Studio en Inteligente y configura host, puerto y contraseña en «Ajustes de esta app → Conexión a OBS». Después, pulsa un control y abre sus opciones de grabación y elige su acción de OBS. Acciones: escena siguiente/anterior, ir a una escena, mostrar/ocultar una fuente de la escena actual (ej. «Fondo negro»), silenciar un micro, subir/bajar su volumen (la velocidad son dB por clic) e iniciar/parar grabación o directo. La plantilla «OBS Studio» y la receta «Volumen del micro (OBS)» lo dejan listo con la entrada `Mic/Aux`; cambia el nombre si tu micro se llama distinto.
 
 ## 3. La pantalla
 
-El selector de modo encabeza la pantalla y el Docker aparece debajo. Pulsa el lápiz de un control para editarlo: se abre un panel superpuesto con una cruz para cerrarlo en cualquiera de los tres modos. En Inteligente y Modos, las opciones de aplicación o modo siguen al Docker.
+El selector de modo encabeza la pantalla y el Docker aparece debajo. Pulsa un control para grabarlo; el botón de opciones permite editarlo: se abre un panel superpuesto con una cruz para cerrarlo en cualquiera de los tres modos. En Inteligente y Modos, las opciones de aplicación o modo siguen al Docker.
 
 ### Ajustes y acciones laterales del visor
 - **Rueda dentada** (abajo a la derecha): despliega en vertical el teclado, el rayo (motor) y el enchufe. Los dos primeros llevan un punto de estado: ámbar = simulador o motor arrancando; verde = teclado real conectado o motor en marcha; rojo = motor caído. La propia rueda lleva un punto solo cuando algo no va bien. Se cierra al pulsar fuera o con Esc.
@@ -64,22 +64,21 @@ El selector de modo encabeza la pantalla y el Docker aparece debajo. Pulsa el l�
 - **↺ / ↻:** giro de la rueda a izquierda / derecha.
 - **Círculo central:** clic del pomo.
 - **Clic directo en una pieza:** abre directamente la ventana de **Grabación** para asignarle una tecla, combinación o botón del ratón al vuelo.
-- **Icono de lápiz (`✎`) debajo de cada pieza (Tecla 1, Tecla 2, Tecla 3 y Rueda):** único botón que abre o cierra debajo el panel **② Elige qué hace** para editar esa pieza en detalle. Si ningún lápiz está activo, el panel ② permanece oculto.
+- **Sin lápices:** pulsa una tecla, la rueda o una de sus dos pastillas para grabar. El botón de opciones de la grabación abre los ajustes detallados.
 - **Menús plegados por defecto:** todos los desplegables arrancan cerrados y se cierran al cambiar entre **Directo**, **Inteligente** y **Modos** (o al cambiar de app o de hueco de modo), abriéndose solo lo que selecciones.
 - **Plantillas:** elige un chip (icono y nombre) para revisar los seis controles antes de confirmar. Hay opciones para música, WoW Forever, navegación, reuniones, edición, trabajo diario y OBS. Las teclas fantasma F13–F18 sirven para asignar acciones en otros programas; no hacen nada por sí solas.
 - **Diagnóstico:** contiene el registro técnico USB, separado de las plantillas.
 - **Luz del teclado** (botón de bombilla y paleta junto al selector de modo): interruptor y tres modos: **Apagada**; **Al pulsar** (cada pulsación enciende la tecla con el siguiente color de la serie azul, rojo, verde…); **Ciclo** (una pulsación lanza un ciclo de colores por las teclas 1, 2 y 3). Se aplica al instante y queda en el teclado, sin pulsar «Aplicar cambios». El color no se puede elegir: lo decide cada modo.
 
-### ② Elige qué hace (icono de lápiz)
-Se abre únicamente al pulsar el lápiz (`✎`) debajo de una tecla o de la rueda. Cuando editas la rueda, arriba aparece un selector compacto (`↺ Izq. | ● Pulsar | ↻ Der.`) para inspeccionar, probar o borrar cada parte.
+### Opciones de la asignación
+Se abre desde el botón de opciones de la grabación. En la rueda puedes seleccionar giro izquierdo, pulsación o giro derecho para configurar sus recetas y velocidad.
 
 - **Asignado ahora:** la acción actual en chips (`Ctrl + Shift + Z`), con su tipo y el contador `n / 3 teclas`. Si lleva velocidad, aparece un selector.
 - **Grabación directa (pulsando la pieza en el visor ①):** abre la ventana de grabación. Pulsa la combinación, haz clic con cualquier botón del ratón (izquierdo, derecho, central, atrás, adelante) o mueve la rueda. Se guarda sola al soltar. Se puede combinar con Ctrl/Shift/Alt/Win (ej. Ctrl + clic derecho, Ctrl + rueda).
   - En el programa de escritorio la captura de teclado la hace el motor nativo (hook de Windows): Alt+Tab, Win y similares se graban sin que el PC los ejecute. Tiene un tiempo máximo de 20 s por seguridad. Para salir sin guardar: «Cancelar».
   - En un navegador (desarrollo) se usa pantalla completa + bloqueo de teclado como alternativa menos fiable.
-  - **Ctrl+Alt+Supr es imposible de capturar** (lo trata el propio Windows). Para eso y para los demás atajos del sistema están los «Atajos del sistema».
+  - **Ctrl+Alt+Supr no se captura:** Windows reserva esa combinación. Los demás atajos se asignan pulsándolos durante la grabación.
 - **Límite:** 1 tecla, o combinación de 2 o 3 en total, contando los modificadores. Ctrl+C = 2, Ctrl+Shift+F13 = 3. Una combinación es modificadores + una sola tecla normal (o un botón/rueda del ratón).
-- **Atajos del sistema:** Alt+Tab, Win+Tab, Alt+F4, Win+D, Win+L, Win+E, Win+V, Win+Shift+S, Ctrl+Alt+Supr, Ctrl+Shift+Esc, Win+., Alt+Esc. Un clic y se asignan sin grabar.
 - **Acciones de OBS:** escenas, fuentes y micrófono en el editor de la app OBS; la conexión WebSocket está en sus ajustes.
 - **Probar / Borrar:** prueba la acción tras 3 segundos o deja el botón sin asignar.
 - **Consola de tramas:** el paquete de cada cambio y de cada flasheo. Lo más reciente va arriba.

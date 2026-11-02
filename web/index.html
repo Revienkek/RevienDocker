@@ -80,25 +80,22 @@
           <div class="acrylic-case" id="device">
             <div class="piece-col">
               <div class="keycap" data-target="KEY_1" tabindex="0" role="button" title="Tecla 1 · Clic para grabar"><span class="k-id">1</span><span class="k-val" id="lbl_KEY_1"></span></div>
-              <button class="edit-pen" data-edit="KEY_1" title="Editar Tecla 1 en detalle" aria-label="Editar Tecla 1"><i data-ic="pencil"></i></button>
             </div>
             <div class="piece-col">
               <div class="keycap" data-target="KEY_2" tabindex="0" role="button" title="Tecla 2 · Clic para grabar"><span class="k-id">2</span><span class="k-val" id="lbl_KEY_2"></span></div>
-              <button class="edit-pen" data-edit="KEY_2" title="Editar Tecla 2 en detalle" aria-label="Editar Tecla 2"><i data-ic="pencil"></i></button>
             </div>
             <div class="piece-col">
               <div class="keycap" data-target="KEY_3" tabindex="0" role="button" title="Tecla 3 · Clic para grabar"><span class="k-id">3</span><span class="k-val" id="lbl_KEY_3"></span></div>
-              <button class="edit-pen" data-edit="KEY_3" title="Editar Tecla 3 en detalle" aria-label="Editar Tecla 3"><i data-ic="pencil"></i></button>
             </div>
             <div class="piece-col encoder-col">
               <div class="encoder-group">
                 <div class="encoder-ring">
-                  <div class="enc-dir" data-target="KNOB_CCW" id="lbl_KNOB_CCW" tabindex="0" role="button" title="Giro a la izquierda · Clic para grabar"></div>
-                  <div class="enc-dir" data-target="KNOB_CW" id="lbl_KNOB_CW" tabindex="0" role="button" title="Giro a la derecha · Clic para grabar"></div>
+                  <button class="enc-dir" data-target="KNOB_CCW" id="lbl_KNOB_CCW" title="Giro izquierdo · grabar"></button>
+                  <span class="wheel-center" aria-hidden="true"><i data-ic="mouse"></i></span>
+                  <button class="enc-dir" data-target="KNOB_CW" id="lbl_KNOB_CW" title="Giro derecho · grabar"></button>
                 </div>
                 <div class="knob" data-target="KNOB_PRESS" tabindex="0" role="button" title="Pulsar la rueda · Clic para grabar"><div class="knob-indicator"></div><span id="lbl_KNOB_PRESS"></span></div>
               </div>
-              <button class="edit-pen" data-edit="KNOB" title="Editar rueda en detalle" aria-label="Editar rueda"><i data-ic="pencil"></i></button>
             </div>
           </div>
           <div class="chassis-side">
@@ -133,12 +130,7 @@
         </div>
       </details>
 
-      <details class="fold" name="acc">
-        <summary><i data-ic="command"></i><span class="s-t">Atajos del sistema<small>Alt+Tab, Win+D, Ctrl+Shift+Esc…</small></span><i class="chev" data-ic="chevron-down"></i></summary>
-        <div class="fold-body">
-        <div class="lib" id="lib"></div>
-      </div>
-      </details>
+
 
       <details class="fold" name="acc" id="obsTools">
         <summary><i data-ic="clapperboard"></i><span class="s-t">Acciones de OBS<small>Escenas, fuentes, micrófono y directo</small></span><i class="chev" data-ic="chevron-down"></i></summary>
@@ -180,7 +172,7 @@
     <div class="muted">Pulsa la combinación, haz clic con el ratón o mueve la rueda. Se guarda al soltar.</div>
     <div id="recChips" class="chips big"></div>
     <div id="recStatus" class="rec-status"></div>
-    <button id="recCancel">Cancelar</button>
+    <div class="rec-actions"><button id="recOptions" title="Opciones de la asignación" aria-label="Opciones de la asignación"><i data-ic="settings"></i></button><button id="recCancel">Cancelar</button></div>
   </div>
 </div>
 

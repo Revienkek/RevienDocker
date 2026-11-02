@@ -37,7 +37,7 @@ Idéntica en Directo, Inteligente y Modos; no se inventan variantes por modo:
 - **Lateral izquierdo (0.0.8):** el logotipo definitivo a toda la altura (título «REVIENDOCKER» en vector, girado, y el dibujo del interruptor). Sustituye a la barra superior, que **ya no existe**. Es también zona de arrastre de la ventana.
 - **Franja inferior (0.0.8):** minimizar, cerrar y la rueda dentada de **ajustes**, discretos, abajo a la derecha. **Toda zona no interactiva** de la ventana (lateral, fondos, textos, huecos de la franja) arrastra la ventana; botones, campos y teclas no.
 2. **Selector:** botón contextual + selector Directo / Inteligente / Modos + luz (solo la bombilla, mismo tamaño y aspecto que el botón de la izquierda, para que la fila quede simétrica).
-3. **Fila del docker:** tres iconos a la izquierda + docker (3 teclas y rueda, un lápiz bajo cada pieza) + ✓ y × a la derecha. El carril izquierdo y la botonera derecha están **a la misma distancia** del docker.
+3. **Fila del docker:** tres iconos a la izquierda + docker (3 teclas y rueda, sin lápices bajo las piezas) + ✓ y × a la derecha. El carril izquierdo y la botonera derecha están **a la misma distancia** del docker.
 4. **Mensaje informativo centrado** debajo.
 
 ### Ventana (Decisión)
@@ -63,7 +63,7 @@ Perfiles guardables desde «+» junto a Directo. Los tres huecos del carril izqu
 - **Una sola puerta a las plantillas:** los tres iconos del carril seleccionan el hueco; el botón «+» superior abre su menú (nombre, icono, Plantilla, Vaciar), o las plantillas si está vacío.
 - **Plantillas como chips** con icono y nombre; la descripción va en una línea al elegir, no en cada tarjeta. «Nuevo modo» es una plantilla más (nombre + icono) y hereda de Directo lo que no defina.
 - **Vista previa compacta** (mini docker + «Usar en este modo»), sin empujar la rejilla. El mini docker aparece solo aquí.
-- El editor de una tecla (lápiz) usa el mismo formato de chips; «Atajos del sistema» deja de ser un acordeón pesado.
+- El editor de opciones se abre desde la grabación y conserva recetas de rueda y OBS. Los atajos se graban con las teclas, sin catálogo predefinido.
 
 ### Aviso nativo de modo
 `src/volume_overlay.py`: 280 × 56 px, siempre visible, sin foco, fuera de la barra de tareas, esquina inferior derecha del área útil con 16 px de margen, 1,8 s. Icono y nombre. No es una notificación del Centro de actividades.
@@ -147,3 +147,6 @@ Foco visible en todo. Etiquetas en español (`aria-label`) en iconos sin texto; 
 2. Licencia de Doris PP para el wordmark vectorial y fuentes sin embeber (Expressway solo Rg; 600/700 sintetizados).
 3. Directo e Inteligente tendrán iconos propios en el carril izquierdo en el futuro; hoy son marcadores (Directo) y tecla de activación (Inteligente).
 4. Si «Vaciar» sobre el hueco activo debe devolver el motor a Directo (hoy el motor puede quedar apuntando a un hueco vacío).
+
+### Giros de rueda (0.0.11)
+Dos pastillas independientes de 56 × 30 px separadas por un icono de rueda. Cada pastilla graba su propio giro. Texto en una línea con elipsis y asignación completa en tooltip y nombre accesible. Se retiran los lápices y la lista de atajos predefinidos; las opciones de la grabación conservan velocidad, recetas y OBS.

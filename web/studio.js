@@ -227,10 +227,6 @@ const RECIPES = [
     ccw: O("volume_down", "Mic/Aux"), cw: O("volume_up", "Mic/Aux"), press: O("toggle_mute", "Mic/Aux") }
 ];
 const withSpeed = (a, s) => ({ ...a, speed: speedApplies(a) ? s : 1 });
-const LIB = [["Alt+Tab", 4, "Tab"], ["Win+Tab", 8, "Tab"], ["Alt+F4", 4, "F4"], ["Win+D", 8, "KeyD"], ["Win+L", 8, "KeyL"], ["Win+E", 8, "KeyE"],
-  ["Win+V", 8, "KeyV"], ["Win+Shift+S", 10, "KeyS"], ["Ctrl+Alt+Supr", 5, "Delete"], ["Ctrl+Shift+Esc", 3, "Escape"], ["Win+.", 8, "Period"], ["Alt+Esc", 4, "Escape"]];
-
-// ---------- Plantillas de app (capas) ----------
 const TEMPLATES = [
   { name: "OBS Studio", exes: ["obs64.exe"], desc: "Escenas, fuente «Fondo negro» y volumen del micro",
     actions: () => ({ KEY_1: O("next_scene"), KEY_2: O("prev_scene"), KEY_3: O("toggle_source", "Fondo negro"),
@@ -291,7 +287,8 @@ function refreshUI(opts = {}) {
     const a = shown(k), box = document.querySelector(`[data-target="${k}"]`);
     box.classList.toggle("inherit", isApp() && !own(k));
     const text = a ? textOf(a) : "—";
-    $("lbl_" + k).textContent = (k === "KNOB_CCW" ? "↺ " : k === "KNOB_CW" ? "↻ " : "") + text;
+    if (k === "KNOB_CCW" || k === "KNOB_CW") renderWheelPill(k, a);
+    else $("lbl_" + k).textContent = text;
   });
 
   const a = cur(), isKnob = currentTarget.startsWith("KNOB"), inherited = isApp() && !own(currentTarget);
@@ -390,6 +387,19 @@ function renderLayers() {
   bar.appendChild(add);
 }
 // Cómo se activa lo que estás editando: lo mismo en las tres pestañas, sobre el dibujo del docker.
+function renderWheelPill(slot, action) {
+  const button = $("lbl_" + slot), a = action || EMPTY;
+  let icon = a.type === "obs" ? "clapperboard" : a.type === "mouse" ? "mouse" : "keyboard", text = textOf(a);
+  if ((a.type === "media" || a.type === "app_volume") && [0xE9, 0xEA].includes(a.code)) {
+    icon = a.type === "app_volume" ? "music" : "volume-2";
+    text = (a.code === 0xE9 ? "+" : "−") + a.speed + "%";
+  } else if (a.type === "mouse" && a.wheel) { text = (a.wheel > 0 ? "↑" : "↓") + (a.speed > 1 ? "×" + a.speed : ""); }
+  else if (a.type === "media") { icon = "music"; }
+  button.innerHTML = ic(icon);
+  button.appendChild(el("span", "wheel-label", text));
+  const label = TARGET_NAME[slot] + ": " + textOf(a) + " · Pulsa para grabar";
+  button.title = label; button.setAttribute("aria-label", label);
+}
 function renderCtx() {
   const kbd = s => `<kbd>${s}</kbd>`, plus = ic("plus"), box = $("deviceCtx");
   let keys = kbd("Botón"), why = "pulsado solo, en cualquier app", name = "";
@@ -590,11 +600,7 @@ function setAction(a) { layer().actions[currentTarget] = a; persist(); refreshUI
     });
     $("obsOps").appendChild(b);
   });
-  LIB.forEach(([name, mod, dom]) => {
-    const b = el("button", "", name);
-    b.addEventListener("click", () => { setAction(K(mod, kc(dom))); toast("Asignado: " + name); });
-    $("lib").appendChild(b);
-  });
+
 })();
 
 // ---------- Perfiles de Directo ----------
@@ -646,21 +652,6 @@ document.querySelectorAll("[data-target]").forEach(t => {
     }
     refreshUI({ quiet: true });
     recStart();
-  });
-});
-// Clic en el lápiz debajo de cada pieza = abre o cierra el menú 2 para edición en detalle.
-document.querySelectorAll(".edit-pen").forEach(btn => {
-  btn.addEventListener("click", () => {
-    if (!editable()) return lockedHint();
-    const key = btn.dataset.edit;
-    if (!$("editor").hidden && btn.classList.contains("active")) return closeEditorUI();
-    currentTarget = key === "KNOB" ? (currentTarget.startsWith("KNOB") ? currentTarget : "KNOB_PRESS") : key;
-    document.querySelectorAll(".edit-pen").forEach(p => p.classList.toggle("active", p === btn));
-    document.querySelectorAll("[data-target]").forEach(n => n.classList.toggle("selected", n.dataset.target === currentTarget));
-    collapseAllFolds();
-    $("editor").hidden = false;
-    knobSpeed = cur().speed || 1;
-    refreshUI();
   });
 });
 function closeEditorUI() {
@@ -897,7 +888,7 @@ function recKey(down, id, modBit, hid) {  // origen común: DOM o motor nativo
   const n = recSnap();
   if (modBit) n.mod |= modBit;
   else {
-    if (!hid) return recWarn("Tecla no soportada. Usa «Atajos del sistema».");
+    if (!hid) return recWarn("Tecla no soportada por este teclado.");
     n.key = hid; n.btn = 0; n.wheel = 0;
   }
   recApply(n);
@@ -911,20 +902,20 @@ function onKeyDown(e) {
 function onKeyUp(e) { e.preventDefault(); e.stopPropagation(); recKey(false, "k" + e.code); }
 const BTN_BIT = { 0: 1, 1: 4, 2: 2, 3: 8, 4: 16 };
 function onMouseDown(e) {
-  if (e.target.closest?.("#recCancel")) return;
+  if (e.target.closest?.("#recCancel, #recOptions")) return;
   e.preventDefault(); e.stopPropagation();
   rec.held.add("m" + e.button);
   const n = recSnap(); n.btn = BTN_BIT[e.button] || 0; n.key = 0; n.wheel = 0;
   recApply(n);
 }
-function onMouseUp(e) { if (e.target.closest?.("#recCancel")) return; e.preventDefault(); e.stopPropagation(); rec.held.delete("m" + e.button); recMaybeFinish(); }
+function onMouseUp(e) { if (e.target.closest?.("#recCancel, #recOptions")) return; e.preventDefault(); e.stopPropagation(); rec.held.delete("m" + e.button); recMaybeFinish(); }
 function onWheel(e) {
   e.preventDefault(); e.stopPropagation();
   const n = recSnap(); n.wheel = e.deltaY < 0 ? 1 : -1; n.btn = 0; n.key = 0;
   recApply(n);
   clearTimeout(rec.timer); rec.timer = setTimeout(recMaybeFinish, 350);
 }
-const stopEvt = e => { if (!e.target.closest?.("#recCancel")) { e.preventDefault(); e.stopPropagation(); } };
+const stopEvt = e => { if (!e.target.closest?.("#recCancel, #recOptions")) { e.preventDefault(); e.stopPropagation(); } };
 const REC_LISTENERS = [["keydown", onKeyDown], ["keyup", onKeyUp], ["mousedown", onMouseDown], ["mouseup", onMouseUp],
   ["wheel", onWheel], ["contextmenu", stopEvt], ["auxclick", stopEvt], ["click", stopEvt]];
 function recMaybeFinish() { if (rec && rec.got && rec.held.size === 0) recFinish(); }
@@ -975,6 +966,7 @@ async function recStart() {
     .then(() => { if (rec === me) updateRecStatus(); });
 }
 $("recCancel").addEventListener("click", recEnd);
+$("recOptions").addEventListener("click", () => { recEnd(); collapseAllFolds(); $("editor").hidden = false; refreshUI(); });
 document.addEventListener("fullscreenchange", () => { if (rec && rec.fs && !document.fullscreenElement) recEnd(); });
 window.addEventListener("blur", () => { if (rec && !rec.native) recEnd(); });
 
