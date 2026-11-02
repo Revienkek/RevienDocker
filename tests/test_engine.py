@@ -86,7 +86,7 @@ class ModeTests(unittest.TestCase):
         self.assertEqual(se.resolve(self.s, "KEY_1", "obs64.exe", False, 0)[1], "mode:0")
         self.assertEqual(se.resolve(self.s, "KEY_2", "obs64.exe", True, 0)[1], "base")   # app sin KEY_2 y modo sin KEY_2
 
-    def test_alt_shift_cambia_de_modo_y_repetir_vuelve_a_directo(self):
+    def test_ctrl_shift_cambia_de_modo_y_repetir_vuelve_a_directo(self):
         with tempfile.TemporaryDirectory() as d:
             e = se.StudioEngine(simulate=True, path=Path(d) / "s.json")
             e.studio = self.s
@@ -102,6 +102,12 @@ class ModeTests(unittest.TestCase):
             self.assertEqual(e.status()["active_mode"], -1)
             e.handle("KNOB_CW", False, True)          # el acorde solo vale con los botones 1–3
             self.assertEqual(e.last["layer"], "base")
+
+class ChordTests(unittest.TestCase):
+    def test_solo_ctrl_shift_es_el_acorde_de_modos(self):
+        self.assertTrue(se.chord_held({"ctrl": True, "shift": True, "alt": False}))
+        self.assertFalse(se.chord_held({"ctrl": False, "shift": True, "alt": True}))   # Alt+Shift ya no cambia de modo
+        self.assertFalse(se.chord_held({"ctrl": True, "shift": False, "alt": False}))
 
 @unittest.skipUnless(se.IS_WIN, "hook de teclado solo en Windows")
 class HookTests(unittest.TestCase):

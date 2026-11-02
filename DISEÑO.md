@@ -61,7 +61,8 @@ Regla: **ninguna esquina llega a 90º ni queda pura (radio 0)**.
 
 ## Visor del dispositivo y edición
 
-- El visor `.acrylic-case` permanece siempre centrado en la columna; la botonera de aplicar y descartar (`.chassis-side`: `✓` y `×`) se ancla a su derecha (`left: calc(100% + 14px)`) sin desplazar el eje central.
+- Norma: el docker siempre se ve completo y en una sola fila: carril de modos (`.mode-rail`, a la izquierda) | visor `.acrylic-case` | botonera `.chassis-side` (`✓` y `×`, a la derecha). Nunca se apilan. El ancho mínimo de la ventana (712 px, `MIN_W` en `studio_app.py`) es esa fila entera.
+- El carril existe también fuera de Modos, vacío y oculto (`visibility`), para que el visor no salte al cambiar de pestaña.
 - Cuando hay cambios pendientes o el teclado requiere preparación, el botón `✓` cambia a fondo rojo completo (`--red`) en lugar de usar un punto flotante.
 - Debajo de cada pieza del visor (Tecla 1, Tecla 2, Tecla 3 y Rueda) se sitúa un botón compacto de lápiz (`.edit-pen`, 30 × 26 px): pulsar la pieza lanza la grabación directa y pulsar su lápiz abre o cierra el panel ② de edición en detalle.
 - Todos los desplegables (`.fold`) permanecen cerrados por defecto y se pliegan al cambiar entre Directo, Inteligente y Modos.
@@ -82,12 +83,12 @@ Regla: **ninguna esquina llega a 90º ni queda pura (radio 0)**.
 
 ## Perfiles de Directo
 
-El selector de perfiles se abre desde el icono «+» junto a Directo. El panel compacto usa iconos para guardar y eliminar, y limita los nombres a 12 caracteres.
+El selector de perfiles se abre desde el icono «+» junto a Directo. Su panel se despliega encima del docker, nunca debajo. El panel compacto usa iconos para guardar y eliminar, y limita los nombres a 12 caracteres.
 
 ## Jerarquía y edición
 
 El Docker precede a las opciones de app o modo. En los tres modos, el lápiz abre el editor superpuesto y conserva la altura de la vista. La cruz comparte la fila superior con la asignación. La conexión WebSocket aparece dentro de los ajustes de la app OBS.
 
-En Inteligente, el icono de capas abre las apps y sus ajustes en un panel superpuesto; la cruz comparte la cabecera con «Atajos para».
+En Inteligente, el icono de capas abre las apps y sus ajustes en un cajón encima del docker, nunca debajo; la cruz comparte la cabecera con «Atajos para».
 
-En Modos, el icono de ajustes abre los modos de trabajo en un panel superpuesto, con cierre en su cabecera.
+En Modos, los iconos del carril seleccionan cada hueco y abren su menú; el icono de ajustes abre el panel de plantillas. Ambos se despliegan encima del docker, nunca debajo, y tienen cierre en su cabecera. Los números de hueco son discretos (opacidad baja) para no competir con el dibujo.

@@ -33,7 +33,9 @@ from app import ENGINE, PORT, make_server
 from studio_icon import icon_image
 
 TITLE = "RevienDocker"
-MIN_W, MIN_H = 720, 560  # = min_size de la ventana
+# Ancho mínimo = carril (56) + visor (530) + botones (56) + separaciones, más márgenes de la app: 712 px.
+# Con eso, el docker nunca baja de su fila: el tick y la X siguen a la derecha.
+MIN_W, MIN_H = 712, 560
 VK_LBUTTON = 0x01
 MUTEX_NAME = "Local\\RevienDocker_SingleInstance_Mutex"
 ERROR_ALREADY_EXISTS = 183

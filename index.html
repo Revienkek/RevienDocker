@@ -25,10 +25,10 @@
   <main class="stage">
 
     <section class="mode-block">
-      <div class="mode-controls"><div class="profile-wrap" id="profileWrap"><button id="profileToggle" class="profile-toggle" title="Perfiles de Directo" aria-label="Perfiles de Directo" aria-expanded="false"><i data-ic="plus"></i></button><div class="profile-panel" id="profilePanel" hidden><div class="profile-create"><input id="profileName" maxlength="12" placeholder="Nombre" aria-label="Nombre del perfil" /><button id="profileSave" title="Guardar perfil confirmado" aria-label="Guardar perfil confirmado"><i data-ic="save"></i></button></div><div id="profileList" class="profile-list"></div></div></div><button id="smartToggle" class="profile-toggle" aria-label="Atajos para apps" title="Atajos para apps" aria-expanded="false" aria-controls="smartPanel" hidden><i data-ic="layers"></i></button><button id="workModesToggle" class="profile-toggle" aria-label="Modos de trabajo" title="Modos de trabajo" aria-expanded="false" aria-controls="workModesPanel" hidden><i data-ic="sliders-horizontal"></i></button><div class="modes" role="radiogroup" aria-label="Modo">
+      <div class="mode-controls"><div class="profile-wrap" id="profileWrap"><button id="profileToggle" class="profile-toggle" title="Perfiles de Directo" aria-label="Perfiles de Directo" aria-expanded="false"><i data-ic="plus"></i></button></div><button id="smartToggle" class="profile-toggle" aria-label="Atajos para apps" title="Atajos para apps" aria-expanded="false" aria-controls="smartPanel" hidden><i data-ic="layers"></i></button><button id="workModesToggle" class="profile-toggle" aria-label="Modos de trabajo" title="Modos de trabajo" aria-expanded="false" aria-controls="workModesPanel" hidden><i data-ic="sliders-horizontal"></i></button><div class="modes" role="radiogroup" aria-label="Modo">
       <button data-mode="direct" role="radio" title="Lo que hace cada botón al pulsarlo solo, en cualquier app. Es la base de todo."><i data-ic="target"></i>Directo</button>
       <button data-mode="smart" role="radio" title="Mantén un modificador y pulsa un botón: atajos propios para la app que tengas delante."><i data-ic="brain"></i>Inteligente</button>
-      <button data-mode="modes" role="radio" title="Tres modos de trabajo: Alt+Shift+1/2/3 cambia de modo y repetirlo vuelve a Directo."><i data-ic="shapes"></i>Modos</button>
+      <button data-mode="modes" role="radio" title="Tres modos de trabajo: Ctrl+Shift+1/2/3 cambia de modo y repetirlo vuelve a Directo."><i data-ic="shapes"></i>Modos</button>
     </div><button id="btnLighting" class="lighting-button" aria-expanded="false" aria-controls="lightingPanel" title="Iluminación"><i data-ic="lightbulb"></i><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18h1a2 2 0 0 0 1.5-3.3 1.7 1.7 0 0 1 1.3-2.8H18a3 3 0 0 0 3-3 9 9 0 0 0-9-9Z"/><circle cx="7.5" cy="10" r=".6"/><circle cx="10" cy="6.8" r=".6"/><circle cx="14" cy="6.8" r=".6"/><circle cx="17" cy="10" r=".6"/></svg><span class="sr-only">Iluminación</span></button></div>
       <div id="lightingPanel" class="lighting-panel" hidden>
         <div class="lighting-title"><strong>Iluminación</strong><button id="closeLighting" aria-label="Cerrar iluminación">×</button></div>
@@ -46,8 +46,74 @@
 
     <section class="device-card">
       <span id="selectedLabel" hidden></span>
+      <div class="deck-drawer" id="deckDrawer">
+        <div class="profile-panel" id="profilePanel" hidden><div class="profile-create"><input id="profileName" maxlength="12" placeholder="Nombre" aria-label="Nombre del perfil" /><button id="profileSave" title="Guardar perfil confirmado" aria-label="Guardar perfil confirmado"><i data-ic="save"></i></button></div><div id="profileList" class="profile-list"></div></div>
+        <div class="mode-menu" id="modeMenu" hidden></div>
+        <div class="smart-panel" id="smartPanel" aria-label="Atajos para apps" hidden>
+        <section class="smart-tabs" id="smartCard" hidden>
+          <div class="smart-head">
+            <span class="s-label"><i data-ic="layers"></i>Atajos para</span>
+            <span class="smart-head-actions"><span class="live-app" id="liveApp" title="App que tienes en primer plano (ignora RevienDocker)"><i data-ic="app-window"></i><span id="activeApp">—</span></span><button id="smartClose" class="close-editor" aria-label="Cerrar atajos para apps">×</button></span>
+          </div>
+          <div id="layerWrap" class="layerbar"></div>
+          <button id="appSuggest" class="suggest" hidden><i data-ic="plus"></i><span id="appSuggestText"></span></button>
+        </section>
+
+        <section class="smart-bar" id="smartRule" hidden>
+          <details class="fold mini" id="layerEdit" hidden>
+            <summary><i data-ic="settings-2"></i><span class="s-t">Ajustes de esta app</span><i class="chev" data-ic="chevron-down"></i></summary>
+            <div class="fold-body layer-edit">
+              <div class="form-group"><label for="layerName">Nombre</label><input type="text" id="layerName" maxlength="40" /></div>
+              <div class="form-group"><label for="layerExes">Programas (.exe, con comas)</label><input type="text" id="layerExes" placeholder="obs64.exe, chrome.exe" /></div>
+              <button id="btnDelLayer" class="danger" title="Quitar esta app y sus atajos"><i data-ic="trash-2"></i><span>Quitar app</span></button>
+            </div>
+          <details id="obsConnection" hidden>
+                <summary><i data-ic="plug-zap"></i>Conexión a OBS<i class="chev" data-ic="chevron-down"></i></summary>
+                <p class="muted" style="margin:6px 0">En OBS: Herramientas → Ajustes del servidor WebSocket.</p>
+                <div class="obs-conn">
+                  <input type="text" id="obsHost" aria-label="Host" placeholder="127.0.0.1" />
+                  <input type="number" id="obsPort" aria-label="Puerto" placeholder="4455" />
+                  <input type="password" id="obsPass" aria-label="Contraseña" placeholder="Contraseña" />
+                </div>
+              </details>
+          </details>
+
+          <div class="trig-row"><span class="muted">Tecla de activación</span><div class="seg" id="triggerSeg"></div></div>
+          <p class="err" id="engineErr" hidden></p>
+        </section>
+
+        </div>
+
+        <div class="smart-panel" id="workModesPanel" aria-label="Modos de trabajo" hidden>
+        <section class="mode-bar" id="modeBar" hidden>
+          <div class="smart-head">
+            <span class="s-label"><i data-ic="shapes"></i>Modos de trabajo</span>
+            <span class="smart-head-actions"><span class="chord" title="Mantén Ctrl y Shift y pulsa un botón del docker"><kbd>Ctrl</kbd><i data-ic="plus"></i><kbd>Shift</kbd><i data-ic="plus"></i><kbd>1 · 2 · 3</kbd></span><button id="workModesClose" class="close-editor" aria-label="Cerrar modos de trabajo">×</button></span>
+          </div>
+          <div class="mode-actions">
+            <button id="modeToggle" title="Activa o desactiva este modo ahora, sin usar el teclado"><i data-ic="play"></i><span id="modeToggleText">Activar ahora</span></button>
+          </div>
+          <details class="fold" id="modeTpl">
+            <summary><i data-ic="layout-grid"></i><span class="s-t" id="modeTplTitle">Plantillas<small>Un modo completo, listo para personalizar</small></span><i class="chev" data-ic="chevron-down"></i></summary>
+            <div class="fold-body">
+              <div class="preset-grid" id="presets"></div>
+              <div class="preset-preview" id="presetPreview" hidden>
+                <div><strong id="presetTitle"></strong><p class="muted" id="presetDescription"></p></div>
+                <div class="preset-mapping" id="presetMapping"></div>
+                <p class="muted" id="presetNote"></p>
+                <button class="primary" id="applyPreset">Usar en este modo</button>
+              </div>
+              <button id="btnBlankMode" class="blank-mode"><i data-ic="plus"></i><span>Modo en blanco</span></button>
+            </div>
+          </details>
+        </section>
+
+        </div>
+
+      </div>
       <div class="chassis-wrap" id="chassis">
         <div class="device-stage">
+          <div class="mode-rail" id="modeRail" role="radiogroup" aria-label="Modos de trabajo"></div>
           <div class="acrylic-case" id="device">
             <div class="piece-col">
               <div class="keycap" data-target="KEY_1" tabindex="0" role="button" title="Tecla 1 · Clic para grabar"><span class="k-id">1</span><span class="k-val" id="lbl_KEY_1"></span></div>
@@ -80,68 +146,6 @@
       </div>
       <div class="ctx" id="deviceCtx"></div>
     </section>
-
-    <div class="smart-panel" id="smartPanel" aria-label="Atajos para apps" hidden>
-    <section class="smart-tabs" id="smartCard" hidden>
-      <div class="smart-head">
-        <span class="s-label"><i data-ic="layers"></i>Atajos para</span>
-        <span class="smart-head-actions"><span class="live-app" id="liveApp" title="App que tienes en primer plano (ignora RevienDocker)"><i data-ic="app-window"></i><span id="activeApp">—</span></span><button id="smartClose" class="close-editor" aria-label="Cerrar atajos para apps">×</button></span>
-      </div>
-      <div id="layerWrap" class="layerbar"></div>
-      <button id="appSuggest" class="suggest" hidden><i data-ic="plus"></i><span id="appSuggestText"></span></button>
-    </section>
-
-    <section class="smart-bar" id="smartRule" hidden>
-      <details class="fold mini" id="layerEdit" hidden>
-        <summary><i data-ic="settings-2"></i><span class="s-t">Ajustes de esta app</span><i class="chev" data-ic="chevron-down"></i></summary>
-        <div class="fold-body layer-edit">
-          <div class="form-group"><label for="layerName">Nombre</label><input type="text" id="layerName" maxlength="40" /></div>
-          <div class="form-group"><label for="layerExes">Programas (.exe, con comas)</label><input type="text" id="layerExes" placeholder="obs64.exe, chrome.exe" /></div>
-          <button id="btnDelLayer" class="danger" title="Quitar esta app y sus atajos"><i data-ic="trash-2"></i><span>Quitar app</span></button>
-        </div>
-      <details id="obsConnection" hidden>
-            <summary><i data-ic="plug-zap"></i>Conexión a OBS<i class="chev" data-ic="chevron-down"></i></summary>
-            <p class="muted" style="margin:6px 0">En OBS: Herramientas → Ajustes del servidor WebSocket.</p>
-            <div class="obs-conn">
-              <input type="text" id="obsHost" aria-label="Host" placeholder="127.0.0.1" />
-              <input type="number" id="obsPort" aria-label="Puerto" placeholder="4455" />
-              <input type="password" id="obsPass" aria-label="Contraseña" placeholder="Contraseña" />
-            </div>
-          </details>
-      </details>
-
-      <div class="trig-row"><span class="muted">Tecla de activación</span><div class="seg" id="triggerSeg"></div></div>
-      <p class="err" id="engineErr" hidden></p>
-    </section>
-
-    </div>
-
-    <div class="smart-panel" id="workModesPanel" aria-label="Modos de trabajo" hidden>
-    <section class="mode-bar" id="modeBar" hidden>
-      <div class="smart-head">
-        <span class="s-label"><i data-ic="shapes"></i>Modos de trabajo</span>
-        <span class="smart-head-actions"><span class="chord" title="Mantén Alt y Shift y pulsa un botón del docker"><kbd>Alt</kbd><i data-ic="plus"></i><kbd>Shift</kbd><i data-ic="plus"></i><kbd>1 · 2 · 3</kbd></span><button id="workModesClose" class="close-editor" aria-label="Cerrar modos de trabajo">×</button></span>
-      </div>
-      <div class="mode-slots" id="modeSlots" role="radiogroup" aria-label="Modo que estás editando"></div>
-      <div class="mode-actions">
-        <button id="modeToggle" title="Activa o desactiva este modo ahora, sin usar el teclado"><i data-ic="play"></i><span id="modeToggleText">Activar ahora</span></button>
-      </div>
-      <details class="fold" id="modeTpl">
-        <summary><i data-ic="layout-grid"></i><span class="s-t" id="modeTplTitle">Plantillas<small>Un modo completo, listo para personalizar</small></span><i class="chev" data-ic="chevron-down"></i></summary>
-        <div class="fold-body">
-          <div class="preset-grid" id="presets"></div>
-          <div class="preset-preview" id="presetPreview" hidden>
-            <div><strong id="presetTitle"></strong><p class="muted" id="presetDescription"></p></div>
-            <div class="preset-mapping" id="presetMapping"></div>
-            <p class="muted" id="presetNote"></p>
-            <button class="primary" id="applyPreset">Usar en este modo</button>
-          </div>
-          <button id="btnBlankMode" class="blank-mode"><i data-ic="plus"></i><span>Modo en blanco</span></button>
-        </div>
-      </details>
-    </section>
-
-    </div>
 
     <section class="editor editor-overlay" id="editor" aria-label="Editar control" hidden>
       <span id="comboCount" hidden></span>

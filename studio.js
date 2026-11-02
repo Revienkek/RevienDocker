@@ -286,7 +286,7 @@ function refreshUI(opts = {}) {
     if (isApp()) { setVal($("layerName"), layer().name); setVal($("layerExes"), layer().exes.join(", ")); }
   }
 
-  if (modes) renderModes();
+  renderModes();
   renderCtx();
   SLOT_ORDER.forEach(k => {
     const a = shown(k), box = document.querySelector(`[data-target="${k}"]`);
@@ -364,13 +364,25 @@ function refreshUI(opts = {}) {
 }
 function logHex(tag, bytes) { logLine(`[${new Date().toLocaleTimeString()}] ${tag}: 03 ${hexOf(bytes)} ...`); }
 
+// Icono Lucide según el programa de la capa (el nombre sigue en el título y para lectores de pantalla).
+const APP_ICONS = [[/whatsapp|telegram|discord|slack|teams/, "message-circle"], [/obs/, "clapperboard"], [/spotify/, "music"],
+  [/chrome|msedge|edge|firefox|brave|opera/, "globe"], [/claude|chatgpt|openai/, "bot"], [/notepad/, "notebook-pen"],
+  [/wow/, "gamepad-2"], [/word|excel|powerpoint|onenote|code|notion/, "file-text"]];
+function appIcon(l) {
+  const text = [l.name, ...(l.exes || [])].join(" ").toLowerCase();
+  const hit = APP_ICONS.find(([re]) => re.test(text));
+  return hit ? hit[1] : "app-window";
+}
+// Nombre corto para la pestaña: la primera palabra del programa («whatsapp-web.chrome» → «whatsapp»).
+const shortName = name => name.replace(/\.exe$/i, "").split(/[-._\s]/)[0].slice(0, 10);
 function renderLayers() {
   const bar = $("layerWrap"); bar.innerHTML = "";
   S.layers.slice(1).forEach(l => {
-    const b = el("button", "layer-tab" + (l.id === layerId ? " active" : ""));
-    b.innerHTML = ic(l.id === "base" ? "layers" : "app-window") + `<span></span><span class="live"></span>`;
-    b.children[1].textContent = l.id === "base" ? "Todas las apps" : l.name; b.dataset.layer = l.id;
-    b.title = l.id === "base" ? "Lo que hace cada botón al pulsarlo solo, en cualquier app" : `Se usa con ${TRIGGERS[S.trigger]} mantenida en: ${l.exes.join(", ") || "(sin programa)"}`;
+    const b = el("button", "layer-tab icon-only" + (l.id === layerId ? " active" : ""));
+    b.innerHTML = `<span class="tab-name"></span>` + ic(appIcon(l)) + `<span class="live"></span>`;
+    b.querySelector(".tab-name").textContent = shortName(l.name); b.dataset.layer = l.id;
+    b.setAttribute("aria-label", l.name);
+    b.title = `${l.name} · ${TRIGGERS[S.trigger]} + botón${l.exes.length ? " · " + l.exes.join(", ") : " · sin programa"}`;
     b.addEventListener("click", () => { if (l.id !== layerId) { layerId = l.id; closeEditorUI(); collapseAllFolds(); swapFx(); refreshUI(); } });
     bar.appendChild(b);
   });
@@ -393,40 +405,74 @@ function renderCtx() {
   box.innerHTML = `${keys}<span class="why">${why}</span>`;
   const b = box.querySelector("b"); if (b) b.textContent = name;
 }
+// Modos: el carril a la izquierda del docker selecciona el hueco y abre su menú (nombre, plantilla, vaciar).
+// El panel «Modos de trabajo» (icono de ajustes) solo elige la plantilla que recibe el hueco elegido.
+let modeMenuOpen = false;
 function renderModes() {
-  const box = $("modeSlots"); box.innerHTML = "";
-  S.modes.forEach((m, i) => {
-    const row = el("div", "mode-row" + (i === modeIdx ? " active" : "") + (i === liveMode ? " is-live" : "") + (m ? "" : " empty"));
-    const select = el("button", "mode-slot"); select.type = "button";
-    select.setAttribute("role", "radio"); select.setAttribute("aria-checked", i === modeIdx);
-    select.innerHTML = `<kbd>${i + 1}</kbd>` + ic(m ? m.icon : "plus") + `<span class="m-name"></span><i class="live"></i>`;
-    select.querySelector(".m-name").textContent = m ? m.name : "Vacío";
-    select.title = m ? `Alt+Shift+${i + 1} activa «${m.name}»` : `Hueco libre: Alt+Shift+${i + 1}`;
-    select.addEventListener("click", () => { if (i !== modeIdx) { modeIdx = i; closeEditorUI(); collapseAllFolds(); swapFx(); refreshUI(); } });
-    row.appendChild(select);
-    if (m) {
-      const edit = el("button", "mode-row-action"), remove = el("button", "mode-row-action mode-row-delete");
-      edit.type = remove.type = "button"; edit.innerHTML = ic("pencil"); remove.innerHTML = ic("trash-2");
-      edit.title = edit.ariaLabel = `Cambiar nombre de ${m.name}`; remove.title = remove.ariaLabel = `Eliminar ${m.name}`;
-      edit.addEventListener("click", () => {
-        const input = el("input", "mode-inline-name");
-        input.value = m.name; input.maxLength = 30; input.setAttribute("aria-label", "Nombre del modo");
-        select.hidden = true; row.insertBefore(input, edit); input.focus(); input.select();
-        let finished = false;
-        const finish = save => { if (finished) return; finished = true; if (save) { m.name = input.value.trim().slice(0, 30) || `Modo ${i + 1}`; persist(); } renderModes(); renderCtx(); };
-        input.addEventListener("click", e => e.stopPropagation());
-        input.addEventListener("keydown", e => { e.stopPropagation(); if (e.key === "Enter") finish(true); else if (e.key === "Escape") finish(false); });
-        input.addEventListener("blur", () => finish(true));
-      });
-      remove.addEventListener("click", () => { if (!window.confirm(`¿Quitar el modo «${m.name}»?`)) return; S.modes[i] = null; persist(); closeEditorUI(); swapFx(); refreshUI(); });
-      row.append(edit, remove);
-    }
-    box.appendChild(row);
-  });
+  renderRail();
   const m = slotMode();
-  $("modeTplTitle").innerHTML = (m ? "Cambiar plantilla" : "Elige una plantilla") + "<small>Un modo completo, listo para personalizar</small>";
+  $("modeTplTitle").innerHTML = (m ? "Cambiar plantilla" : "Elige una plantilla") + `<small>Hueco ${modeIdx + 1} · un modo completo, listo para personalizar</small>`;
   $("modeToggle").hidden = !API.ok || !m;
   $("modeToggleText").textContent = liveMode === modeIdx ? "Volver a Directo" : "Activar ahora";
+}
+function renderRail() {
+  const rail = $("modeRail");
+  rail.classList.toggle("off", S.mode !== "modes");
+  rail.querySelectorAll(".mode-rail-btn").forEach(n => n.remove());
+  S.modes.forEach((m, i) => {
+    const b = el("button", "mode-rail-btn" + (i === modeIdx ? " active" : "") + (i === liveMode ? " is-live" : "") + (m ? "" : " empty"));
+    b.type = "button"; b.setAttribute("role", "radio"); b.setAttribute("aria-checked", String(i === modeIdx));
+    b.tabIndex = S.mode === "modes" ? 0 : -1;
+    b.innerHTML = `<kbd>${i + 1}</kbd>` + ic(m ? m.icon : "plus") + `<i class="live"></i>`;
+    const label = m ? `${m.name} · Ctrl+Shift+${i + 1}` : `Hueco libre ${i + 1}: elegir plantilla`;
+    b.title = label; b.setAttribute("aria-label", label);
+    b.addEventListener("click", () => railClick(i));
+    rail.appendChild(b);
+  });
+  renderMenu();
+}
+function railClick(i) {
+  if (i === modeIdx) modeMenuOpen = !modeMenuOpen;
+  else { modeIdx = i; modeMenuOpen = true; }
+  closeEditorUI(); swapFx(); refreshUI();
+}
+function closeModeMenu() { if (!modeMenuOpen) return; modeMenuOpen = false; renderMenu(); }
+function renderMenu() {
+  const menu = $("modeMenu"), m = S.modes[modeIdx];
+  menu.hidden = !(modeMenuOpen && S.mode === "modes");
+  menu.innerHTML = "";
+  if (menu.hidden) return;
+  const head = el("div", "mode-menu-head");
+  head.innerHTML = ic(m ? m.icon : "plus") + `<span class="mode-menu-title">Hueco ${modeIdx + 1}${m ? "" : " · vacío"}</span>`;
+  const close = el("button", "close-editor", "×"); close.setAttribute("aria-label", "Cerrar menú del modo");
+  close.addEventListener("click", closeModeMenu);
+  head.appendChild(close);
+  const actions = el("div", "mode-menu-actions");
+  const tpl = el("button", "", "Plantilla"); tpl.innerHTML = ic("layout-grid") + "<span>Plantilla</span>";
+  tpl.title = "Elegir la plantilla de este hueco";
+  tpl.addEventListener("click", () => { modeMenuOpen = false; refreshUI(); showWorkModesPanel(true); });
+  actions.appendChild(tpl);
+  if (m) {
+    const input = el("input", "mode-inline-name"); input.type = "text"; input.maxLength = 30; input.value = m.name;
+    input.setAttribute("aria-label", "Nombre del modo");
+    input.addEventListener("keydown", e => { if (e.key === "Enter") input.blur(); else if (e.key === "Escape") { input.value = m.name; input.blur(); } });
+    input.addEventListener("change", () => { m.name = input.value.trim().slice(0, 30) || `Modo ${modeIdx + 1}`; persist(); renderModes(); renderCtx(); });
+    const clear = el("button", "danger"); clear.type = "button"; clear.innerHTML = ic("trash-2") + "<span>Vaciar</span>";
+    clear.title = "Quita el modo de este hueco. La plantilla no se borra.";
+    clear.addEventListener("click", () => {
+      if (!window.confirm(`¿Vaciar el hueco ${modeIdx + 1}? La plantilla «${m.name}» sigue disponible.`)) return;
+      S.modes[modeIdx] = null; modeMenuOpen = false; persist(); closeEditorUI(); swapFx(); refreshUI();
+    });
+    actions.appendChild(clear);
+    menu.append(head, input, actions);
+  } else menu.append(head, actions);
+}
+document.addEventListener("click", e => { if (modeMenuOpen && e.target.isConnected && !$("modeRail").contains(e.target) && !$("modeMenu").contains(e.target)) closeModeMenu(); });
+// Con el docker bloqueado (sin plantilla o sin app), la pieza lleva a donde se resuelve.
+function lockedHint() {
+  if (S.mode === "smart") return openAdd();
+  if (S.mode === "modes") return showWorkModesPanel(true);
+  toast("Elige una plantilla o crea un modo en blanco", true);
 }
 function fillMode(m) { S.modes[modeIdx] = m; persist(); closeEditorUI(); refreshUI(); }
 function setAction(a) { layer().actions[currentTarget] = a; persist(); refreshUI(); }
@@ -474,7 +520,7 @@ $("profileSave").addEventListener("click", () => {
   if (!confirmed || JSON.stringify(confirmed) !== JSON.stringify(S.layers[0].actions)) return toast("Confirma primero los cambios con el botón ✓", true);
   S.profiles.push({name, actions: JSON.parse(JSON.stringify(confirmed))}); $("profileName").value = ""; persist(); renderProfiles(); toast("Perfil guardado");
 });
-document.addEventListener("click", e => { if (!$("profileWrap").contains(e.target)) { $("profilePanel").hidden = true; $("profileToggle").setAttribute("aria-expanded", "false"); } });
+document.addEventListener("click", e => { if (!$("profileWrap").contains(e.target) && !$("profilePanel").contains(e.target)) { $("profilePanel").hidden = true; $("profileToggle").setAttribute("aria-expanded", "false"); } });
 
 function showSmartPanel(show) {
   if (show) closeEditorUI();
@@ -496,7 +542,7 @@ $("workModesClose").addEventListener("click", () => { showWorkModesPanel(false);
 // Clic directo en una pieza del docker = abre grabación directa.
 document.querySelectorAll("[data-target]").forEach(t => {
   t.addEventListener("click", () => {
-    if (!editable()) return S.mode === "smart" ? openAdd() : toast("Elige una plantilla o crea un modo en blanco", true);
+    if (!editable()) return lockedHint();
     currentTarget = t.dataset.target;
     knobSpeed = cur().speed || 1;
     if (!$("editor").hidden) {
@@ -511,7 +557,7 @@ document.querySelectorAll("[data-target]").forEach(t => {
 // Clic en el lápiz debajo de cada pieza = abre o cierra el menú 2 para edición en detalle.
 document.querySelectorAll(".edit-pen").forEach(btn => {
   btn.addEventListener("click", () => {
-    if (!editable()) return S.mode === "smart" ? openAdd() : toast("Elige una plantilla o crea un modo en blanco", true);
+    if (!editable()) return lockedHint();
     const key = btn.dataset.edit;
     if (!$("editor").hidden && btn.classList.contains("active")) return closeEditorUI();
     currentTarget = key === "KNOB" ? (currentTarget.startsWith("KNOB") ? currentTarget : "KNOB_PRESS") : key;
@@ -530,7 +576,7 @@ function closeEditorUI() {
   $("selectedLabel").textContent = "";
 }
 $("closeEditor").addEventListener("click", closeEditorUI);
-document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("editor").hidden) { closeEditorUI(); } else if (e.key === "Escape" && !$("smartPanel").hidden && !$("addOverlay").classList.contains("show")) { showSmartPanel(false); $("smartToggle").focus(); } else if (e.key === "Escape" && !$("workModesPanel").hidden) { showWorkModesPanel(false); $("workModesToggle").focus(); } });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("editor").hidden) { closeEditorUI(); } else if (e.key === "Escape" && !$("smartPanel").hidden && !$("addOverlay").classList.contains("show")) { showSmartPanel(false); $("smartToggle").focus(); } else if (e.key === "Escape" && !$("workModesPanel").hidden) { showWorkModesPanel(false); $("workModesToggle").focus(); } else if (e.key === "Escape") closeModeMenu(); });
 function showLighting(show) {
   $("lightingPanel").hidden = !show;
   $("btnLighting").setAttribute("aria-expanded", String(show));
@@ -549,7 +595,7 @@ $("device").addEventListener("keydown", e => {
 });
 document.querySelectorAll(".modes button").forEach(c => c.addEventListener("click", () => {
   if (S.mode === c.dataset.mode) return;
-  S.mode = c.dataset.mode; persist(); closeEditorUI(); collapseAllFolds(); showLighting(false); swapFx(); refreshUI();
+  S.mode = c.dataset.mode; modeMenuOpen = false; persist(); closeEditorUI(); collapseAllFolds(); showLighting(false); swapFx(); refreshUI();
 }));
 // ---------- Luz ----------
 // Solo existen los modos 0, 1 y 2 (los mismos que ofrece el programa del fabricante); descripciones comprobadas en el teclado real.

@@ -8,7 +8,7 @@ Cómo funciona RevienDocker (el docker y la app son un solo sistema):
      (Shift / Ctrl / Alt) está pulsada físicamente.
   3. En un hilo aparte decide qué hacer. Prioridad: con la tecla de activación y una capa para la app en
      primer plano, esa capa; si no, el modo activo (si lo hay); si no, la capa «base» (Directo).
-     Alt+Shift + botón 1/2/3 activa el modo 1/2/3; repetirlo vuelve a Directo.
+     Ctrl+Shift + botón 1/2/3 activa el modo 1/2/3; repetirlo vuelve a Directo.
   4. La acción se ejecuta por SendInput (teclado, ratón, multimedia) o por OBS WebSocket.
 
 No hay sondeo: el motor está dormido hasta que llega una tecla fantasma.
@@ -41,11 +41,16 @@ STUDIO_FILE = DATA_DIR / "studio.json"
 
 SLOTS = ("KEY_1", "KEY_2", "KEY_3", "KNOB_CCW", "KNOB_CW", "KNOB_PRESS")
 MODE_SLOTS = 3
-MODE_KEYS = ("KEY_1", "KEY_2", "KEY_3")   # con Alt+Shift activan el modo 1, 2 o 3
+MODE_KEYS = ("KEY_1", "KEY_2", "KEY_3")   # con Ctrl+Shift activan el modo 1, 2 o 3
 GHOST_VK = {0x7C: "KEY_1", 0x7D: "KEY_2", 0x7E: "KEY_3", 0x7F: "KNOB_CCW", 0x80: "KNOB_CW", 0x81: "KNOB_PRESS"}
 TRIGGER_VKS = {"shift": {0x10, 0xA0, 0xA1}, "ctrl": {0x11, 0xA2, 0xA3}, "alt": {0x12, 0xA4, 0xA5}}
 TRIGGER_VK = {"shift": 0x10, "ctrl": 0x11, "alt": 0x12}
 MOD_VK = ((1, 0x11), (2, 0x10), (4, 0x12), (8, 0x5B))  # Ctrl, Shift, Alt, Win
+
+
+def chord_held(phys):
+    """Ctrl+Shift físicos: cambio de modo. Alt ya no interviene (es de Windows y de los menús)."""
+    return bool(phys.get("ctrl") and phys.get("shift"))
 OBS_OPS = ("next_scene", "prev_scene", "scene", "toggle_source", "toggle_mute",
            "volume_up", "volume_down", "toggle_record", "toggle_stream")
 
@@ -97,7 +102,7 @@ def _clean_actions(raw):
 
 
 def _clean_modes(raw):
-    """Tres huecos (Alt+Shift+1/2/3); cada uno vacío (None) o un modo {name, icon, actions}."""
+    """Tres huecos (Ctrl+Shift+1/2/3); cada uno vacío (None) o un modo {name, icon, actions}."""
     raw = raw if isinstance(raw, list) else []
     out = []
     for i in range(MODE_SLOTS):
@@ -423,7 +428,7 @@ if IS_WIN:
                         return 1  # grabando: ni Windows ni las apps ven la tecla (Alt+Tab, Win…)
                     if vk in GHOST_VK and GHOST_VK[vk] in self.ghost_slots:
                         if not up:
-                            chord = self.phys["alt"] and self.phys["shift"]   # Alt+Shift: cambio de modo
+                            chord = chord_held(self.phys)   # Ctrl+Shift: cambio de modo
                             self.on_ghost(GHOST_VK[vk], self.phys[self.trigger], chord)
                         return 1  # se traga: ninguna app ve F13–F18
                     for name, vks in TRIGGER_VKS.items():
@@ -626,7 +631,7 @@ class StudioEngine:
         return self.studio
 
     def set_mode(self, index):
-        """Alt+Shift+N: activa el modo N; repetirlo (o un hueco vacío) vuelve a Directo. Devuelve el índice activo o None."""
+        """Ctrl+Shift+N: activa el modo N; repetirlo (o un hueco vacío) vuelve a Directo. Devuelve el índice activo o None."""
         m = self.studio["modes"][index] if 0 <= index < MODE_SLOTS else None
         if not m:
             return self.active_mode
@@ -637,7 +642,7 @@ class StudioEngine:
                 if self.active_mode is None:
                     show_message("target", "Directo")
                 else:
-                    show_message(m["icon"], m["name"], f"Alt+Shift+{index + 1}")
+                    show_message(m["icon"], m["name"], f"Ctrl+Shift+{index + 1}")
             except Exception:
                 pass
         return self.active_mode
@@ -686,8 +691,8 @@ class StudioEngine:
 
     def handle(self, slot, trigger_held, chord=False):
         if chord and slot in MODE_KEYS:
-            # Alt y Shift siguen pulsados y la tecla fantasma no llegó a Windows: sin esta pulsación neutra,
-            # al soltarlos Windows lo tomaría por Alt+Shift (cambio de idioma) o por Alt solo (menú).
+            # Ctrl y Shift siguen pulsados y la tecla fantasma no llegó a Windows: sin esta pulsación neutra,
+            # al soltarlos Windows podría tomarlo por un atajo de Ctrl/Shift o abrir un menú.
             if IS_WIN and not self.simulate:
                 key_down(0xFF)
                 key_up(0xFF)
