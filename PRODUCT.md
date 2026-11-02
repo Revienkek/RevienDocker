@@ -50,7 +50,7 @@ Perfiles guardables desde «+» junto a Directo. Los tres huecos del carril izqu
 
 ### Inteligente (Decisión)
 - Cada botón cambia según la app en primer plano. El icono de capas abre «Atajos para» (apps y sus ajustes) como capa superpuesta.
-- **Tecla de activación:** **una sola** (Shift, Ctrl o Alt; excluyente, porque con dos se podría activar un modo sin querer). Es **global** a todo Inteligente (`S.trigger`). Sale del menú y pasa a los **tres iconos del carril izquierdo** (Shift / Ctrl / Alt); el texto «Tecla de activación» desaparece y cada icono se explica con su etiqueta al pasar el ratón o al enfocar.
+- **Tecla de activación:** **una sola** (Shift, Ctrl o Alt; excluyente, porque con dos se podría activar un modo sin querer). Es **global** a todo Inteligente (`S.trigger`). Sale del menú y pasa a los **tres botones del carril izquierdo**, rotulados con texto corto (Shift / Ctrl / Alt) porque los iconos no se entendían; el texto «Tecla de activación» desaparece y cada botón añade su explicación al pasar el ratón o al enfocar.
 - **«Añadir app»** y «Atajos para» comparten formato de chips con **icono + nombre corto**, sin párrafos. Las apps abiertas entran en una cuadrícula compacta; el campo «O escribe el programa» y «Cerrar» siguen a la vista.
 
 ### Modos (Decisión)

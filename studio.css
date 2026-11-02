@@ -347,6 +347,7 @@ details[open] > summary .chev { transform: rotate(180deg); }
 .mode-icon-btn { background: transparent; color: var(--muted); }
 .mode-icon-btn[aria-expanded="true"] { background: var(--panel-3); border-color: var(--line-2); color: #fff; }
 @media (hover: hover) and (pointer: fine) { .mode-icon-btn:hover { background: var(--panel-2); color: var(--text); } }
+.mode-rail-btn .rail-key { font: 700 0.64rem var(--mono); letter-spacing: -0.01em; }
 .mode-rail-btn.placeholder { border-style: dashed; border-color: var(--line-2); background: transparent; color: var(--muted); opacity: 0.5; cursor: default; }
 
 /* Referencia: el docker en pequeño dentro de cada menú superpuesto, para ver qué cubre la capa y qué cambia. */

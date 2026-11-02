@@ -96,7 +96,6 @@ const SLOT_ORDER = ["KEY_1", "KEY_2", "KEY_3", "KNOB_CCW", "KNOB_PRESS", "KNOB_C
 const HW_SLOTS = { KEY_1: 0x01, KEY_2: 0x02, KEY_3: 0x03, KNOB_CCW: 0x0D, KNOB_PRESS: 0x0E, KNOB_CW: 0x0F };
 const GHOST = { KEY_1: "F13", KEY_2: "F14", KEY_3: "F15", KNOB_CCW: "F16", KNOB_CW: "F17", KNOB_PRESS: "F18" };
 const TRIGGERS = { shift: "Shift", ctrl: "Ctrl", alt: "Alt" };
-const TRIGGER_ICONS = { shift: "arrow-big-up", ctrl: "chevron-up", alt: "option" };
 
 // ---------- Estado ----------
 const defaultBase = () => ({ KEY_1: K(0, kc("F13")), KEY_2: K(0, kc("F14")), KEY_3: K(0, kc("F15")), KNOB_CCW: M(0xEA), KNOB_PRESS: M(0xE2), KNOB_CW: M(0xE9) });
@@ -466,7 +465,7 @@ function renderRail() {
       const on = S.trigger === key, b = el("button", "mode-rail-btn" + (on ? " active" : ""));
       b.type = "button"; b.setAttribute("role", "radio"); b.setAttribute("aria-checked", String(on));
       const tip = `${label}: mantén ${label} y pulsa un botón`; b.title = tip; b.setAttribute("aria-label", tip);
-      b.innerHTML = ic(TRIGGER_ICONS[key]);
+      b.append(el("span", "rail-key", label));
       b.addEventListener("click", () => { if (S.trigger === key) return; S.trigger = key; persist(); refreshUI(); });
       rail.appendChild(b);
     });
