@@ -408,6 +408,39 @@ function renderCtx() {
 // Modos: el carril a la izquierda del docker selecciona el hueco y abre su menú (nombre, plantilla, vaciar).
 // El panel «Modos de trabajo» (icono de ajustes) solo elige la plantilla que recibe el hueco elegido.
 let modeMenuOpen = false;
+// Iconos que se pueden dar a un modo: todos tienen equivalente en el aviso nativo de Windows.
+const MODE_ICONS = [["music", "Música"], ["volume-2", "Volumen"], ["mic", "Micrófono"], ["gamepad-2", "Juegos"], ["clapperboard", "Vídeo"], ["film", "Cine"],
+  ["brush", "Edición"], ["notebook-pen", "Notas"], ["code-xml", "Código"], ["terminal", "Terminal"], ["app-window", "Ventanas"], ["globe", "Web"],
+  ["message-circle", "Chat"], ["zap", "Rápido"], ["sparkles", "Destacado"], ["sliders-horizontal", "Ajustes"]];
+function iconPicker(current, onPick) {
+  const box = el("div", "icon-picker"); box.setAttribute("role", "radiogroup"); box.setAttribute("aria-label", "Icono del modo");
+  MODE_ICONS.forEach(([name, label]) => {
+    const b = el("button", "icon-opt" + (name === current ? " active" : "")); b.type = "button";
+    b.setAttribute("role", "radio"); b.setAttribute("aria-checked", String(name === current)); b.title = label; b.setAttribute("aria-label", label);
+    b.innerHTML = ic(name);
+    b.addEventListener("click", () => {
+      onPick(name);
+      box.querySelectorAll(".icon-opt").forEach(o => { o.classList.toggle("active", o === b); o.setAttribute("aria-checked", String(o === b)); });
+    });
+    box.appendChild(b);
+  });
+  return box;
+}
+// Referencia visual: el docker en pequeño, solo en la vista previa de una plantilla (donde decides qué hará cada botón).
+function miniDocker(pick) {
+  const text = k => { const a = pick(k); return a ? textOf(a) : "—"; };
+  const box = el("div", "mini-docker"), keys = el("div", "mini-keys"), knob = el("span", "mini-knob");
+  ["KEY_1", "KEY_2", "KEY_3"].forEach((k, i) => {
+    const key = el("span", "mini-key"); key.append(el("small", "", String(i + 1)), el("b", "", text(k))); key.title = `${TARGET_NAME[k]}: ${text(k)}`; keys.appendChild(key);
+  });
+  knob.append(el("b", "", text("KNOB_PRESS")), el("small", "", `↺ ${text("KNOB_CCW")} · ↻ ${text("KNOB_CW")}`));
+  knob.title = `Rueda · giro izquierda: ${text("KNOB_CCW")} · pulsar: ${text("KNOB_PRESS")} · giro derecha: ${text("KNOB_CW")}`;
+  box.append(keys, knob);
+  box.setAttribute("role", "img");
+  box.setAttribute("aria-label", "Referencia del docker: " + SLOT_ORDER.map(k => `${TARGET_NAME[k]} ${text(k)}`).join(", "));
+  return box;
+}
+function fillMini(host, pick, caption) { host.replaceChildren(miniDocker(pick), el("small", "mini-cap", caption)); }
 function renderModes() {
   renderRail();
   const m = slotMode();
@@ -416,13 +449,20 @@ function renderModes() {
   $("modeToggleText").textContent = liveMode === modeIdx ? "Volver a Directo" : "Activar ahora";
 }
 function renderRail() {
-  const rail = $("modeRail");
-  rail.classList.toggle("off", S.mode !== "modes");
+  const rail = $("modeRail"), live = S.mode === "modes";
   rail.querySelectorAll(".mode-rail-btn").forEach(n => n.remove());
+  if (live) { rail.setAttribute("role", "radiogroup"); rail.setAttribute("aria-label", "Modos de trabajo"); rail.removeAttribute("aria-hidden"); }
+  else { rail.removeAttribute("role"); rail.removeAttribute("aria-label"); rail.setAttribute("aria-hidden", "true"); }
+  if (!live) {   // Directo e Inteligente reservan el mismo sitio: sus iconos llegarán más adelante
+    for (let i = 0; i < 3; i++) {
+      const b = el("button", "mode-rail-btn placeholder"); b.type = "button"; b.disabled = true; b.tabIndex = -1; b.title = "Próximamente";
+      b.innerHTML = ic("minus"); rail.appendChild(b);
+    }
+    return renderMenu();
+  }
   S.modes.forEach((m, i) => {
     const b = el("button", "mode-rail-btn" + (i === modeIdx ? " active" : "") + (i === liveMode ? " is-live" : "") + (m ? "" : " empty"));
     b.type = "button"; b.setAttribute("role", "radio"); b.setAttribute("aria-checked", String(i === modeIdx));
-    b.tabIndex = S.mode === "modes" ? 0 : -1;
     b.innerHTML = `<kbd>${i + 1}</kbd>` + ic(m ? m.icon : "plus") + `<i class="live"></i>`;
     const label = m ? `${m.name} · Ctrl+Shift+${i + 1}` : `Hueco libre ${i + 1}: elegir plantilla`;
     b.title = label; b.setAttribute("aria-label", label);
@@ -436,21 +476,27 @@ function railClick(i) {
   else { modeIdx = i; modeMenuOpen = true; }
   closeEditorUI(); swapFx(); refreshUI();
 }
-function closeModeMenu() { if (!modeMenuOpen) return; modeMenuOpen = false; renderMenu(); }
+let menuIconsOpen = false;
+function closeModeMenu() { if (!modeMenuOpen) return; modeMenuOpen = false; menuIconsOpen = false; renderMenu(); }
 function renderMenu() {
   const menu = $("modeMenu"), m = S.modes[modeIdx];
   menu.hidden = !(modeMenuOpen && S.mode === "modes");
   menu.innerHTML = "";
-  if (menu.hidden) return;
+  if (menu.hidden) { menuIconsOpen = false; return; }
   const head = el("div", "mode-menu-head");
-  head.innerHTML = ic(m ? m.icon : "plus") + `<span class="mode-menu-title">Hueco ${modeIdx + 1}${m ? "" : " · vacío"}</span>`;
+  const lead = el(m ? "button" : "span", m ? "mode-icon-btn" : "mode-icon");
+  lead.innerHTML = ic(m ? m.icon : "plus");
+  if (m) {
+    lead.type = "button"; lead.title = "Cambiar el icono"; lead.setAttribute("aria-label", "Cambiar el icono"); lead.setAttribute("aria-expanded", String(menuIconsOpen));
+    lead.addEventListener("click", () => { menuIconsOpen = !menuIconsOpen; renderMenu(); });
+  }
   const close = el("button", "close-editor", "×"); close.setAttribute("aria-label", "Cerrar menú del modo");
   close.addEventListener("click", closeModeMenu);
-  head.appendChild(close);
+  head.append(lead, el("span", "mode-menu-title", `Hueco ${modeIdx + 1}${m ? "" : " · vacío"}`), close);
   const actions = el("div", "mode-menu-actions");
   const tpl = el("button", "", "Plantilla"); tpl.innerHTML = ic("layout-grid") + "<span>Plantilla</span>";
   tpl.title = "Elegir la plantilla de este hueco";
-  tpl.addEventListener("click", () => { modeMenuOpen = false; refreshUI(); showWorkModesPanel(true); });
+  tpl.addEventListener("click", () => { modeMenuOpen = false; menuIconsOpen = false; refreshUI(); showWorkModesPanel(true); });
   actions.appendChild(tpl);
   if (m) {
     const input = el("input", "mode-inline-name"); input.type = "text"; input.maxLength = 30; input.value = m.name;
@@ -461,10 +507,12 @@ function renderMenu() {
     clear.title = "Quita el modo de este hueco. La plantilla no se borra.";
     clear.addEventListener("click", () => {
       if (!window.confirm(`¿Vaciar el hueco ${modeIdx + 1}? La plantilla «${m.name}» sigue disponible.`)) return;
-      S.modes[modeIdx] = null; modeMenuOpen = false; persist(); closeEditorUI(); swapFx(); refreshUI();
+      S.modes[modeIdx] = null; modeMenuOpen = false; menuIconsOpen = false; persist(); closeEditorUI(); swapFx(); refreshUI();
     });
     actions.appendChild(clear);
-    menu.append(head, input, actions);
+    const parts = [head, input];
+    if (menuIconsOpen) parts.push(iconPicker(m.icon, name => { m.icon = name; persist(); renderModes(); }));
+    menu.append(...parts, actions);
   } else menu.append(head, actions);
 }
 document.addEventListener("click", e => { if (modeMenuOpen && e.target.isConnected && !$("modeRail").contains(e.target) && !$("modeMenu").contains(e.target)) closeModeMenu(); });
@@ -674,7 +722,19 @@ const PRESETS = [
     note: "Son teclas poco habituales: no hacen nada por sí solas. Asígnalas a acciones en otra app. RevienDocker las envía al pulsar el botón.",
     actions: () => ({ KEY_1: F(13), KEY_2: F(14), KEY_3: F(15), KNOB_CCW: F(16), KNOB_PRESS: F(18), KNOB_CW: F(17) }) }
 ];
-let selectedPreset = null;
+PRESETS.push({ id: "blank", name: "Nuevo modo", icon: "plus", desc: "Empieza de cero: lo que no definas hace lo de Directo.",
+  note: "Elige nombre e icono. Después asigna cada botón con su lápiz.", blank: true, actions: () => ({}) });
+let selectedPreset = null, blankIcon = "sliders-horizontal";
+function previewMini() {
+  const p = selectedPreset, acts = p.actions();
+  fillMini($("presetMapping"), k => acts[k] || (p.blank ? S.layers[0].actions[k] : undefined), p.blank ? "Hereda de Directo hasta que lo cambies" : "Así queda el docker");
+}
+function renderBlankFields() {
+  const on = !!(selectedPreset && selectedPreset.blank);
+  $("blankFields").hidden = !on;
+  $("applyPreset").textContent = on ? "Crear modo" : "Usar en este modo";
+  if (on) $("blankIcons").replaceChildren(iconPicker(blankIcon, n => { blankIcon = n; }));
+}
 PRESETS.forEach(p => {
   const b = el("button", "preset-card"); b.dataset.preset = p.id;
   b.innerHTML = ic(p.icon) + "<span><strong></strong><small></small></span>";
@@ -684,23 +744,23 @@ PRESETS.forEach(p => {
     document.querySelectorAll(".preset-card").forEach(card => card.classList.toggle("active", card === b));
     $("presetTitle").textContent = p.name; $("presetDescription").textContent = p.desc;
     $("presetNote").textContent = p.note || "Rellena este modo con las seis acciones. Después puedes personalizarlas una a una.";
-    const mapping = $("presetMapping"); mapping.innerHTML = "";
-    const actions = p.actions();
-    SLOT_ORDER.forEach(slot => { const cell = el("div"), label = el("small", "", TARGET_NAME[slot]), value = el("strong", "", textOf(actions[slot])); cell.append(label, value); mapping.appendChild(cell); });
+    if (p.blank) { blankIcon = "sliders-horizontal"; $("blankName").value = `Modo ${modeIdx + 1}`; }
+    previewMini(); renderBlankFields();
     $("presetPreview").hidden = false;
   });
   $("presets").appendChild(b);
 });
 $("applyPreset").addEventListener("click", () => {
   if (!selectedPreset) return;
-  const m = slotMode();
-  if (m && Object.keys(m.actions).length && !window.confirm(`«${selectedPreset.name}» reemplazará los atajos del modo «${m.name}». ¿Continuar?`)) return;
-  fillMode({ name: selectedPreset.name, icon: selectedPreset.icon, actions: selectedPreset.actions() });
-  $("presetPreview").hidden = true; selectedPreset = null;
+  const p = selectedPreset, m = slotMode();
+  if (m && Object.keys(m.actions).length && !window.confirm(`«${p.name}» reemplazará los atajos del modo «${m.name}». ¿Continuar?`)) return;
+  const name = p.blank ? ($("blankName").value.trim().slice(0, 30) || `Modo ${modeIdx + 1}`) : p.name;
+  fillMode({ name, icon: p.blank ? blankIcon : p.icon, actions: p.actions() });
+  $("presetPreview").hidden = true; selectedPreset = null; renderBlankFields();
   document.querySelectorAll(".preset-card").forEach(card => card.classList.remove("active"));
-  toast(`Modo ${modeIdx + 1}: ${S.modes[modeIdx].name}`);
+  toast(p.blank ? `Modo ${modeIdx + 1}: ${name}. Lo que no definas hace lo de Directo` : `Modo ${modeIdx + 1}: ${name}`);
+  showWorkModesPanel(false);   // el docker queda a la vista con el resultado
 });
-$("btnBlankMode").addEventListener("click", () => { fillMode({ name: `Modo ${modeIdx + 1}`, icon: "sliders-horizontal", actions: {} }); toast("Modo en blanco: lo que no definas hace lo de Directo"); });
 $("modeToggle").addEventListener("click", () => api("/api/mode", { slot: modeIdx }).then(updateEngineUI).catch(() => toast("No se pudo cambiar de modo", true)));
 
 // ---------- Capas: añadir app ----------

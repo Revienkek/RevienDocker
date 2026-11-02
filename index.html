@@ -101,9 +101,12 @@
                 <div><strong id="presetTitle"></strong><p class="muted" id="presetDescription"></p></div>
                 <div class="preset-mapping" id="presetMapping"></div>
                 <p class="muted" id="presetNote"></p>
+                <div class="blank-fields" id="blankFields" hidden>
+                  <div class="form-group"><label for="blankName">Nombre del modo</label><input type="text" id="blankName" maxlength="30" /></div>
+                  <div class="form-group"><label id="blankIconsLabel">Icono</label><div id="blankIcons"></div></div>
+                </div>
                 <button class="primary" id="applyPreset">Usar en este modo</button>
               </div>
-              <button id="btnBlankMode" class="blank-mode"><i data-ic="plus"></i><span>Modo en blanco</span></button>
             </div>
           </details>
         </section>

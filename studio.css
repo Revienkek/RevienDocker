@@ -235,7 +235,6 @@ details[open] > summary .chev { transform: rotate(180deg); }
 .chord .ic { width: 14px; height: 14px; }
 .mode-slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .mode-actions { display: flex; }
-.blank-mode { align-self: flex-start; border-style: dashed; }
 
 /* ---------- Inspector ---------- */
 .editor { padding: 20px; background: var(--panel); border: 1px solid var(--line-2); border-radius: 8px; }
@@ -283,10 +282,7 @@ details[open] > summary .chev { transform: rotate(180deg); }
 .preset-card.active { border-color: #fff; background: var(--panel-3); }
 .preset-preview { display: flex; flex-direction: column; gap: 12px; border: 1px solid var(--line-2); background: var(--bg); border-radius: 6px; padding: 16px; }
 .preset-preview .primary { align-self: flex-start; }
-.preset-mapping { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 6px; }
-.preset-mapping div { background: var(--panel-2); padding: 8px 10px; border-radius: 4px; }
-.preset-mapping small { display: block; color: var(--muted); }
-.preset-mapping strong { font-size: .78rem; overflow-wrap: anywhere; }
+.preset-preview { order: -1; }
 .hex-console { background: #06070a; border: 1px solid var(--line); border-radius: 4px; padding: 9px 11px; font: 0.7rem var(--mono); color: #aab4c5; height: 96px; overflow-y: auto; line-height: 1.5; font-variant-numeric: tabular-nums; }
 
 /* ---------- Modales y avisos ---------- */
@@ -360,7 +356,6 @@ details[open] > summary .chev { transform: rotate(180deg); }
 
 /* Carril de modos a la izquierda del visor: un icono por hueco, con su menú al pulsarlo. */
 .mode-rail { position: relative; width: 56px; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 8px 0; }
-.mode-rail.off { visibility: hidden; }
 .mode-rail-btn { position: relative; width: 40px; height: 40px; padding: 0; border-radius: 6px; background: transparent; border-color: var(--line); color: var(--muted);
   transition: transform 160ms var(--ease-out), background-color 160ms ease, border-color 160ms ease, color 160ms ease; }
 @media (hover: hover) and (pointer: fine) { .mode-rail-btn:hover { background: var(--panel-2); border-color: var(--line-2); color: var(--text); } }
@@ -378,3 +373,30 @@ details[open] > summary .chev { transform: rotate(180deg); }
 .mode-menu-actions { display: flex; gap: 8px; }
 .mode-menu-actions button { flex: 1; padding: 7px 8px; font-size: 0.74rem; }
 .mode-inline-name { width: 100%; padding: 6px 8px; }
+.mode-icon-btn, .mode-icon { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; min-width: 30px; min-height: 30px; padding: 0; }
+.mode-icon { color: var(--muted); }
+.mode-icon-btn { background: transparent; color: var(--muted); }
+.mode-icon-btn[aria-expanded="true"] { background: var(--panel-3); border-color: var(--line-2); color: #fff; }
+@media (hover: hover) and (pointer: fine) { .mode-icon-btn:hover { background: var(--panel-2); color: var(--text); } }
+.mode-rail-btn.placeholder { border-style: dashed; border-color: var(--line-2); background: transparent; color: var(--muted); opacity: 0.5; cursor: default; }
+
+/* Referencia: el docker en pequeño dentro de cada menú superpuesto, para ver qué cubre la capa y qué cambia. */
+.mini-ref { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.mini-cap { color: var(--muted); font-size: 0.7rem; line-height: 1.35; }
+.mini-docker { flex: none; display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; }
+.mini-keys { display: flex; gap: 4px; }
+.mini-key, .mini-knob { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; min-width: 0; height: 40px; padding: 0 4px; background: var(--panel-2); border: 1px solid var(--line); }
+.mini-key { width: 54px; border-radius: 4px; }
+.mini-knob { width: 96px; border-radius: 20px; }
+.mini-key small, .mini-knob small { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.5rem; color: var(--muted); }
+.mini-key b, .mini-knob b { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 700 0.6rem var(--mono); color: var(--text); }
+
+/* Selector de icono de un modo */
+.icon-picker { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; }
+.icon-opt { min-height: 34px; padding: 0; border-radius: 4px; background: transparent; color: var(--muted); }
+.icon-opt .ic { width: 18px; height: 18px; }
+@media (hover: hover) and (pointer: fine) { .icon-opt:hover { background: var(--panel-2); color: var(--text); } }
+.icon-opt.active { background: var(--panel-3); border-color: #fff; color: #fff; }
+.blank-fields { display: flex; flex-direction: column; gap: 12px; }
+@media (max-width: 700px) { .icon-picker { grid-template-columns: repeat(4, 1fr); } .mini-ref { flex-wrap: wrap; } }
+

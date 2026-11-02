@@ -147,6 +147,7 @@ _(vacío; se rellena al probar con el hardware)_
 
 | Fecha | Cambio |
 |---|---|
+| 2026-11-02 | **Modos más claros.** Misma estructura en Directo, Inteligente y Modos (barra superior, iconos + docker + iconos, mensaje centrado). «Nuevo modo» sustituye al botón «Modo en blanco» y es una plantilla más, con nombre e icono a elegir; el icono de cualquier modo se cambia desde su menú. Mini docker en la vista previa de las plantillas. El aviso nativo del modo activo pasa a abajo a la derecha, sobre la bandeja. |
 | 2026-11-02 | **Menús superpuestos sobre el docker.** Los paneles de Directo (perfiles), Inteligente (Atajos para) y Modos (plantillas y menú de cada hueco) se abren como capa encima del docker, sin empujarlo. |
 | 2026-11-02 | **Modos con Ctrl+Shift** (antes Alt+Shift). Carril de iconos a la izquierda del docker, uno por hueco: su menú cambia el nombre, elige plantilla o vacía el hueco (la plantilla no se borra). El icono de ajustes de la cabecera sigue abriendo las plantillas. «Atajos para» muestra un icono por app en lugar de su nombre. Ancho mínimo 712 × 560: el docker nunca se apila; `✓` y `×` siempre a la derecha.
 | 2026-11-01 | Unificación de **Directo / Inteligente / Modos** (3 huecos con plantillas y cambio rápido con `Alt+Shift+1/2/3` + overlay compacto). Limpieza visual del visor: sin barra informativa bajo las pestañas, botón de aplicar/descartar (`✓` / `×`) a la derecha del visor con aviso en rojo completo, clic directo en cada pieza para grabar al vuelo, icono de lápiz (`✎`) bajo cada pieza para abrir el menú 2, eliminación de «Elegir a mano» y menús plegados por defecto. |
@@ -172,7 +173,10 @@ En Directo, el botón «+» junto a los modos abre los perfiles. Confirma primer
 
 Con **Ctrl+Shift+1/2/3** cambias de hueco (repetirlo vuelve a Directo).
 
-- **Carril de iconos** a la izquierda del docker: un icono por hueco. Pulsa uno para seleccionarlo y abrir su menú, superpuesto sobre el docker: nombre (se guarda al salir del campo), **Plantilla** y **Vaciar**.
+- **Carril de iconos** a la izquierda del docker: un icono por hueco. Pulsa uno para seleccionarlo y abrir su menú, superpuesto sobre el docker: nombre (se guarda al salir del campo), icono (pulsa el icono de la cabecera del menú y elige otro), **Plantilla** y **Vaciar**.
 - **Vaciar** deja el hueco libre. La plantilla no se borra: sigue disponible en el panel de plantillas.
 - El **«+»** de un hueco vacío abre su menú; desde ahí, **Plantilla** abre el panel.
-- El icono de ajustes junto al selector abre el panel **Modos de trabajo**: plantillas, modo en blanco y «Activar ahora» para el hueco seleccionado.
+- El icono de ajustes junto al selector abre el panel **Modos de trabajo**: plantillas y «Activar ahora» para el hueco seleccionado. Al elegir una plantilla, arriba aparece la vista previa con un mini docker que muestra cómo quedaría, y «Usar en este modo» la aplica y cierra el panel.
+- **Nuevo modo** es una plantilla más (la última de la rejilla): pide un nombre y un icono (16 a elegir), crea el modo vacío y cierra el panel. Lo que no definas en él hace lo de Directo.
+- Al activar un modo (con Ctrl+Shift+1/2/3 o desde la app) o volver a Directo, sale un aviso nativo muy breve (icono y nombre) abajo a la derecha, justo encima de la barra de tareas y de la bandeja, sin quitar el foco a lo que estés haciendo. Así sabes qué modo está activo aunque la app esté minimizada.
+- En **Directo** e **Inteligente** el carril de la izquierda muestra tres huecos reservados (discontinuos y desactivados): la estructura de pantalla es la misma en los tres modos.

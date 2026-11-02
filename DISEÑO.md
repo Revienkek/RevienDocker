@@ -62,7 +62,8 @@ Regla: **ninguna esquina llega a 90º ni queda pura (radio 0)**.
 ## Visor del dispositivo y edición
 
 - Norma: el docker siempre se ve completo y en una sola fila: carril de modos (`.mode-rail`, a la izquierda) | visor `.acrylic-case` | botonera `.chassis-side` (`✓` y `×`, a la derecha). Nunca se apilan. El ancho mínimo de la ventana (712 px, `MIN_W` en `studio_app.py`) es esa fila entera.
-- El carril existe también fuera de Modos, vacío y oculto (`visibility`), para que el visor no salte al cambiar de pestaña.
+- Estructura canónica, idéntica en Directo, Inteligente y Modos: (1) barra superior con el botón contextual, el selector de los tres modos y la luz; (2) fila de iconos a la izquierda + docker + iconos a la derecha; (3) mensaje informativo centrado debajo (`#deviceCtx`). No se inventan variantes por modo.
+- Fuera de Modos el carril muestra tres marcadores (`.mode-rail-btn.placeholder`: discontinuos, opacidad 0,5, desactivados y ocultos a lectores de pantalla) para que el visor no salte al cambiar de pestaña. Cuando Directo e Inteligente tengan iconos propios, ocuparán ese sitio.
 - Cuando hay cambios pendientes o el teclado requiere preparación, el botón `✓` cambia a fondo rojo completo (`--red`) en lugar de usar un punto flotante.
 - Debajo de cada pieza del visor (Tecla 1, Tecla 2, Tecla 3 y Rueda) se sitúa un botón compacto de lápiz (`.edit-pen`, 30 × 26 px): pulsar la pieza lanza la grabación directa y pulsar su lápiz abre o cierra el panel ② de edición en detalle.
 - Todos los desplegables (`.fold`) permanecen cerrados por defecto y se pliegan al cambiar entre Directo, Inteligente y Modos.
@@ -80,6 +81,18 @@ Regla: **ninguna esquina llega a 90º ni queda pura (radio 0)**.
 3. **Negrita de Expressway**: solo tengo la variante Rg; los pesos 600 y 700 se sintetizan y pueden verse borrosos.
 4. **Radios**: 4 px en controles y 6 px en contenedores. ¿Te parece bien esa proporción?
 5. **Título en mayúsculas** con el degradado: ¿lo prefieres en tipo mixto?
+
+## Referencia del docker en las plantillas
+
+El mini docker (`.mini-ref`: tres teclas + rueda a escala pequeña, solo lectura, con un pie de una línea) aparece únicamente donde ayuda a decidir: en la vista previa de la plantilla elegida, que va arriba del todo en el panel de plantillas y muestra cómo quedarían los botones. «Nuevo modo» hereda de Directo lo que no defina. El resto de menús (perfiles, Atajos para, menú de hueco) no lo llevan: no deciden acciones y solo añadirían ruido.
+
+## Selector de icono
+
+Rejilla de 16 iconos (`.icon-picker`, 8 columnas, 4 por debajo de 700 px) con `radiogroup`, estado activo y etiqueta en español. Todos tienen glifo equivalente en `volume_overlay.py`, así que el aviso nativo nunca muestra un icono genérico por error.
+
+## Aviso nativo de modo
+
+`volume_overlay.py`: ventana siempre visible, sin foco y fuera de la barra de tareas, 280 × 56 px, con icono y nombre del modo (y el atajo). Se coloca en la esquina inferior derecha del área útil (`notice_origin`, con 16 px de margen), justo encima de la bandeja, 1,8 s. No es una notificación del Centro de actividades de Windows: debe verse al instante aunque la app esté minimizada.
 
 ## Perfiles de Directo
 

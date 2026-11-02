@@ -103,6 +103,13 @@ class ModeTests(unittest.TestCase):
             e.handle("KNOB_CW", False, True)          # el acorde solo vale con los botones 1–3
             self.assertEqual(e.last["layer"], "base")
 
+class NoticeTests(unittest.TestCase):
+    def test_el_aviso_va_abajo_a_la_derecha_del_area_util(self):
+        from volume_overlay import notice_origin
+        # Pantalla 1920×1080 con barra de tareas de 48 px: el área útil termina en y=1032.
+        self.assertEqual(notice_origin((0, 0, 1920, 1032), 280, 56), (1920 - 280 - 16, 1032 - 56 - 16))
+
+
 class ChordTests(unittest.TestCase):
     def test_solo_ctrl_shift_es_el_acorde_de_modos(self):
         self.assertTrue(se.chord_held({"ctrl": True, "shift": True, "alt": False}))

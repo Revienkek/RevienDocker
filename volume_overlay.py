@@ -1,6 +1,7 @@
 """Indicador discreto sobre la barra de tareas: nivel de volumen y cambio de modo (icono + poco texto)."""
 
 import ctypes
+import ctypes.wintypes
 import queue
 import threading
 
@@ -11,7 +12,23 @@ _started = False
 # Iconos de «Segoe MDL2 Assets» (incluida en Windows) para los iconos que ofrece la interfaz.
 GLYPHS = {"target": "\uE765", "music": "\uE8D6", "mic": "\uE720", "clapperboard": "\uE714", "app-window": "\uE774",
           "brush": "\uE790", "code-xml": "\uE943", "gamepad-2": "\uE7FC", "pen-line": "\uE70F", "sliders-horizontal": "\uE713"}
+GLYPHS.update({name: chr(code) for name, code in {"globe": 0xE774, "film": 0xE714, "terminal": 0xE756, "zap": 0xE945,
+                                                 "message-circle": 0xE8BD, "notebook-pen": 0xE70F, "volume-2": 0xE767, "sparkles": 0xE734}.items()})
 W, H = 280, 56
+MARGIN = 16
+
+
+def notice_origin(work, width, height, margin=MARGIN):
+    """Esquina inferior derecha del área útil (justo encima de la barra de tareas y de la bandeja)."""
+    _left, _top, right, bottom = work
+    return right - width - margin, bottom - height - margin
+
+
+def _work_area(user32, fallback):
+    rect = ctypes.wintypes.RECT()
+    if user32.SystemParametersInfoW(0x0030, 0, ctypes.byref(rect), 0):   # SPI_GETWORKAREA
+        return rect.left, rect.top, rect.right, rect.bottom
+    return fallback
 
 
 def _post(item):
@@ -90,9 +107,8 @@ def _run():
                     canvas.itemconfigure(icon, text=item[1], font=("Segoe MDL2 Assets", 18))
                     canvas.itemconfigure(title, text=item[2])
                     canvas.itemconfigure(hint, text=item[3])
-                # Posición cercana a la barra, sin robar el foco a juegos ni editores.
-                x = max(16, int(root.winfo_screenwidth() * 0.075))
-                y = max(16, root.winfo_screenheight() - 150)
+                # Abajo a la derecha, sobre la bandeja, sin robar el foco a juegos ni editores.
+                x, y = notice_origin(_work_area(user32, (0, 0, root.winfo_screenwidth(), root.winfo_screenheight())), W, H)
                 user32.SetWindowPos(hwnd, -1, x, y, W, H, 0x0010 | 0x0040)  # NOACTIVATE | SHOWWINDOW
                 until[0] = time.monotonic() + 1.8
             elif until[0] and time.monotonic() >= until[0]:
