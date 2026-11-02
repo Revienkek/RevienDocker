@@ -14,7 +14,6 @@ import ctypes
 import os
 import sys
 import threading
-import time
 
 # Declarar Per-Monitor V2 DPI awareness antes de inicializar ningún control WinForms / WebView2
 try:
@@ -33,16 +32,10 @@ from app import ENGINE, PORT, make_server
 from studio_icon import icon_image
 
 TITLE = "RevienDocker"
-# Ancho mínimo = carril (56) + visor (530) + botones (56) + separaciones, más márgenes de la app: 712 px.
-# Con eso, el docker nunca baja de su fila: el tick y la X siguen a la derecha.
-MIN_W, MIN_H = 712, 560
-VK_LBUTTON = 0x01
+# Ventana de tamaño fijo (PRODUCT.md): no se redimensiona ni se maximiza.
+WIN_W, WIN_H = 720, 420
 MUTEX_NAME = "Local\\RevienDocker_SingleInstance_Mutex"
 ERROR_ALREADY_EXISTS = 183
-
-
-class _Point(ctypes.Structure):
-    _fields_ = [("x", ctypes.c_long), ("y", ctypes.c_long)]
 
 
 def activate_existing_instance() -> bool:
@@ -83,16 +76,12 @@ def main():
     ENGINE.apply(ENGINE.studio, persist=False)  # el motor arranca siempre: el docker y la app son uno
     threading.Thread(target=server.serve_forever, daemon=True, name="studio-http").start()
 
-    window = webview.create_window(TITLE, f"http://127.0.0.1:{PORT}/index.html", width=760, height=720, min_size=(MIN_W, MIN_H),
+    window = webview.create_window(TITLE, f"http://127.0.0.1:{PORT}/index.html", width=WIN_W, height=WIN_H, resizable=False,
                                    frameless=True, easy_drag=False, background_color="#08090c", hidden="--minimized" in sys.argv)
-    state = {"quit": False, "max": False, "hidden": "--minimized" in sys.argv, "minimized": False}
+    state = {"quit": False, "hidden": "--minimized" in sys.argv, "minimized": False}
     tray = None
 
-    def set_maximized():
-        state["max"] = True
-
     def set_restored():
-        state["max"] = False
         state["minimized"] = False
         if tray:
             tray.update_menu()
@@ -102,8 +91,30 @@ def main():
         if tray:
             tray.update_menu()
 
-    window.events.maximized += set_maximized
     window.events.restored += set_restored
+
+    def fit_client():
+        """Windows resta el marco al crear la ventana sin marco: se mide el área real de la página y se corrige
+        hasta que sea exactamente WIN_W × WIN_H (la interfaz está maquetada a ese tamaño)."""
+        for _ in range(3):
+            try:
+                w, h = window.evaluate_js("[window.innerWidth, window.innerHeight]")
+            except Exception:
+                return
+            dw, dh = WIN_W - int(w), WIN_H - int(h)
+            if not dw and not dh:
+                return
+            window.resize(window.width + dw, window.height + dh)
+
+    def no_maximize():
+        """Sin botón de maximizar: tampoco por Win+Flecha arriba ni al arrastrar la ventana a un borde."""
+        user32 = ctypes.windll.user32
+        hwnd = user32.FindWindowW(None, TITLE)
+        if hwnd:
+            user32.SetWindowLongW(hwnd, -16, user32.GetWindowLongW(hwnd, -16) & ~0x10000)  # GWL_STYLE, WS_MAXIMIZEBOX
+
+    window.events.loaded += fit_client
+    window.events.loaded += no_maximize
     window.events.minimized += set_minimized
 
     def hide_to_tray():
@@ -131,39 +142,6 @@ def main():
         else:
             hide_to_tray()
 
-    def resize_drag(edge):
-        """Ventana sin marco: Windows no ofrece borde nativo que arrastrar, así que seguimos el ratón
-        mientras el botón siga pulsado y ajustamos tamaño y posición (mínimo = min_size)."""
-        if state["max"]:
-            return
-        user32 = ctypes.windll.user32
-        scale = (user32.GetDpiForWindow(user32.FindWindowW(None, TITLE)) or 96) / 96
-
-        def run():
-            start = _Point()
-            user32.GetCursorPos(ctypes.byref(start))
-            x0, y0, w0, h0 = window.x, window.y, window.width, window.height
-            while user32.GetAsyncKeyState(VK_LBUTTON) & 0x8000:
-                now = _Point()
-                user32.GetCursorPos(ctypes.byref(now))
-                dx, dy = (now.x - start.x) / scale, (now.y - start.y) / scale
-                x, y, w, h = x0, y0, w0, h0
-                if "w" in edge:
-                    w = max(MIN_W, w0 - dx)
-                    x = x0 + w0 - w
-                if "e" in edge:
-                    w = max(MIN_W, w0 + dx)
-                if "n" in edge:
-                    h = max(MIN_H, h0 - dy)
-                    y = y0 + h0 - h
-                if "s" in edge:
-                    h = max(MIN_H, h0 + dy)
-                window.resize(round(w), round(h))
-                window.move(round(x), round(y))
-                time.sleep(0.01)
-
-        threading.Thread(target=run, daemon=True, name="studio-resize").start()
-
     def quit_app():
         state["quit"] = True
         if tray:
@@ -172,12 +150,8 @@ def main():
         window.destroy()
 
     def control(action):
-        if action.startswith("resize-"):
-            resize_drag(action[len("resize-"):])
-        elif action == "minimize":
+        if action == "minimize":
             window.minimize()
-        elif action == "maximize":
-            window.restore() if state["max"] else window.maximize()
         elif action == "close":
             if ENGINE.hook is not None:
                 hide_to_tray()  # el motor inteligente sigue en la bandeja

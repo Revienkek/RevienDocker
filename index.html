@@ -17,7 +17,6 @@
     <div class="tb-drag pywebview-drag-region"></div>
     <div class="winctl" id="winctl" hidden>
       <button data-win="minimize" title="Minimizar"><i data-ic="minus"></i></button>
-      <button data-win="maximize" title="Maximizar"><i data-ic="square"></i></button>
       <button data-win="close" class="close" id="winClose" title="Cerrar"><i data-ic="x"></i></button>
     </div>
   </header>
@@ -25,7 +24,7 @@
   <main class="stage">
 
     <section class="mode-block">
-      <div class="mode-controls"><div class="profile-wrap" id="profileWrap"><button id="profileToggle" class="profile-toggle" title="Perfiles de Directo" aria-label="Perfiles de Directo" aria-expanded="false"><i data-ic="plus"></i></button></div><button id="smartToggle" class="profile-toggle" aria-label="Atajos para apps" title="Atajos para apps" aria-expanded="false" aria-controls="smartPanel" hidden><i data-ic="layers"></i></button><button id="workModesToggle" class="profile-toggle" aria-label="Modos de trabajo" title="Modos de trabajo" aria-expanded="false" aria-controls="workModesPanel" hidden><i data-ic="sliders-horizontal"></i></button><div class="modes" role="radiogroup" aria-label="Modo">
+      <div class="mode-controls"><div class="profile-wrap" id="profileWrap"><button id="profileToggle" class="profile-toggle" title="Perfiles de Directo" aria-label="Perfiles de Directo" aria-expanded="false"><i data-ic="plus"></i></button></div><button id="smartToggle" class="profile-toggle" aria-label="Atajos para apps" title="Atajos para apps" aria-expanded="false" aria-controls="smartPanel" hidden><i data-ic="layers"></i></button><button id="modeNow" class="profile-toggle" aria-label="Activar este modo ahora" title="Activar este modo ahora" hidden><i data-ic="play"></i></button><div class="modes" role="radiogroup" aria-label="Modo">
       <button data-mode="direct" role="radio" title="Lo que hace cada botón al pulsarlo solo, en cualquier app. Es la base de todo."><i data-ic="target"></i>Directo</button>
       <button data-mode="smart" role="radio" title="Mantén un modificador y pulsa un botón: atajos propios para la app que tengas delante."><i data-ic="brain"></i>Inteligente</button>
       <button data-mode="modes" role="radio" title="Tres modos de trabajo: Ctrl+Shift+1/2/3 cambia de modo y repetirlo vuelve a Directo."><i data-ic="shapes"></i>Modos</button>
@@ -78,37 +77,7 @@
               </details>
           </details>
 
-          <div class="trig-row"><span class="muted">Tecla de activación</span><div class="seg" id="triggerSeg"></div></div>
           <p class="err" id="engineErr" hidden></p>
-        </section>
-
-        </div>
-
-        <div class="smart-panel" id="workModesPanel" aria-label="Modos de trabajo" hidden>
-        <section class="mode-bar" id="modeBar" hidden>
-          <div class="smart-head">
-            <span class="s-label"><i data-ic="shapes"></i>Modos de trabajo</span>
-            <span class="smart-head-actions"><span class="chord" title="Mantén Ctrl y Shift y pulsa un botón del docker"><kbd>Ctrl</kbd><i data-ic="plus"></i><kbd>Shift</kbd><i data-ic="plus"></i><kbd>1 · 2 · 3</kbd></span><button id="workModesClose" class="close-editor" aria-label="Cerrar modos de trabajo">×</button></span>
-          </div>
-          <div class="mode-actions">
-            <button id="modeToggle" title="Activa o desactiva este modo ahora, sin usar el teclado"><i data-ic="play"></i><span id="modeToggleText">Activar ahora</span></button>
-          </div>
-          <details class="fold" id="modeTpl">
-            <summary><i data-ic="layout-grid"></i><span class="s-t" id="modeTplTitle">Plantillas<small>Un modo completo, listo para personalizar</small></span><i class="chev" data-ic="chevron-down"></i></summary>
-            <div class="fold-body">
-              <div class="preset-grid" id="presets"></div>
-              <div class="preset-preview" id="presetPreview" hidden>
-                <div><strong id="presetTitle"></strong><p class="muted" id="presetDescription"></p></div>
-                <div class="preset-mapping" id="presetMapping"></div>
-                <p class="muted" id="presetNote"></p>
-                <div class="blank-fields" id="blankFields" hidden>
-                  <div class="form-group"><label for="blankName">Nombre del modo</label><input type="text" id="blankName" maxlength="30" /></div>
-                  <div class="form-group"><label id="blankIconsLabel">Icono</label><div id="blankIcons"></div></div>
-                </div>
-                <button class="primary" id="applyPreset">Usar en este modo</button>
-              </div>
-            </div>
-          </details>
         </section>
 
         </div>
@@ -198,11 +167,6 @@
   </div>
 </div>
 
-<div class="resize" id="resize" hidden>
-  <i data-edge="n"></i><i data-edge="s"></i><i data-edge="w"></i><i data-edge="e"></i>
-  <i data-edge="nw"></i><i data-edge="ne"></i><i data-edge="sw"></i><i data-edge="se"></i>
-</div>
-
 <div id="recOverlay" class="overlay">
   <div class="modal-card rec-card">
     <h2><span class="rec-dot"></span><span id="recTitle">Grabando…</span></h2>
@@ -214,19 +178,18 @@
 </div>
 
 <div id="addOverlay" class="overlay">
-  <div class="modal-card">
-    <h2><i data-ic="layers"></i>Añadir una app</h2>
-    <div class="form-group"><label>Plantillas</label><div class="pick-list" id="tplList"></div></div>
-    <div class="form-group"><label>Abiertas ahora</label><div class="pick-list" id="winList"></div><p class="muted" id="winHint"></p></div>
+  <div class="modal-card add-card" role="dialog" aria-label="Añadir una app">
+    <div class="add-head"><h2><i data-ic="layers"></i>Añadir una app</h2><button id="addCancel" class="close-editor" aria-label="Cerrar">×</button></div>
+    <div class="form-group"><label>Plantillas</label><div class="chip-grid" id="tplList"></div></div>
+    <div class="form-group"><label>Abiertas ahora</label><div class="chip-grid chip-scroll" id="winList"></div><p class="muted" id="winHint"></p></div>
     <div class="form-group">
       <label for="newExe">O escribe el programa</label>
-      <div class="layer-edit" style="grid-template-columns:1fr 1fr auto">
+      <div class="add-own">
         <input type="text" id="newName" placeholder="Nombre (ej. Premiere)" maxlength="40" />
         <input type="text" id="newExe" placeholder="premiere.exe" />
         <button id="btnNewLayer" class="primary"><i data-ic="plus"></i>Añadir</button>
       </div>
     </div>
-    <button id="addCancel">Cerrar</button>
   </div>
 </div>
 

@@ -28,7 +28,7 @@ svg { shape-rendering: geometricPrecision; text-rendering: geometricPrecision; }
 img { image-rendering: -webkit-optimize-contrast; image-rendering: high-quality; }
 .app { height: 100%; display: flex; flex-direction: column; border: 1px solid var(--line); background:
   radial-gradient(900px 380px at 50% -8%, rgba(255, 255, 255, 0.05), transparent 70%), var(--bg); }
-.scroll { flex: 1; overflow-y: auto; padding: 22px 12px 28px; }
+.scroll { flex: 1; overflow-y: auto; padding: 12px 12px 10px; }
 .scroll::-webkit-scrollbar { width: 10px; }
 .scroll::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 4px; border: 3px solid var(--bg); }
 .muted { color: var(--muted); font-size: 0.78rem; }
@@ -38,7 +38,7 @@ i[data-ic], i.i { display: inline-flex; font-style: normal; }
 
 /* ---------- Controles ---------- */
 button, .keycap, .enc-dir, .knob, .layer-tab, .recipe, .opt, .mod-btn, .tile {
-  transition: transform 160ms var(--ease-out), background-color 160ms ease, border-color 160ms ease, color 160ms ease, opacity 160ms ease;
+  transition: transform 160ms var(--ease-out), background-color 160ms ease, border-color 160ms ease, color 160ms ease, opacity 160ms ease, box-shadow 160ms ease;
 }
 button {
   cursor: pointer; font: 600 0.8rem var(--font); color: var(--text); padding: 8px 12px; border-radius: 4px;
@@ -72,7 +72,7 @@ label { font-size: 0.74rem; color: var(--muted); font-weight: 600; }
 kbd { font: 700 0.72rem var(--mono); background: var(--panel-3); border: 1px solid var(--line-2); border-bottom-width: 2px; border-radius: 4px; padding: 1px 6px; }
 
 /* ---------- Barra de título ---------- */
-.titlebar { height: 50px; flex: none; display: flex; align-items: center; gap: 8px; padding: 0 0 0 14px; background: var(--panel); border-bottom: 1px solid var(--line); position: relative; }
+.titlebar { height: 50px; flex: none; display: flex; align-items: center; gap: 8px; padding: 0 0 0 58px; background: var(--panel); border-bottom: 1px solid var(--line); position: relative; }
 .tb-brand { position: absolute; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 8px; flex: none; }
 /* Título: vector (assets/wordmark.svg), con el degradado metálico y el filete fino dentro del propio SVG */
 .tb-brand .wordmark { height: 24px; width: auto; display: block; shape-rendering: geometricPrecision; }
@@ -90,11 +90,11 @@ kbd { font: 700 0.72rem var(--mono); background: var(--panel-3); border: 1px sol
 .winctl button:active { transform: none; }
 
 /* ---------- Layout: una sola columna central ---------- */
-.stage { width: 100%; max-width: 780px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; padding: 6px 0 12px; }
+.stage { width: 100%; max-width: 780px; margin: 0 auto; display: flex; flex-direction: column; gap: 6px; padding: 0; }
 @media (max-width: 700px) {
   .tb-brand .wordmark, #deviceText, #engineText { display: none; }
 }
-.mode-block { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.mode-block { display: flex; flex-direction: column; align-items: center; gap: 8px; }
 .mode-controls { display: flex; align-items: center; gap: 10px; }
 .mode-block { position: relative; }
 .lighting-button { align-self: stretch; padding: 8px 12px; }
@@ -106,31 +106,11 @@ kbd { font: 700 0.72rem var(--mono); background: var(--panel-3); border: 1px sol
 .modes { display: flex; gap: 4px; padding: 4px; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; }
 .modes button { border: 1px solid transparent; background: transparent; padding: 10px 22px; border-radius: 4px; color: var(--muted); font-size: 0.88rem; }
 .modes button .ic { width: 18px; height: 18px; }
-/* Ventana sin marco: zonas finas en bordes y esquinas (solo con puntero fino; el arrastre lo hace studio_app.py) */
-.resize { position: fixed; inset: 0; pointer-events: none; z-index: 45; }
-.resize i { position: absolute; pointer-events: auto; }
-.resize [data-edge="n"], .resize [data-edge="s"] { left: 12px; right: 12px; height: 6px; }
-.resize [data-edge="n"] { top: 0; }
-.resize [data-edge="s"] { bottom: 0; }
-.resize [data-edge="w"], .resize [data-edge="e"] { top: 12px; bottom: 12px; width: 6px; }
-.resize [data-edge="w"] { left: 0; }
-.resize [data-edge="e"] { right: 0; }
-.resize [data-edge="nw"], .resize [data-edge="ne"], .resize [data-edge="sw"], .resize [data-edge="se"] { width: 12px; height: 12px; }
-.resize [data-edge="nw"] { top: 0; left: 0; }
-.resize [data-edge="ne"] { top: 0; right: 0; }
-.resize [data-edge="sw"] { bottom: 0; left: 0; }
-.resize [data-edge="se"] { bottom: 0; right: 0; }
-@media (hover: hover) and (pointer: fine) {
-  .resize [data-edge="n"], .resize [data-edge="s"] { cursor: ns-resize; }
-  .resize [data-edge="w"], .resize [data-edge="e"] { cursor: ew-resize; }
-  .resize [data-edge="nw"], .resize [data-edge="se"] { cursor: nwse-resize; }
-  .resize [data-edge="ne"], .resize [data-edge="sw"] { cursor: nesw-resize; }
-}
 .step-row { display: flex; align-items: center; gap: 10px; font-size: 0.78rem; font-weight: 700; color: var(--muted); letter-spacing: 0.04em; }
 .step-row .step { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: #fff; color: #0a0a0c; font-size: 0.72rem; letter-spacing: 0; }
 .step-row em { font-style: normal; color: var(--text); font-weight: 600; margin-left: auto; letter-spacing: 0; font-size: 0.82rem; }
 .step-row .num { margin-left: auto; }
-.device-card, .editor { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.device-card, .editor { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .form-group { display: flex; flex-direction: column; gap: 7px; }
 details > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 12px; color: var(--text); font-weight: 600; font-size: 0.86rem; }
 details > summary::-webkit-details-marker { display: none; }
@@ -172,8 +152,6 @@ details[open] > summary .chev { transform: rotate(180deg); }
 .rule .ic { color: var(--muted); }
 .rule b { font-family: var(--mono); font-weight: 700; }
 .rule .why { color: var(--muted); flex-basis: 100%; font-size: 0.76rem; }
-.trig-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-.trig-row .seg { min-width: 200px; }
 .layer-edit { display: grid; grid-template-columns: 1fr 1.4fr auto; gap: 10px; align-items: end; }
 .layer-edit .form-group { gap: 6px; }
 .err { color: var(--amber); font-size: 0.76rem; }
@@ -183,7 +161,7 @@ details[open] > summary .chev { transform: rotate(180deg); }
 .ctx { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; min-height: 28px; font-size: 0.8rem; color: var(--muted); }
 .ctx .ic { width: 14px; height: 14px; color: var(--muted); }
 .ctx b { color: var(--text); font-weight: 700; }
-.chassis-wrap { display: flex; justify-content: center; padding: 12px 8px; border-radius: 6px; background: radial-gradient(ellipse 60% 70% at 50% 45%, rgba(255, 255, 255, 0.06), transparent 72%); }
+.chassis-wrap { display: flex; justify-content: center; padding: 2px 8px; border-radius: 6px; background: radial-gradient(ellipse 60% 70% at 50% 45%, rgba(255, 255, 255, 0.06), transparent 72%); }
 /* Orden fijo: carril de modos | visor | botones aplicar/descartar. Nunca se apilan. */
 .device-stage { position: relative; display: flex; align-items: center; justify-content: center; gap: 14px; }
 .acrylic-case { display: flex; align-items: flex-end; gap: 22px; padding: 26px 32px 20px; max-width: 100%; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.16);
@@ -274,23 +252,14 @@ details[open] > summary .chev { transform: rotate(180deg); }
 .obs-conn { display: grid; grid-template-columns: 1.4fr 0.7fr 1.2fr; gap: 6px; }
 .presets-bar { display: flex; flex-wrap: wrap; gap: 8px; }
 .advanced-section { display: flex; flex-direction: column; gap: 10px; }
-.preset-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 8px; }
-.preset-card { justify-content: flex-start; align-items: flex-start; text-align: left; padding: 13px; }
-.preset-card .ic { width: 20px; height: 20px; flex: none; }
-.preset-card span { display: flex; flex-direction: column; gap: 3px; }
-.preset-card small { color: var(--muted); font-weight: 400; line-height: 1.4; }
-.preset-card.active { border-color: #fff; background: var(--panel-3); }
-.preset-preview { display: flex; flex-direction: column; gap: 12px; border: 1px solid var(--line-2); background: var(--bg); border-radius: 6px; padding: 16px; }
-.preset-preview .primary { align-self: flex-start; }
-.preset-preview { order: -1; }
 .hex-console { background: #06070a; border: 1px solid var(--line); border-radius: 4px; padding: 9px 11px; font: 0.7rem var(--mono); color: #aab4c5; height: 96px; overflow-y: auto; line-height: 1.5; font-variant-numeric: tabular-nums; }
 
 /* ---------- Modales y avisos ---------- */
 .overlay { position: fixed; inset: 0; background: rgba(4, 5, 8, 0.9); display: flex; align-items: center; justify-content: center; z-index: 50;
   opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 150ms var(--ease-out), visibility 0s linear 150ms; padding: 16px; }
 .overlay.show { opacity: 1; visibility: visible; pointer-events: auto; transition: opacity 200ms var(--ease-out); }
-.modal-card { width: min(540px, 100%); max-height: 90vh; overflow: auto; background: var(--panel); border: 1px solid var(--line-2); border-radius: 4px; padding: 22px;
-  display: flex; flex-direction: column; gap: 14px; transform: scale(0.95); transition: transform 150ms var(--ease-out); }
+.modal-card { width: min(540px, 100%); max-height: 90vh; overflow: auto; background: var(--panel); border: 1px solid var(--line-2); border-radius: 6px; padding: 22px;
+  display: flex; flex-direction: column; gap: 14px; transform: scale(0.97); transition: transform 150ms var(--ease-out); }
 .overlay.show .modal-card { transform: scale(1); transition: transform 200ms var(--ease-out); }
 .modal-card h2 { font-size: 1rem; display: flex; align-items: center; gap: 10px; }
 .rec-card { align-items: center; text-align: center; border-color: #fff; }
@@ -299,9 +268,6 @@ details[open] > summary .chev { transform: rotate(180deg); }
 .rec-card .chips { min-height: 64px; }
 .rec-status { font-size: 0.76rem; color: var(--green); }
 .rec-status.warn { color: var(--amber); }
-.pick-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 7px; }
-.pick-list button { flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; }
-.pick-list small { font: 400 0.68rem var(--mono); color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
 .toast { position: fixed; bottom: 18px; left: 50%; background: #fff; color: #0a0a0c; font-weight: 700; padding: 9px 16px; border-radius: 4px; opacity: 0;
   transform: translate(-50%, 8px); transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out); pointer-events: none; z-index: 60; }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
@@ -336,28 +302,31 @@ details[open] > summary .chev { transform: rotate(180deg); }
 /* Editor superpuesto para mantener estable la vista Directo. */
 .tb-brand .wordmark { max-width: 215px; height: 20px; }
 .cur-head .close-editor { margin-left: auto; color: var(--muted); min-width: 36px; min-height: 36px; }
-.editor-overlay { position: fixed; z-index: 40; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(620px, calc(100vw - 32px)); max-height: calc(100vh - 80px); overflow-y: auto; background: var(--panel); border: 1px solid var(--line-2); box-shadow: 0 18px 55px #000c; }
+.editor-overlay { position: fixed; z-index: 40; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(620px, calc(100vw - 32px)); max-height: calc(100vh - 24px); overflow-y: auto; background: var(--panel); border: 1px solid var(--line-2); box-shadow: 0 18px 55px #000c; }
 #obsConnection { border-top: 1px solid var(--line); padding-top: 12px; }
 #obsConnection > summary { min-height: 36px; }
 #obsConnection .obs-conn { margin-top: 10px; }
 
 /* Menús de Directo, Inteligente y Modos: capa superpuesta sobre el Docker, centrada en la ventana como Atajos para. */
-.deck-drawer { position: fixed; z-index: 40; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; gap: 12px; width: min(620px, calc(100vw - 32px)); max-height: calc(100vh - 80px); overflow-y: auto; }
+.deck-drawer { position: fixed; z-index: 40; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; gap: 12px; width: min(620px, calc(100vw - 32px)); max-height: calc(100vh - 24px); overflow-y: auto; }
 .deck-drawer > * { min-width: 0; }
 .deck-drawer:not(:has(> :not([hidden]))) { display: none; }
+/* Ancladas arriba, no centradas: al crecer una vista previa, lo que ya estaba pulsado no salta de sitio. */
+.deck-drawer { top: 116px; transform: translateX(-50%); max-height: calc(100vh - 124px); }
+.deck-drawer:has(> .mode-menu.tpl:not([hidden])) { top: 58px; max-height: calc(100vh - 66px); }
 
 /* Atajos de Inteligente en un panel compacto sobre el Docker. */
 .smart-panel { width: 100%; padding: 20px; display: flex; flex-direction: column; gap: 14px; background: var(--panel); border: 1px solid var(--line-2); border-radius: 8px; box-shadow: 0 18px 55px #000c; }
 .smart-head-actions { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
 .smart-head-actions .close-editor { flex: none; min-width: 36px; min-height: 36px; color: var(--muted); }
 .smart-panel .smart-bar { padding: 14px; }
+.smart-bar:not(:has(> :not([hidden]))) { display: none; }
 
-#workModesPanel .mode-bar { padding: 0; border: 0; background: transparent; }
 
 /* Carril de modos a la izquierda del visor: un icono por hueco, con su menú al pulsarlo. */
-.mode-rail { position: relative; width: 56px; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 8px 0; }
+.mode-rail { position: relative; width: 40px; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 8px 0; }
 .mode-rail-btn { position: relative; width: 40px; height: 40px; padding: 0; border-radius: 6px; background: transparent; border-color: var(--line); color: var(--muted);
-  transition: transform 160ms var(--ease-out), background-color 160ms ease, border-color 160ms ease, color 160ms ease; }
+  transition: transform 160ms var(--ease-out), background-color 160ms ease, border-color 160ms ease, color 160ms ease, box-shadow 160ms ease; }
 @media (hover: hover) and (pointer: fine) { .mode-rail-btn:hover { background: var(--panel-2); border-color: var(--line-2); color: var(--text); } }
 .mode-rail-btn .ic { width: 18px; height: 18px; }
 .mode-rail-btn.active { background: var(--panel-2); border-color: var(--line-2); color: #fff; }
@@ -397,6 +366,61 @@ details[open] > summary .chev { transform: rotate(180deg); }
 .icon-opt .ic { width: 18px; height: 18px; }
 @media (hover: hover) and (pointer: fine) { .icon-opt:hover { background: var(--panel-2); color: var(--text); } }
 .icon-opt.active { background: var(--panel-3); border-color: #fff; color: #fff; }
-.blank-fields { display: flex; flex-direction: column; gap: 12px; }
 @media (max-width: 700px) { .icon-picker { grid-template-columns: repeat(4, 1fr); } .mini-ref { flex-wrap: wrap; } }
-
+
+/* ---------- Ventana fija (PRODUCT.md): todo compacto, sin margen muerto ---------- */
+.winctl { align-self: center; margin-right: 58px; gap: 4px; }
+.winctl button { width: 34px; height: 30px; }
+.chip-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 6px; }
+.chip-grid .layer-tab.icon-only { min-width: 0; }
+.chip-grid .tab-name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chip-scroll { max-height: 114px; overflow-y: auto; padding-right: 4px; }
+.chip-scroll::-webkit-scrollbar { width: 8px; }
+.chip-scroll::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 4px; border: 2px solid var(--panel); }
+.add-card { width: min(620px, 100%); padding: 14px 16px; gap: 10px; }
+.add-card .form-group { gap: 5px; }
+.add-head { display: flex; align-items: center; justify-content: space-between; }
+.add-head .close-editor { min-width: 30px; min-height: 30px; padding: 0; color: var(--muted); }
+.add-own { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; }
+.preset-preview { display: grid; gap: 10px; padding: 12px; border: 1px solid var(--line-2); background: var(--bg); border-radius: 6px; }
+.preset-top { display: flex; align-items: center; gap: 16px; }
+.preset-top .mini-ref { flex: none; flex-direction: column; align-items: flex-start; gap: 6px; }
+.preset-info { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.preset-info strong { font-size: 0.82rem; }
+.preset-info .primary { margin-top: 4px; }
+.preset-preview .blank-row { display: flex; gap: 8px; }
+.preset-preview .blank-row .mode-inline-name { flex: 1; }
+.preset-preview .icon-picker { grid-template-columns: repeat(16, 1fr); gap: 4px; }
+.preset-preview .icon-opt { min-height: 32px; }
+.mode-menu .chip-grid { grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); }
+
+/* ---------- Lenguaje de estados (PRODUCT.md) ---------- */
+/* Seleccionado: borde blanco + halo suave. Es la misma señal en carril, chips, iconos y plantillas. */
+.mode-rail-btn.active, .layer-tab.active, .icon-opt.active, .modes button.active { border-color: rgba(255, 255, 255, 0.7); box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.07); }
+/* ✓ verde y × rojo: el tick siempre es «aplicar», la equis siempre es «quitar». Con cambios pendientes el tick se rellena. */
+#btnFlashAll { color: var(--green); border-color: rgba(74, 222, 128, 0.35); }
+#btnFlashAll.alert { background: var(--green); border-color: var(--green); color: #07130b; box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.14); }
+#btnDiscard { color: var(--red); border-color: rgba(248, 113, 113, 0.35); }
+@media (hover: hover) and (pointer: fine) {
+  #btnFlashAll:hover { border-color: var(--green); background: rgba(74, 222, 128, 0.1); }
+  #btnFlashAll.alert:hover { background: #6ee7a0; border-color: #6ee7a0; }
+  #btnDiscard:hover { border-color: var(--red); background: rgba(248, 113, 113, 0.1); }
+}
+/* El editor de una tecla (lápiz) también se ancla arriba y es compacto: sin subtítulos largos en sus desplegables. */
+.editor-overlay { top: 58px; transform: translateX(-50%); max-height: calc(100vh - 66px); gap: 8px; }
+.acc { gap: 6px; }
+.acc .fold { padding: 0 14px; }
+.acc .fold > summary { min-height: 40px; padding: 6px 0; }
+.acc .fold > summary small { display: none; }
+.acc .fold > summary > .ic:first-child { width: 18px; height: 18px; }
+.acc .fold-body { gap: 10px; padding: 2px 0 12px; }
+#modeNow.on { border-color: rgba(74, 222, 128, 0.55); color: var(--green); }
+
+/* ---------- Movimiento de las capas (frecuencia baja: se animan, rápido y con ease-out) ---------- */
+@keyframes layer-in { from { opacity: 0; scale: 0.97; } }
+.deck-drawer > :not([hidden]), .editor-overlay:not([hidden]) { animation: layer-in 180ms var(--ease-out); transform-origin: 50% 40%; }
+@media (prefers-reduced-motion: reduce) {
+  .deck-drawer > :not([hidden]), .editor-overlay:not([hidden]) { animation: none; }
+}
+
+

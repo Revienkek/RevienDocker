@@ -8,7 +8,7 @@ Un programador para el macropad de 3 teclas + 1 rueda (chip WCH CH57x). El tecla
 
 ## 2. Arrancar
 
-**Como programa (recomendado):** abre el acceso directo «RevienDocker» del escritorio (o `dist\RevienDocker.exe`). Es una ventana propia, sin marco de Windows: arriba tiene su minimizar, maximizar y cerrar.
+**Como programa (recomendado):** abre el acceso directo «RevienDocker» del escritorio (o `dist\RevienDocker.exe`). Es una ventana propia, sin marco de Windows: arriba tiene su minimizar y cerrar. Su tamaño es fijo.
 - RevienDocker debe estar abierto o en la bandeja para que el motor ejecute las acciones de los controles.
 - En modo **Inteligente**, cerrar la oculta en la bandeja (junto al reloj) y el motor sigue activo. Salir del todo: clic derecho en su icono → Salir.
 - En el menú del icono de la bandeja puedes elegir **Minimizar a la bandeja** o **Mostrar RevienDocker**, según esté visible u oculta. El motor continúa activo mientras la app esté en la bandeja.
@@ -35,7 +35,7 @@ Abre `http://127.0.0.1:8765/index.html`. También vale abrir `index.html` con do
 1. Pulsa la tarjeta «Inteligente». Aparece la barra de capas y los ajustes.
 2. Pulsa una vez «Preparar teclado». El teclado pasa a emitir F13–F18 y este programa las intercepta (ninguna app las ve).
 3. **Capa Base:** lo que hace cada botón sin tecla de activación.
-4. **＋ Añadir app:** elige una plantilla (OBS Studio, Navegador, Spotify), una app abierta ahora o escribe el `.exe`. Esa capa se usa cuando mantienes **Shift** (o Ctrl/Alt, a tu elección) y pulsas un botón con esa app en primer plano.
+4. **＋ Añadir app:** elige entre los chips de plantillas (OBS Studio, Navegador, Spotify, WoW Forever), los de apps abiertas ahora (icono y nombre, con desplazamiento si hay muchas) o escribe el `.exe`. Esa capa se usa cuando mantienes **Shift** (o Ctrl/Alt, a tu elección) y pulsas un botón con esa app en primer plano.
 5. Un botón vacío en una capa de app usa la acción de la Base. Una app sin capa también.
 6. «App en primer plano» muestra en vivo qué detecta el programa; la pestaña de la capa se enciende en verde al coincidir. Cambia de ventana y míralo.
 7. **▶ Probar** ejecuta la acción en este PC tras 3 segundos (cambia antes a la ventana donde quieras probarla). Sirve para ensayar sin el teclado.
@@ -53,20 +53,20 @@ El selector de modo encabeza la pantalla y el Docker aparece debajo. Pulsa el l�
 - **Píldoras de estado:** ámbar = simulador; verde = teclado real conectado y estado del motor.
 - **Enchufe:** busca el teclado de nuevo.
 - **Columna derecha del visor (`✓` / `×`):** pegada a la derecha del dibujo del docker sin desplazar su centro. El botón **`✓`** escribe/aplica los cambios y se ilumina en **rojo completo** cuando hay cambios sin aplicar o el teclado no está preparado; debajo aparece **`×`** para descartar los cambios pendientes.
-- **Minimizar / maximizar / cerrar:** la ventana es propia (solo en el programa de escritorio).
-- **Redimensionar:** en el programa de escritorio, arrastra cualquier borde o esquina de la ventana (el cursor cambia a flecha de redimensionar). Tamaño mínimo 712 × 560; con ventana maximizada no se redimensiona.
+- **Minimizar / cerrar:** la ventana es propia (solo en el programa de escritorio).
+- **Tamaño fijo (720 × 420):** no se redimensiona ni se maximiza. Los menús se abren como capa sobre el docker y caben dentro de la ventana.
 
 ### ① El teclado (centro)
 - **Directo / Inteligente** está justo encima: es el modo de trabajo (ver sección 2b).
 - En modo Inteligente, el botón de capas junto a los modos abre el panel **Atajos para:**, superpuesto sobre el docker, con un icono por cada app (su nombre aparece al pasar el ratón) y «Añadir app». A la derecha, la app que tienes en primer plano (ignora a RevienDocker: si vuelves a la ventana, sigue mostrando la última app real). Si esa app aún no tiene atajos, sale el botón **Crear atajos para <app>**: un clic y ya tiene su pestaña.
-- Encima del teclado, una línea visual explica la regla de la pestaña elegida, por ejemplo `Shift + Botón → OBS Studio` («mantén Shift mientras pulsas, con esa app en primer plano») o `Botón → cualquier app` («pulsa el botón solo»). Ahí mismo eliges la tecla de activación (Shift, Ctrl o Alt) y, en las apps, sus ajustes (nombre, programas, quitar).
+- Encima del teclado, una línea visual explica la regla de la pestaña elegida, por ejemplo `Shift + Botón → OBS Studio` («mantén Shift mientras pulsas, con esa app en primer plano») o `Botón → cualquier app` («pulsa el botón solo»). La tecla de activación (Shift, Ctrl o Alt; una sola, común a todo Inteligente) se elige con los tres iconos a la izquierda del docker: ↑ Shift, ^ Ctrl, ⌥ Alt. En las apps, sus ajustes (nombre, programas, quitar) están en «Atajos para».
 - **KEY 1/2/3:** las tres teclas mecánicas. Muestran la acción asignada (ej. `Ctrl+Shift+F13`).
 - **↺ / ↻:** giro de la rueda a izquierda / derecha.
 - **Círculo central:** clic del pomo.
 - **Clic directo en una pieza:** abre directamente la ventana de **Grabación** para asignarle una tecla, combinación o botón del ratón al vuelo.
 - **Icono de lápiz (`✎`) debajo de cada pieza (Tecla 1, Tecla 2, Tecla 3 y Rueda):** único botón que abre o cierra debajo el panel **② Elige qué hace** para editar esa pieza en detalle. Si ningún lápiz está activo, el panel ② permanece oculto.
 - **Menús plegados por defecto:** todos los desplegables arrancan cerrados y se cierran al cambiar entre **Directo**, **Inteligente** y **Modos** (o al cambiar de app o de hueco de modo), abriéndose solo lo que selecciones.
-- **Plantillas:** elige una tarjeta para revisar los seis controles antes de confirmar. Hay opciones para música, WoW Forever, navegación, reuniones, edición, trabajo diario y OBS. Las teclas fantasma F13–F18 sirven para asignar acciones en otros programas; no hacen nada por sí solas.
+- **Plantillas:** elige un chip (icono y nombre) para revisar los seis controles antes de confirmar. Hay opciones para música, WoW Forever, navegación, reuniones, edición, trabajo diario y OBS. Las teclas fantasma F13–F18 sirven para asignar acciones en otros programas; no hacen nada por sí solas.
 - **Diagnóstico:** contiene el registro técnico USB, separado de las plantillas.
 - **Luz del teclado** (botón de bombilla y paleta junto al selector de modo): interruptor y tres modos: **Apagada**; **Al pulsar** (cada pulsación enciende la tecla con el siguiente color de la serie azul, rojo, verde…); **Ciclo** (una pulsación lanza un ciclo de colores por las teclas 1, 2 y 3). Se aplica al instante y queda en el teclado, sin pulsar «Aplicar cambios». El color no se puede elegir: lo decide cada modo.
 
@@ -147,6 +147,7 @@ _(vacío; se rellena al probar con el hardware)_
 
 | Fecha | Cambio |
 |---|---|
+| 2026-11-02 | **Ventana fija y menús compactos.** La ventana pasa a 720 × 420 sin redimensionar ni maximizar, con los espacios verticales recortados y el carril y la botonera a la misma distancia del docker. La tecla de activación de Inteligente (una sola) pasa a los tres iconos del carril izquierdo. «Añadir una app» y las plantillas de Modos usan chips con icono y nombre, como «Atajos para»; las plantillas viven solo en el menú de cada hueco. ✓ verde y × rojo, selección con borde blanco y halo. Estilo oficial y decisiones de producto en `PRODUCT.md` (sustituye a `DISEÑO.md`). |
 | 2026-11-02 | **Modos más claros.** Misma estructura en Directo, Inteligente y Modos (barra superior, iconos + docker + iconos, mensaje centrado). «Nuevo modo» sustituye al botón «Modo en blanco» y es una plantilla más, con nombre e icono a elegir; el icono de cualquier modo se cambia desde su menú. Mini docker en la vista previa de las plantillas. El aviso nativo del modo activo pasa a abajo a la derecha, sobre la bandeja. |
 | 2026-11-02 | **Menús superpuestos sobre el docker.** Los paneles de Directo (perfiles), Inteligente (Atajos para) y Modos (plantillas y menú de cada hueco) se abren como capa encima del docker, sin empujarlo. |
 | 2026-11-02 | **Modos con Ctrl+Shift** (antes Alt+Shift). Carril de iconos a la izquierda del docker, uno por hueco: su menú cambia el nombre, elige plantilla o vacía el hueco (la plantilla no se borra). El icono de ajustes de la cabecera sigue abriendo las plantillas. «Atajos para» muestra un icono por app en lugar de su nombre. Ancho mínimo 712 × 560: el docker nunca se apila; `✓` y `×` siempre a la derecha.
@@ -155,7 +156,7 @@ _(vacío; se rellena al probar con el hardware)_
 | 2026-11-01 | Rediseño de uso: una columna central con el selector de modo sobre el teclado, secciones plegables de una en una con más aire y subtítulos, pestañas «Atajos para» por app con detección de la app real y atajo «Crear atajos para…», regla visual `Shift + Botón → App`. |
 | 2026-11-01 | «Flashear» pasa a «Aplicar cambios» con «Descartar», aviso de teclado desconocido y luz con los 3 modos reales (comprobados en el teclado y en el programa del fabricante). |
 | 2026-11-01 | Escritura USB corregida (formato real del CH57x 0x8890, errores de escritura visibles) y nueva sección «Luz del teclado» con envío en vivo. |
-| 2026-10-31 | v0.02: icono nuevo (`assets/ICON.jpg` → `icon.png/.ico`), título metálico en Doris PP, interfaz en Expressway, esquinas suaves (nunca cuadradas) y documento de diseño `DISEÑO.md`. |
+| 2026-10-31 | v0.02: icono nuevo (`assets/ICON.jpg` → `icon.png/.ico`), título metálico en Doris PP, interfaz en Expressway, esquinas suaves (nunca cuadradas) y documento de diseño (hoy integrado en `PRODUCT.md`). |
 | 2026-10-31 | v0.01: ventana redimensionable por bordes y esquinas (zonas propias, la ventana sin marco no tenía borde nativo), diseño que se adapta de 820 a 1400 px (flujo del modo Inteligente sin saltos de fila, dos columnas pasan a una en anchuras medianas), botones de ventana visibles también al arrancar en modo Directo, lista blanca de acciones en `/api/window`. |
 | 2026-10-31 | Renombrado a **RevienDocker**: icono nuevo (R · v · D), ventana propia sin marco y compacta, iconos Lucide, interfaz reducida con flujo visual, grabación nativa de teclado, aviso de «sin flashear». |
 | 2026-10-31 | Aplicación de escritorio: `RevienDocker.exe` con ventana, bandeja, instancia única y USB por hidapi. |
@@ -173,10 +174,11 @@ En Directo, el botón «+» junto a los modos abre los perfiles. Confirma primer
 
 Con **Ctrl+Shift+1/2/3** cambias de hueco (repetirlo vuelve a Directo).
 
-- **Carril de iconos** a la izquierda del docker: un icono por hueco. Pulsa uno para seleccionarlo y abrir su menú, superpuesto sobre el docker: nombre (se guarda al salir del campo), icono (pulsa el icono de la cabecera del menú y elige otro), **Plantilla** y **Vaciar**.
-- **Vaciar** deja el hueco libre. La plantilla no se borra: sigue disponible en el panel de plantillas.
-- El **«+»** de un hueco vacío abre su menú; desde ahí, **Plantilla** abre el panel.
-- El icono de ajustes junto al selector abre el panel **Modos de trabajo**: plantillas y «Activar ahora» para el hueco seleccionado. Al elegir una plantilla, arriba aparece la vista previa con un mini docker que muestra cómo quedaría, y «Usar en este modo» la aplica y cierra el panel.
-- **Nuevo modo** es una plantilla más (la última de la rejilla): pide un nombre y un icono (16 a elegir), crea el modo vacío y cierra el panel. Lo que no definas en él hace lo de Directo.
+- **Carril de iconos** a la izquierda del docker: un icono por hueco. Pulsa uno para seleccionarlo y abrir su menú, superpuesto sobre el docker: nombre (se guarda al salir del campo), icono (pulsa el icono de la cabecera del menú y elige otro), **Plantilla** y **Vaciar**. La cabecera recuerda su atajo (Ctrl+Shift+1/2/3).
+- **Vaciar** deja el hueco libre. La plantilla no se borra: sigue disponible entre las plantillas.
+- Un hueco vacío (**«+»**) abre directamente las **plantillas**; en un hueco con modo, **Plantilla** las abre dentro del mismo menú (con una flecha para volver). Es la única puerta a las plantillas.
+- Las plantillas son chips con icono y nombre. Al elegir uno, debajo aparece la vista previa (mini docker y descripción) y «Usar en este modo» la aplica y cierra el menú.
+- El botón de la izquierda del selector (▶) **activa el modo seleccionado ahora** (o vuelve a Directo si ya está activo), sin usar el teclado.
+- **Nuevo modo** es una plantilla más (el último chip): pide un nombre y un icono (16 a elegir en una fila) y «Crear modo» crea el modo vacío y cierra el menú. Lo que no definas en él hace lo de Directo.
 - Al activar un modo (con Ctrl+Shift+1/2/3 o desde la app) o volver a Directo, sale un aviso nativo muy breve (icono y nombre) abajo a la derecha, justo encima de la barra de tareas y de la bandeja, sin quitar el foco a lo que estés haciendo. Así sabes qué modo está activo aunque la app esté minimizada.
 - En **Directo** e **Inteligente** el carril de la izquierda muestra tres huecos reservados (discontinuos y desactivados): la estructura de pantalla es la misma en los tres modos.
