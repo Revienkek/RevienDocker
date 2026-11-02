@@ -440,19 +440,35 @@ let modeMenuOpen = false;
 // Iconos que se pueden dar a un modo: todos tienen equivalente en el aviso nativo de Windows.
 const MODE_ICONS = [["music", "Música"], ["volume-2", "Volumen"], ["mic", "Micrófono"], ["gamepad-2", "Juegos"], ["clapperboard", "Vídeo"], ["film", "Cine"],
   ["brush", "Edición"], ["notebook-pen", "Notas"], ["code-xml", "Código"], ["terminal", "Terminal"], ["app-window", "Ventanas"], ["globe", "Web"],
-  ["message-circle", "Chat"], ["zap", "Rápido"], ["sparkles", "Destacado"], ["sliders-horizontal", "Ajustes"]];
+  ["message-circle", "Chat"], ["zap", "Rápido"], ["sparkles", "Destacado"], ["target", "Objetivo"], ["sliders-horizontal", "Ajustes"]];
+// Marcas y suites: ocultas tras el «+» del selector (los mismos iconos que salen solos al detectar el programa, APP_ICONS).
+const APP_ICON_PICKS = [["wow", "WoW"], ["spotify", "Spotify"], ["obs", "OBS"], ["steam", "Steam"], ["epic", "Epic Games"], ["battlenet", "Battle.net"],
+  ["minecraft", "Minecraft"], ["twitch", "Twitch"], ["vlc", "VLC"], ["discord", "Discord"], ["whatsapp", "WhatsApp"], ["telegram", "Telegram"],
+  ["slack", "Slack"], ["teams", "Teams"], ["zoom", "Zoom"], ["chrome", "Chrome"], ["edge", "Edge"], ["firefox", "Firefox"], ["opera", "Opera"],
+  ["brave", "Brave"], ["google", "Google"], ["claude", "Claude"], ["chatgpt", "ChatGPT"], ["office", "Microsoft 365"], ["word", "Word"],
+  ["excel", "Excel"], ["powerpoint", "PowerPoint"], ["notion", "Notion"], ["obsidian", "Obsidian"], ["vscode", "VS Code"], ["adobe", "Adobe"],
+  ["figma", "Figma"], ["davinci", "DaVinci Resolve"], ["blender", "Blender"]];
 function iconPicker(current, onPick) {
-  const box = el("div", "icon-picker"); box.setAttribute("role", "radiogroup"); box.setAttribute("aria-label", "Icono del modo");
-  MODE_ICONS.forEach(([name, label]) => {
+  const box = el("div", "icon-picker-wrap"), main = el("div", "icon-picker"), extra = el("div", "icon-picker icon-extra");
+  box.setAttribute("role", "radiogroup"); box.setAttribute("aria-label", "Icono del modo");
+  const opt = ([name, label]) => {
     const b = el("button", "icon-opt" + (name === current ? " active" : "")); b.type = "button";
     b.setAttribute("role", "radio"); b.setAttribute("aria-checked", String(name === current)); b.title = label; b.setAttribute("aria-label", label);
     b.innerHTML = ic(name);
     b.addEventListener("click", () => {
       onPick(name);
-      box.querySelectorAll(".icon-opt").forEach(o => { o.classList.toggle("active", o === b); o.setAttribute("aria-checked", String(o === b)); });
+      box.querySelectorAll(".icon-opt:not(.icon-more)").forEach(o => { o.classList.toggle("active", o === b); o.setAttribute("aria-checked", String(o === b)); });
     });
-    box.appendChild(b);
-  });
+    return b;
+  };
+  MODE_ICONS.forEach(o => main.appendChild(opt(o)));
+  APP_ICON_PICKS.forEach(o => extra.appendChild(opt(o)));
+  const more = el("button", "icon-opt icon-more"); more.type = "button"; more.innerHTML = ic("plus");
+  more.title = "Más iconos: apps y marcas"; more.setAttribute("aria-label", more.title);
+  const show = on => { extra.hidden = !on; more.setAttribute("aria-expanded", String(on)); };
+  more.addEventListener("click", () => { show(extra.hidden); if (!extra.hidden) extra.scrollIntoView({ block: "nearest" }); });   // el menú desplaza por dentro si no cabe
+  show(APP_ICON_PICKS.some(([name]) => name === current));   // si el icono actual es de una app, la fila ya sale abierta
+  main.appendChild(more); box.append(main, extra);
   return box;
 }
 // Referencia visual: el docker en pequeño, solo en la vista previa de una plantilla (donde decides qué hará cada botón).
@@ -605,7 +621,10 @@ function renderTplView(menu) {
   const add = chip(blank.name, blank.icon, full ? `Ya tienes ${MY_MAX} modos propios: borra uno para crear otro` : blank.desc, pick(blank), sel(blank));
   add.disabled = full; mine.appendChild(add);
   menu.append(head, el("div", "mode-menu-sub", "Plantillas"), base, el("div", "mode-menu-sub", `Mis modos · ${S.library.length}/${MY_MAX}`), mine);
-  if (selectedPreset) menu.appendChild(presetPreview(selectedPreset));
+  if (selectedPreset) {
+    const preview = presetPreview(selectedPreset); menu.appendChild(preview);
+    preview.scrollIntoView({ block: "nearest" });   // en la ventana de 420 px la vista previa queda a la vista sin saltar el resto
+  }
 }
 function presetPreview(p) {
   const acts = p.actions(), box = el("div", "preset-preview"), top = el("div", "preset-top");

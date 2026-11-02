@@ -3,6 +3,17 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versiones `0.x.y`: una por tanda de trabajo.
 La versión actual está en `src/version.py` y en el nombre de la etiqueta de GitHub (`v0.x.y`). Producto y estilo: [PRODUCT.md](PRODUCT.md).
 
+## [0.1.2] · 2026-11-02 · Iconos de apps
+
+### Añadido
+- 34 iconos propios de aplicaciones y suites (WoW, Spotify, OBS, Adobe, Google, Microsoft 365, Discord, Steam…), dibujados a mano con la rejilla y el trazo de Lucide. Salen solos al detectar el programa en «Añadir app» y en Inteligente.
+- El selector de iconos de Mis modos termina en un «+» discreto que despliega esos iconos, y un icono más en la fila principal («Objetivo»). Sin salirse de la ventana de 720 × 420.
+
+### Cambiado
+- «WoW Forever» pasa a llamarse «WoW» en las plantillas. Spotify, WoW y OBS usan su icono propio.
+- La vista previa de una plantilla se desplaza a la vista dentro del menú.
+- El aviso nativo de modo usa el glifo de Windows más parecido para cada icono de marca.
+
 ## [0.1.1] · 2026-11-02 · Mis modos
 
 ### Añadido

@@ -353,7 +353,12 @@ details[open] > summary .chev { transform: rotate(180deg); }
 .mini-key b, .mini-knob b { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 600 0.6rem var(--mono); color: var(--text); }
 
 /* Selector de icono de un modo */
-.icon-picker { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; }
+.icon-picker-wrap { display: grid; gap: 6px; }
+.icon-picker { display: grid; grid-template-columns: repeat(18, 1fr); gap: 4px; }
+.icon-extra { padding-top: 6px; border-top: 1px solid var(--line); }
+.icon-extra[hidden] { display: none; }
+.icon-more { border-style: dashed; }   /* discreto: invita a descubrir las apps sin competir con los iconos de siempre */
+.icon-more[aria-expanded="true"] { border-style: solid; border-color: var(--line-2); background: var(--panel-3); color: var(--text); }
 .icon-opt { min-height: 34px; padding: 0; border-radius: 4px; background: transparent; color: var(--muted); }
 .icon-opt .ic { width: 18px; height: 18px; }
 @media (hover: hover) and (pointer: fine) { .icon-opt:hover { background: var(--panel-2); color: var(--text); } }
@@ -380,7 +385,6 @@ details[open] > summary .chev { transform: rotate(180deg); }
 .preset-info .primary { margin-top: 4px; }
 .preset-preview .blank-row { display: flex; gap: 8px; }
 .preset-preview .blank-row .mode-inline-name { flex: 1; }
-.preset-preview .icon-picker { grid-template-columns: repeat(16, 1fr); gap: 4px; }
 .preset-preview .icon-opt { min-height: 32px; }
 .mode-menu .chip-grid { grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); }
 

@@ -59,7 +59,7 @@ Perfiles guardables desde «+» junto a Directo. Los tres huecos del carril izqu
 - **«Añadir app»** y «Atajos para» comparten formato de chips con **icono + nombre corto**, sin párrafos. Las apps abiertas entran en una cuadrícula compacta; el campo «O escribe el programa» y «Cerrar» siguen a la vista.
 
 ### Modos (Decisión)
-- Tres huecos, cada uno con nombre e icono elegidos por el usuario (16 iconos). Ctrl+Shift+1/2/3 activa; repetir vuelve a Directo.
+- Tres huecos, cada uno con nombre e icono elegidos por el usuario (17 iconos y, al final de la fila, un «+» discreto de borde discontinuo que despliega 34 de apps y marcas; si el icono actual es de una app, la fila sale abierta; todo cabe en la ventana de 720 × 420). Ctrl+Shift+1/2/3 activa; repetir vuelve a Directo.
 - **Confirmación física (0.1.0):** la pulsación de cambio de modo enciende brevemente la tecla del macropad (unos 450 ms), incluso con luz Apagada; después se restaura la preferencia. Es un aviso de entrada/salida, no un indicador permanente. En Al pulsar se conserva el efecto nativo. Cambiar el hueco desde la interfaz no genera un aviso físico: el firmware recuerda la última tecla del aparato, no una selección por software.
 - **Una sola puerta a plantillas y Mis modos:** los tres iconos del carril seleccionan el hueco; el botón «+» superior abre su menú (nombre, icono, Guardar en Mis modos, Quitar del hueco), o las plantillas y Mis modos si está libre.
 - **Plantillas como chips** con icono y nombre; la descripción va en una línea al elegir, no en cada tarjeta.

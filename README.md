@@ -3,7 +3,7 @@
 <p align="center"><b>Tres teclas, una rueda y la acción justa en cada momento.</b></p>
 
 <p align="center">
-  Versión 0.1.1 · <a href="https://github.com/Revienkek/RevienDocker/releases/latest">Descargar <code>RevienDocker.exe</code></a> · <a href="CHANGELOG.md">Historial de cambios</a> · <a href="PRODUCT.md">Producto y estilo</a> · <a href="docs/GUIA_USUARIO.md">Guía de uso</a>
+  Versión 0.1.2 · <a href="https://github.com/Revienkek/RevienDocker/releases/latest">Descargar <code>RevienDocker.exe</code></a> · <a href="CHANGELOG.md">Historial de cambios</a> · <a href="PRODUCT.md">Producto y estilo</a> · <a href="docs/GUIA_USUARIO.md">Guía de uso</a>
 </p>
 
 ![RevienDocker](docs/captura.png)
