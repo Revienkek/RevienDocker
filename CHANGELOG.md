@@ -9,6 +9,8 @@ La versión actual está en `src/version.py` y en el nombre de la etiqueta de Gi
 - Los tres huecos de la izquierda en Directo son accesos a tres perfiles: un clic usa el perfil al momento, se marca el activo y un hueco libre abre la lista para elegir. Cada perfil tiene icono propio (selector como en Mis modos) y tres marcas 1/2/3 para ponerlo o quitarlo de un hueco. Un perfil nuevo ocupa el primer hueco libre.
 
 ### Cambiado
+- La ventana pasa de 720 × 420 a 720 × 348: se quita la franja vacía bajo el mensaje. El lateral se reajusta: el título gana tamaño en la R y la D y el resto va en versalitas más pequeñas, y el dibujo del interruptor se reduce un 16 %.
+- Clic derecho en una zona de arrastre devuelve la ventana a la esquina inferior derecha, sobre la barra de tareas.
 - Minimizar manda la ventana a la bandeja, siempre. La app ya no tiene botón en la barra de tareas ni en Alt+Tab: solo se ve en la bandeja del sistema.
 - Los perfiles guardados antes reciben identificador e icono sin perder nada.
 

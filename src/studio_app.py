@@ -34,7 +34,7 @@ from version import __version__
 
 TITLE = "RevienDocker"
 # Ventana de tamaño fijo (PRODUCT.md): no se redimensiona ni se maximiza.
-WIN_W, WIN_H = 720, 420
+WIN_W, WIN_H = 720, 348
 CORNER_MARGIN = 12   # px entre la ventana y los bordes del área útil al abrir
 OFFSCREEN = -32000   # la ventana nace fuera de pantalla y solo se muestra ya colocada: sin parpadeo en otra esquina
 MUTEX_NAME = "Local\\RevienDocker_SingleInstance_Mutex"
@@ -128,10 +128,10 @@ def main():
 
     placed = []
 
-    def place_corner():
-        """Posición inicial: esquina inferior derecha del área útil del monitor principal (justo sobre la barra de tareas).
-        Solo al abrir; la ventana nace fuera de pantalla y esta es la primera vez que se ve."""
-        if placed:
+    def place_corner(force=False):
+        """Esquina inferior derecha del área útil del monitor principal (justo sobre la barra de tareas). Se coloca sola al abrir
+        (la ventana nace fuera de pantalla y esta es la primera vez que se ve) y, con force, cuando el usuario la pide."""
+        if placed and not force:
             return
         placed.append(True)
         user32 = ctypes.windll.user32
@@ -219,6 +219,8 @@ def main():
                 quit_app()
         elif action in ("show", "restore"):
             show_window()
+        elif action == "corner":
+            place_corner(force=True)  # clic derecho en una zona de arrastre: vuelve a su sitio de siempre
 
     app.StudioHandler.window_control = control
     tray = pystray.Icon("revien-docker", icon_image(64), f"{TITLE} {__version__}", menu=pystray.Menu(

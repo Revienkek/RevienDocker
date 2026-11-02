@@ -55,7 +55,7 @@ En los tres: teclado, multimedia y desplazamiento del ratón; cada giro de la ru
 ## Ventana
 
 - La ventana tiene tamaño fijo: no se redimensiona ni se maximiza. Al abrirse aparece en la esquina inferior derecha, sobre la barra de tareas. Solo vive en la bandeja del sistema: minimizar la guarda ahí y no ocupa la barra de tareas.
-- Abajo a la derecha están minimizar, cerrar y los ajustes (rueda dentada: estado del teclado y del motor, y buscar el teclado). No hay barra de título: la ventana se mueve arrastrando cualquier zona que no sea un botón o un campo.
+- Abajo a la derecha están minimizar, cerrar y los ajustes (rueda dentada: estado del teclado y del motor, y buscar el teclado). No hay barra de título: la ventana se mueve arrastrando cualquier zona que no sea un botón o un campo, y con clic derecho en una de esas zonas vuelve a su esquina.
 
 ## Estructura del repositorio
 

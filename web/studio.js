@@ -637,7 +637,7 @@ function renderTplView(menu) {
   menu.append(head, el("div", "mode-menu-sub", "Plantillas"), base, el("div", "mode-menu-sub", `Mis modos · ${S.library.length}/${MY_MAX}`), mine);
   if (selectedPreset) {
     const preview = presetPreview(selectedPreset); menu.appendChild(preview);
-    preview.scrollIntoView({ block: "nearest" });   // en la ventana de 420 px la vista previa queda a la vista sin saltar el resto
+    preview.scrollIntoView({ block: "nearest" });   // en la ventana de 348 px la vista previa queda a la vista sin saltar el resto
   }
 }
 function presetPreview(p) {
@@ -957,6 +957,12 @@ $("btnNewLayer").addEventListener("click", () => {
 // La ventana no tiene barra: se arrastra desde cualquier zona que no sea interactiva (pywebview solo arrastra desde elementos con esta clase).
 const INTERACTIVE = "button,input,select,textarea,summary,a,label,kbd,[role=radio],[role=switch],[role=button],[tabindex],.keycap,.enc-dir,.knob";
 window.addEventListener("mousedown", e => { if (e.button === 0 && e.target instanceof Element && !e.target.closest(INTERACTIVE)) e.target.classList.add("pywebview-drag-region"); }, true);
+// Clic derecho en una zona de arrastre: la ventana vuelve a la esquina inferior derecha, sobre la barra de tareas.
+window.addEventListener("contextmenu", e => {
+  if (!API.desktop || !(e.target instanceof Element) || e.target.closest(INTERACTIVE)) return;
+  e.preventDefault();
+  api("/api/window", { action: "corner" }).catch(() => {});
+}, true);
 
 document.querySelectorAll("[data-win]").forEach(b => b.addEventListener("click", () => api("/api/window", { action: b.dataset.win }).catch(() => toast("No se pudo cambiar la ventana", true))));
 

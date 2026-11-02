@@ -8,7 +8,7 @@ Un programador para el macropad de 3 teclas + 1 rueda (chip WCH CH57x). El tecla
 
 ## 2. Arrancar
 
-**Como programa (recomendado):** abre el acceso directo «RevienDocker» del escritorio (o `dist\RevienDocker.exe`). Es una ventana propia, sin marco de Windows: abajo a la derecha tiene minimizar, cerrar y los ajustes (rueda dentada). No tiene botón en la barra de tareas: vive en la bandeja, y minimizar la guarda ahí. Para moverla, arrastra cualquier zona que no sea un botón o un campo. Su tamaño es fijo.
+**Como programa (recomendado):** abre el acceso directo «RevienDocker» del escritorio (o `dist\RevienDocker.exe`). Es una ventana propia, sin marco de Windows: abajo a la derecha tiene minimizar, cerrar y los ajustes (rueda dentada). No tiene botón en la barra de tareas: vive en la bandeja, y minimizar la guarda ahí. Para moverla, arrastra cualquier zona que no sea un botón o un campo; con clic derecho en una de esas zonas vuelve a su esquina inferior derecha. Su tamaño es fijo.
 - RevienDocker debe estar abierto o en la bandeja para que el motor ejecute las acciones de los controles.
 - Minimizar siempre la oculta en la bandeja (junto al reloj) y el motor sigue activo. Cerrar también, salvo que no haga falta el motor. Al abrirla aparece abajo a la derecha, sin saltos. Salir del todo: clic derecho en su icono → Salir.
 - En el menú del icono de la bandeja puedes elegir **Minimizar a la bandeja** o **Mostrar RevienDocker**, según esté visible u oculta. El motor continúa activo mientras la app esté en la bandeja.
@@ -54,7 +54,7 @@ El selector de modo encabeza la pantalla y el Docker aparece debajo. Pulsa un co
 - **Enchufe:** busca el teclado de nuevo.
 - **Columna derecha del visor (`✓` / `×`):** pegada a la derecha del dibujo del docker sin desplazar su centro. El botón **`✓`** escribe/aplica los cambios y se ilumina en **rojo completo** cuando hay cambios sin aplicar o el teclado no está preparado; debajo aparece **`×`** para descartar los cambios pendientes.
 - **Minimizar / cerrar:** junto a la rueda dentada; la ventana es propia (solo en el programa de escritorio).
-- **Tamaño fijo (720 × 420):** no se redimensiona ni se maximiza. Los menús se abren como capa sobre el docker y caben dentro de la ventana.
+- **Tamaño fijo (720 × 348):** no se redimensiona ni se maximiza. Los menús se abren como capa sobre el docker y caben dentro de la ventana.
 
 ### ① El teclado (centro)
 - **Directo / Inteligente** está justo encima: es el modo de trabajo (ver sección 2b).

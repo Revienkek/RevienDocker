@@ -34,15 +34,15 @@ Un docker físico con tres formas de uso sobre el mismo aparato y la misma panta
 
 ### Estructura canónica (Decisión)
 Idéntica en Directo, Inteligente y Modos; no se inventan variantes por modo:
-- **Lateral izquierdo (0.0.8):** el logotipo definitivo a toda la altura (título «REVIENDOCKER» en vector, girado, y el dibujo del interruptor). Sustituye a la barra superior, que **ya no existe**. Es también zona de arrastre de la ventana.
+- **Lateral izquierdo (0.0.8):** el logotipo definitivo a toda la altura (título «REVIENDOCKER» en vector, girado, con R y D grandes y el resto en versalitas más pequeñas, y el dibujo del interruptor al 84 % del ancho). `tools/` no lo genera: el SVG se rehízo a partir de los trazados originales. Sustituye a la barra superior, que **ya no existe**. Es también zona de arrastre de la ventana.
 - **Franja inferior (0.0.8):** minimizar, cerrar y la rueda dentada de **ajustes**, discretos, abajo a la derecha. **Toda zona no interactiva** de la ventana (lateral, fondos, textos, huecos de la franja) arrastra la ventana; botones, campos y teclas no.
 2. **Selector:** botón contextual + selector Directo / Inteligente / Modos + luz (solo la bombilla, mismo tamaño y aspecto que el botón de la izquierda, para que la fila quede simétrica).
 3. **Fila del docker:** tres iconos a la izquierda + docker (3 teclas y rueda, sin lápices bajo las piezas) + ✓ y × a la derecha. El carril izquierdo y la botonera derecha están **a la misma distancia** del docker.
 4. **Mensaje informativo centrado** debajo.
 
 ### Ventana (Decisión)
-- **Tamaño fijo, 720 × 420.** No se redimensiona, no se maximiza, no se expande ni se colapsa. Sin botón de maximizar; el doble clic en la barra y el arrastre de bordes no hacen nada. Minimizar y cerrar se mantienen.
-- **Posición inicial:** esquina inferior derecha del área útil (sobre la barra de tareas, 12 px de margen). Después se puede arrastrar; se recoloca solo al abrir. La ventana nace fuera de pantalla y solo se muestra ya colocada (sin parpadeo en otra esquina).
+- **Tamaño fijo, 720 × 348** (0.1.4; antes 720 × 420, con una franja vacía bajo el mensaje). No se redimensiona, no se maximiza, no se expande ni se colapsa. Sin botón de maximizar; el doble clic en la barra y el arrastre de bordes no hacen nada. Minimizar y cerrar se mantienen.
+- **Posición inicial:** esquina inferior derecha del área útil (sobre la barra de tareas, 12 px de margen). Después se puede arrastrar; **clic derecho en cualquier zona de arrastre** la devuelve a esa esquina; se recoloca solo al abrir. La ventana nace fuera de pantalla y solo se muestra ya colocada (sin parpadeo en otra esquina).
 - Sin margen muerto: el contenido llena el marco. Espacios verticales compactos entre barra, selector, docker y mensaje.
 - Los menús son **capas superpuestas** sobre el docker, nunca debajo ni en flujo; deben caber en la ventana y, si algo no cabe, desplazan por dentro.
 - Los menús terminan donde acaba el docker y no tapan el mensaje de abajo.
@@ -59,7 +59,7 @@ Perfiles guardables desde «+» junto a Directo, cada uno con nombre e icono. Lo
 - **«Añadir app»** y «Atajos para» comparten formato de chips con **icono + nombre corto**, sin párrafos. Las apps abiertas entran en una cuadrícula compacta; el campo «O escribe el programa» y «Cerrar» siguen a la vista.
 
 ### Modos (Decisión)
-- Tres huecos, cada uno con nombre e icono elegidos por el usuario (17 iconos y, al final de la fila, un «+» discreto de borde discontinuo que despliega 34 de apps y marcas; si el icono actual es de una app, la fila sale abierta; todo cabe en la ventana de 720 × 420). Ctrl+Shift+1/2/3 activa; repetir vuelve a Directo.
+- Tres huecos, cada uno con nombre e icono elegidos por el usuario (17 iconos y, al final de la fila, un «+» discreto de borde discontinuo que despliega 34 de apps y marcas; si el icono actual es de una app, la fila sale abierta; todo cabe en la ventana de 720 × 348). Ctrl+Shift+1/2/3 activa; repetir vuelve a Directo.
 - **Confirmación física (0.1.0):** la pulsación de cambio de modo enciende brevemente la tecla del macropad (unos 450 ms), incluso con luz Apagada; después se restaura la preferencia. Es un aviso de entrada/salida, no un indicador permanente. En Al pulsar se conserva el efecto nativo. Cambiar el hueco desde la interfaz no genera un aviso físico: el firmware recuerda la última tecla del aparato, no una selección por software.
 - **Una sola puerta a plantillas y Mis modos:** los tres iconos del carril seleccionan el hueco; el botón «+» superior abre su menú (nombre, icono, Guardar en Mis modos, Quitar del hueco), o las plantillas y Mis modos si está libre.
 - **Plantillas como chips** con icono y nombre; la descripción va en una línea al elegir, no en cada tarjeta.
@@ -71,7 +71,7 @@ Perfiles guardables desde «+» junto a Directo, cada uno con nombre e icono. Lo
 `src/volume_overlay.py`: 280 × 56 px, siempre visible, sin foco, fuera de la barra de tareas, esquina inferior derecha del área útil con 16 px de margen, 1,8 s. Icono y nombre. No es una notificación del Centro de actividades.
 
 ### Técnicas
-Estructura: `src/` (Python), `web/` (interfaz y assets), `docs/`, `tools/`, `tests/`. Interfaz estática, sin build ni dependencias de front. Ventana de escritorio fija de 720 × 420 (`WIN_W, WIN_H` en `src/studio_app.py`). Iconos Lucide generados (`tools/build_icons.py`, 68 iconos) más 34 propios de apps y suites (`tools/custom_icons.py`: dibujados a mano, sin copiar de ningún paquete). No se ofrecen para elegir: salen solos al detectar el programa (`APP_ICONS` en `web/studio.js`, gana la primera coincidencia). Estado `S` en `localStorage` `botonera.studio.v2` y `studio.json`. Los originales y datos de cada persona no salen del PC.
+Estructura: `src/` (Python), `web/` (interfaz y assets), `docs/`, `tools/`, `tests/`. Interfaz estática, sin build ni dependencias de front. Ventana de escritorio fija de 720 × 348 (`WIN_W, WIN_H` en `src/studio_app.py`). Iconos Lucide generados (`tools/build_icons.py`, 68 iconos) más 34 propios de apps y suites (`tools/custom_icons.py`: dibujados a mano, sin copiar de ningún paquete). No se ofrecen para elegir: salen solos al detectar el programa (`APP_ICONS` en `web/studio.js`, gana la primera coincidencia). Estado `S` en `localStorage` `botonera.studio.v2` y `studio.json`. Los originales y datos de cada persona no salen del PC.
 
 ## Brand Commitments
 
