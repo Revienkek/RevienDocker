@@ -440,6 +440,8 @@ function renderCtx() {
     if (slotMode()) { why = "con el modo <b></b> activo"; name = slotMode().name; }
     else why = "elige una plantilla para este modo";
   }
+  box.classList.toggle("unsaved", !$("btnDiscard").hidden);   // con la × a la vista, el mensaje pasa a avisar de los cambios pendientes
+  if (!$("btnDiscard").hidden) { box.textContent = "Tienes cambios sin guardar"; return; }
   box.innerHTML = `${keys}<span class="why">${why}</span>`;
   const b = box.querySelector("b"); if (b) b.textContent = name;
 }

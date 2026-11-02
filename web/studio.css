@@ -152,6 +152,8 @@ details[open] > summary .chev { transform: rotate(180deg); }
 .ctx { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; min-height: 28px; font-size: 0.8rem; color: var(--muted); }
 .ctx .ic { width: 14px; height: 14px; color: var(--muted); }
 .ctx b { color: var(--text); font-weight: 600; }
+.ctx.unsaved { align-self: center; justify-self: center; width: fit-content; margin: 0 auto; padding: 3px 12px; min-height: 0; border: 1px solid rgba(248, 113, 113, 0.45); border-radius: 4px; color: rgba(248, 113, 113, 0.85); }
+@media (hover: hover) and (pointer: fine) { .modes button:not(.active):hover { color: var(--text); background: var(--panel-2); border-color: var(--line-2); } }
 .chassis-wrap { display: flex; justify-content: center; padding: 2px 8px; border-radius: 6px; background: radial-gradient(ellipse 60% 70% at 50% 45%, rgba(255, 255, 255, 0.06), transparent 72%); }
 /* Orden fijo: carril de modos | visor | botones aplicar/descartar. Nunca se apilan. */
 .device-stage { position: relative; display: flex; align-items: center; justify-content: center; gap: 14px; }
