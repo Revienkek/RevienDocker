@@ -145,25 +145,7 @@ _(vacío; se rellena al probar con el hardware)_
 
 ## 9. Historial
 
-| Fecha | Cambio |
-|---|---|
-| 2026-11-02 | **Ventana fija y menús compactos.** La ventana pasa a 720 × 420 sin redimensionar ni maximizar, con los espacios verticales recortados y el carril y la botonera a la misma distancia del docker. La tecla de activación de Inteligente (una sola) pasa a los tres botones rotulados del carril izquierdo. «Añadir una app» y las plantillas de Modos usan chips con icono y nombre, como «Atajos para»; las plantillas viven solo en el menú de cada hueco. ✓ verde y × rojo, selección con borde blanco y halo. Estilo oficial y decisiones de producto en `PRODUCT.md` (sustituye a `DISEÑO.md`). |
-| 2026-11-02 | **Modos más claros.** Misma estructura en Directo, Inteligente y Modos (barra superior, iconos + docker + iconos, mensaje centrado). «Nuevo modo» sustituye al botón «Modo en blanco» y es una plantilla más, con nombre e icono a elegir; el icono de cualquier modo se cambia desde su menú. Mini docker en la vista previa de las plantillas. El aviso nativo del modo activo pasa a abajo a la derecha, sobre la bandeja. |
-| 2026-11-02 | **Menús superpuestos sobre el docker.** Los paneles de Directo (perfiles), Inteligente (Atajos para) y Modos (plantillas y menú de cada hueco) se abren como capa encima del docker, sin empujarlo. |
-| 2026-11-02 | **Modos con Ctrl+Shift** (antes Alt+Shift). Carril de iconos a la izquierda del docker, uno por hueco: su menú cambia el nombre, elige plantilla o vacía el hueco (la plantilla no se borra). El icono de ajustes de la cabecera sigue abriendo las plantillas. «Atajos para» muestra un icono por app en lugar de su nombre. Ancho mínimo 712 × 560: el docker nunca se apila; `✓` y `×` siempre a la derecha.
-| 2026-11-01 | Unificación de **Directo / Inteligente / Modos** (3 huecos con plantillas y cambio rápido con `Alt+Shift+1/2/3` + overlay compacto). Limpieza visual del visor: sin barra informativa bajo las pestañas, botón de aplicar/descartar (`✓` / `×`) a la derecha del visor con aviso en rojo completo, clic directo en cada pieza para grabar al vuelo, icono de lápiz (`✎`) bajo cada pieza para abrir el menú 2, eliminación de «Elegir a mano» y menús plegados por defecto. |
-| 2026-11-01 | Control de instancia única por mutex nativo y HTTP: evita iconos duplicados en la bandeja al abrir y minimizar. Nueva 3ª opción «Modos» (placeholder con icono Lucide Shapes) en el selector de la cabecera. |
-| 2026-11-01 | Rediseño de uso: una columna central con el selector de modo sobre el teclado, secciones plegables de una en una con más aire y subtítulos, pestañas «Atajos para» por app con detección de la app real y atajo «Crear atajos para…», regla visual `Shift + Botón → App`. |
-| 2026-11-01 | «Flashear» pasa a «Aplicar cambios» con «Descartar», aviso de teclado desconocido y luz con los 3 modos reales (comprobados en el teclado y en el programa del fabricante). |
-| 2026-11-01 | Escritura USB corregida (formato real del CH57x 0x8890, errores de escritura visibles) y nueva sección «Luz del teclado» con envío en vivo. |
-| 2026-10-31 | v0.02: icono nuevo (`assets/ICON.jpg` → `icon.png/.ico`), título metálico en Doris PP, interfaz en Expressway, esquinas suaves (nunca cuadradas) y documento de diseño (hoy integrado en `PRODUCT.md`). |
-| 2026-10-31 | v0.01: ventana redimensionable por bordes y esquinas (zonas propias, la ventana sin marco no tenía borde nativo), diseño que se adapta de 820 a 1400 px (flujo del modo Inteligente sin saltos de fila, dos columnas pasan a una en anchuras medianas), botones de ventana visibles también al arrancar en modo Directo, lista blanca de acciones en `/api/window`. |
-| 2026-10-31 | Renombrado a **RevienDocker**: icono nuevo (R · v · D), ventana propia sin marco y compacta, iconos Lucide, interfaz reducida con flujo visual, grabación nativa de teclado, aviso de «sin flashear». |
-| 2026-10-31 | Aplicación de escritorio: `RevienDocker.exe` con ventana, bandeja, instancia única y USB por hidapi. |
-| 2026-10-31 | Rediseño completo (studio.css / studio.js), modo Inteligente con capas por app, tecla de activación, motor Windows, OBS WebSocket nativo, persistencia, botón Probar. |
-| 2026-10-31 | Grabación real con paso intermedio, captura total en Chrome/Edge, atajos listos, ratón completo, recetas de rueda y velocidad. |
-| 2026-10-31 | Editor de botón con captura de teclado (1 a 3 teclas), pestañas y catálogo completo de teclas. |
-| 2026-10-31 | Proyecto recuperado de Drive; modo simulador, LED, preset Dev, WebHID, pruebas. |
+El historial de versiones y cambios está en [CHANGELOG.md](CHANGELOG.md).
 
 
 ## Perfiles de Directo

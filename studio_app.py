@@ -30,6 +30,7 @@ import webview
 import app
 from app import ENGINE, PORT, make_server
 from studio_icon import icon_image
+from version import __version__
 
 TITLE = "RevienDocker"
 # Ventana de tamaño fijo (PRODUCT.md): no se redimensiona ni se maximiza.
@@ -161,7 +162,7 @@ def main():
             show_window()
 
     app.StudioHandler.window_control = control
-    tray = pystray.Icon("revien-docker", icon_image(64), TITLE, menu=pystray.Menu(
+    tray = pystray.Icon("revien-docker", icon_image(64), f"{TITLE} {__version__}", menu=pystray.Menu(
         pystray.MenuItem(lambda _: "Mostrar RevienDocker" if state["hidden"] or state["minimized"] else "Minimizar a la bandeja",
                          lambda *_: toggle_window(), default=True),
         pystray.MenuItem("Salir", lambda *_: quit_app())))
