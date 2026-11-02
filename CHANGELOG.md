@@ -3,6 +3,16 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versiones `0.x.y`: una por tanda de trabajo.
 La versión actual está en `src/version.py` y en el nombre de la etiqueta de GitHub (`v0.x.y`). Producto y estilo: [PRODUCT.md](PRODUCT.md).
 
+## [0.1.1] · 2026-11-02 · Mis modos
+
+### Añadido
+- **Mis modos:** hasta tres modos propios guardados, junto a las plantillas. Se crean con «Nuevo modo» o con «Guardar en Mis modos» desde un hueco, se actualizan con «Guardar cambios» y se borran desde un hueco libre.
+- Usar una plantilla o un modo guardado pone una copia en el hueco: editarla no cambia la plantilla base ni lo guardado hasta que lo guardes.
+
+### Cambiado
+- El menú de un hueco con modo ofrece nombre, icono, «Guardar en Mis modos» y «Quitar del hueco» (antes «Vaciar», cuyo aviso decía que la plantilla seguía disponible aunque el modo fuera propio). Se pide confirmación solo si se pierde algo.
+- Las plantillas y Mis modos solo aparecen en un hueco libre.
+
 ## [0.1.0] · 2026-11-02 · Confirmación luminosa de modos
 
 ### Añadido

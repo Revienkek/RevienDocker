@@ -43,6 +43,7 @@ STUDIO_FILE = DATA_DIR / "studio.json"
 
 SLOTS = ("KEY_1", "KEY_2", "KEY_3", "KNOB_CCW", "KNOB_CW", "KNOB_PRESS")
 MODE_SLOTS = 3
+MY_MODES_MAX = 3  # «Mis modos»: modos propios guardados, reutilizables en cualquier hueco
 MODE_KEYS = ("KEY_1", "KEY_2", "KEY_3")   # con Ctrl+Shift activan el modo 1, 2 o 3
 GHOST_VK = {0x7C: "KEY_1", 0x7D: "KEY_2", 0x7E: "KEY_3", 0x7F: "KNOB_CCW", 0x80: "KNOB_CW", 0x81: "KNOB_PRESS"}
 TRIGGER_VKS = {"shift": {0x10, 0xA0, 0xA1}, "ctrl": {0x11, 0xA2, 0xA3}, "alt": {0x12, 0xA4, 0xA5}}
@@ -63,6 +64,7 @@ DEFAULT_STUDIO = {
     "flashed": "",
     "applied": None,
     "modes": [None, None, None],
+    "library": [],
     "profiles": [],
     "layers": [{"id": "base", "name": "Base", "exes": [], "actions": {}}],
     "obs": {"host": "127.0.0.1", "port": 4455, "password": ""},
@@ -107,16 +109,39 @@ def _clean_actions(raw):
     return acts
 
 
-def _clean_modes(raw):
-    """Tres huecos (Ctrl+Shift+1/2/3); cada uno vacío (None) o un modo {name, icon, actions}."""
+def _clean_mode(m, n):
+    icon = re.sub(r"[^a-z0-9-]", "", str(m.get("icon", "")).lower())[:30] or "sliders-horizontal"
+    return {"name": str(m.get("name", ""))[:30] or f"Modo {n}", "icon": icon, "actions": _clean_actions(m.get("actions"))}
+
+
+def _clean_id(raw):
+    return re.sub(r"[^a-z0-9_-]", "", str(raw or "").lower())[:40]
+
+
+def _clean_library(raw):
+    """Mis modos: hasta MY_MODES_MAX modos propios {id, name, icon, actions}. El id enlaza cada hueco con su copia guardada."""
+    out, seen = [], set()
+    for m in (raw if isinstance(raw, list) else []):
+        mid = _clean_id(m.get("id")) if isinstance(m, dict) else ""
+        if not mid or mid in seen or len(out) >= MY_MODES_MAX:
+            continue
+        seen.add(mid)
+        out.append({"id": mid, **_clean_mode(m, len(out) + 1)})
+    return out
+
+
+def _clean_modes(raw, library_ids=()):
+    """Tres huecos (Ctrl+Shift+1/2/3); cada uno vacío (None) o un modo {name, icon, actions[, from]}.
+    «from» es el id de su copia en Mis modos; si esa copia ya no existe, se descarta."""
     raw = raw if isinstance(raw, list) else []
     out = []
     for i in range(MODE_SLOTS):
         m = raw[i] if i < len(raw) else None
         if isinstance(m, dict):
-            icon = re.sub(r"[^a-z0-9-]", "", str(m.get("icon", "")).lower())[:30] or "sliders-horizontal"
-            out.append({"name": str(m.get("name", ""))[:30] or f"Modo {i + 1}", "icon": icon,
-                        "actions": _clean_actions(m.get("actions"))})
+            mode = _clean_mode(m, i + 1)
+            if _clean_id(m.get("from")) in library_ids:
+                mode["from"] = _clean_id(m.get("from"))
+            out.append(mode)
         else:
             out.append(None)
     return out
@@ -131,7 +156,8 @@ def normalize_studio(d):
     out["led_mode"] = _int(d.get("led_mode"), 0, 255, 1)
     out["flashed"] = str(d.get("flashed", ""))[:600]  # firma de lo último escrito en el teclado (para el aviso de «sin preparar»)
     out.pop("applied", None)
-    out["modes"] = _clean_modes(d.get("modes"))
+    out["library"] = _clean_library(d.get("library"))
+    out["modes"] = _clean_modes(d.get("modes"), {m["id"] for m in out["library"]})
     profiles = d.get("profiles") if isinstance(d.get("profiles"), list) else []
     out["profiles"] = [{"name": str(p.get("name", "")).strip()[:12], "actions": _clean_actions(p.get("actions"))}
                        for p in profiles[:100] if isinstance(p, dict) and str(p.get("name", "")).strip()]
@@ -160,7 +186,7 @@ def normalize_studio(d):
     base["exes"] = []
     out["layers"] = [base] + [L for L in layers if L["id"] != "base"]
     # Recupera configuraciones Spotify creadas antes de separar su sesión de audio.
-    for group in out["layers"][1:] + [m for m in out["modes"] if m]:
+    for group in out["layers"][1:] + [m for m in out["modes"] if m] + out["library"]:
         if group["name"].strip().casefold() == "spotify" or "spotify.exe" in group.get("exes", []):
             for action in group["actions"].values():
                 if action["type"] == "media" and action["code"] in (0xE9, 0xEA, 0xE2):

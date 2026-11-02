@@ -100,8 +100,9 @@ const TRIGGERS = { shift: "Shift", ctrl: "Ctrl", alt: "Alt" };
 
 // ---------- Estado ----------
 const defaultBase = () => ({ KEY_1: K(0, kc("F13")), KEY_2: K(0, kc("F14")), KEY_3: K(0, kc("F15")), KNOB_CCW: M(0xEA), KNOB_PRESS: M(0xE2), KNOB_CW: M(0xE9) });
-const defaultState = () => ({ mode: "direct", trigger: "shift", led_mode: 1, flashed: "", modes: [null, null, null], profiles: [], obs: { host: "127.0.0.1", port: 4455, password: "" },
+const defaultState = () => ({ mode: "direct", trigger: "shift", led_mode: 1, flashed: "", modes: [null, null, null], library: [], profiles: [], obs: { host: "127.0.0.1", port: 4455, password: "" },
   layers: [{ id: "base", name: "Base", exes: [], actions: defaultBase() }] });
+const MY_MAX = 3;   // «Mis modos»: tantos modos propios como huecos
 const LS_KEY = "botonera.studio.v2";
 let S = defaultState();
 let layerId = "base", currentTarget = "KEY_1", knobSpeed = 1, modeIdx = 0, liveMode = -1, savedSnap = "";
@@ -124,10 +125,20 @@ function fixState(s) {
   s.trigger = TRIGGERS[s.trigger] ? s.trigger : "shift";
   s.led_mode = Number.isInteger(s.led_mode) ? s.led_mode : 1;
   s.flashed = typeof s.flashed === "string" ? s.flashed : "";
+  const cleanMode = (m, n) => ({ name: String(m.name || `Modo ${n}`).slice(0, 30), icon: String(m.icon || "sliders-horizontal"),
+    actions: m.actions && typeof m.actions === "object" ? m.actions : {} });
+  const seen = new Set();   // Mis modos: hasta MY_MAX modos propios con id único
+  s.library = (Array.isArray(s.library) ? s.library : []).filter(m => {
+    const ok = m && typeof m === "object" && typeof m.id === "string" && m.id && !seen.has(m.id) && seen.size < MY_MAX;
+    if (ok) seen.add(m.id);
+    return ok;
+  }).map((m, i) => ({ id: m.id, ...cleanMode(m, i + 1) }));
   s.modes = [0, 1, 2].map(i => {
     const m = Array.isArray(s.modes) ? s.modes[i] : null;
-    return m && typeof m === "object" ? { name: String(m.name || `Modo ${i + 1}`).slice(0, 30), icon: String(m.icon || "sliders-horizontal"),
-      actions: m.actions && typeof m.actions === "object" ? m.actions : {} } : null;
+    if (!m || typeof m !== "object") return null;
+    const mode = cleanMode(m, i + 1);
+    if (seen.has(m.from)) mode.from = m.from;   // enlace con su copia en Mis modos; si ya no existe, se pierde
+    return mode;
   });
   s.profiles = Array.isArray(s.profiles) ? s.profiles.filter(p => p && typeof p.name === "string" && p.actions && typeof p.actions === "object").map(p => ({name: p.name.slice(0, 12), actions: p.actions})) : [];
   s.obs = { ...d.obs, ...(s.obs || {}) };
@@ -414,8 +425,8 @@ function renderCtx() {
   box.innerHTML = `${keys}<span class="why">${why}</span>`;
   const b = box.querySelector("b"); if (b) b.textContent = name;
 }
-// Modos: el carril a la izquierda del docker selecciona el hueco y abre su menú (nombre, plantilla, vaciar).
-// El panel «Modos de trabajo» (icono de ajustes) solo elige la plantilla que recibe el hueco elegido.
+// Modos: el carril a la izquierda del docker selecciona el hueco. Hueco libre: el menú ofrece plantillas, Mis modos y «Nuevo modo».
+// Hueco con modo: el menú permite renombrarlo, cambiar su icono, guardarlo en Mis modos y quitarlo del hueco.
 let modeMenuOpen = false;
 // Iconos que se pueden dar a un modo: todos tienen equivalente en el aviso nativo de Windows.
 const MODE_ICONS = [["music", "Música"], ["volume-2", "Volumen"], ["mic", "Micrófono"], ["gamepad-2", "Juegos"], ["clapperboard", "Vídeo"], ["film", "Cine"],
@@ -511,7 +522,7 @@ function renderMenu() {
   menu.innerHTML = "";
   if (menu.hidden) { menuIconsOpen = false; menuView = "main"; return; }
   menu.classList.toggle("tpl", menuView === "tpl" || !m);
-  if (menuView === "tpl" || !m) return renderTplView(menu, m);
+  if (menuView === "tpl" || !m) return renderTplView(menu);
   const lead = el("button", "mode-icon-btn"); lead.innerHTML = ic(m.icon);
   lead.type = "button"; lead.title = "Cambiar el icono"; lead.setAttribute("aria-label", "Cambiar el icono"); lead.setAttribute("aria-expanded", String(menuIconsOpen));
   lead.addEventListener("click", () => { menuIconsOpen = !menuIconsOpen; renderMenu(); });
@@ -521,62 +532,105 @@ function renderMenu() {
   input.addEventListener("keydown", e => { if (e.key === "Enter") input.blur(); else if (e.key === "Escape") { input.value = m.name; input.blur(); } });
   input.addEventListener("change", () => { m.name = input.value.trim().slice(0, 30) || `Modo ${modeIdx + 1}`; persist(); renderModes(); renderCtx(); });
   const actions = el("div", "mode-menu-actions");
-  const tpl = el("button"); tpl.type = "button"; tpl.innerHTML = ic("layout-grid") + "<span>Plantilla</span>";
-  tpl.title = "Elegir otra plantilla para este hueco";
-  tpl.addEventListener("click", () => { menuView = "tpl"; menuIconsOpen = false; selectedPreset = null; renderMenu(); });
-  const clear = el("button", "danger"); clear.type = "button"; clear.innerHTML = ic("trash-2") + "<span>Vaciar</span>";
-  clear.title = "Quita el modo de este hueco. La plantilla no se borra.";
-  clear.addEventListener("click", () => {
-    if (!window.confirm(`¿Vaciar el hueco ${modeIdx + 1}? La plantilla «${m.name}» sigue disponible.`)) return;
-    S.modes[modeIdx] = null; modeMenuOpen = false; menuIconsOpen = false; menuView = "main"; persist(); closeEditorUI(); swapFx(); refreshUI();
-  });
-  actions.append(tpl, clear);
+  const lib = linkedLib(m), save = el("button"); save.type = "button";
+  if (lib && sameMode(lib, m)) { save.innerHTML = ic("check") + "<span>Guardado</span>"; save.disabled = true; save.title = "Este modo está guardado en Mis modos tal como está"; }
+  else if (lib) { save.innerHTML = ic("save") + "<span>Guardar cambios</span>"; save.title = `Actualiza «${lib.name}» en Mis modos`; }
+  else if (S.library.length < MY_MAX) { save.innerHTML = ic("save") + "<span>Guardar en Mis modos</span>"; save.title = "Guarda una copia para usarla en cualquier hueco"; }
+  else { save.innerHTML = ic("save") + "<span>Guardar en Mis modos</span>"; save.disabled = true; save.title = `Ya tienes ${MY_MAX} modos propios: borra uno desde un hueco libre para guardar este`; }
+  save.addEventListener("click", () => saveMine(m));
+  const clear = el("button", "danger"); clear.type = "button"; clear.innerHTML = ic("trash-2") + "<span>Quitar del hueco</span>";
+  clear.title = "Deja este hueco libre. Si está guardado en Mis modos, sigue allí";
+  clear.addEventListener("click", () => clearSlot(m));
+  actions.append(save, clear);
   const parts = [head, input];
   if (menuIconsOpen) parts.push(iconPicker(m.icon, name => { m.icon = name; persist(); renderModes(); }));
   menu.append(...parts, actions);
 }
-// Plantillas: la misma cuadrícula de chips (icono + nombre) que «Atajos para»; la descripción va en la vista previa.
-function renderTplView(menu, m) {
-  const lead = el("span", "mode-icon"); lead.innerHTML = ic("layout-grid");
-  const head = menuHead(`Hueco ${modeIdx + 1} · ${m ? "cambiar plantilla" : "elige una plantilla"}`, lead);
-  if (m) {
-    const back = el("button", "mode-icon-btn"); back.type = "button"; back.innerHTML = ic("arrow-left");
-    back.title = "Volver al menú del hueco"; back.setAttribute("aria-label", back.title);
-    back.addEventListener("click", () => { menuView = "main"; selectedPreset = null; renderMenu(); });
-    head.replaceChild(back, head.firstChild);
+// ---------- Mis modos: hasta MY_MAX modos propios guardados ----------
+// Una plantilla se copia al hueco al usarla: editar el modo del hueco nunca toca la plantilla. Un modo propio también se copia;
+// «from» enlaza el hueco con su copia guardada y solo «Guardar cambios» la actualiza.
+const clone = v => JSON.parse(JSON.stringify(v));
+const canon = v => Array.isArray(v) ? v.map(canon) : v && typeof v === "object" ? Object.fromEntries(Object.keys(v).sort().map(k => [k, canon(v[k])])) : v;
+const sameMode = (a, b) => JSON.stringify(canon([a.name, a.icon, a.actions])) === JSON.stringify(canon([b.name, b.icon, b.actions]));
+const linkedLib = m => (m && m.from ? S.library.find(x => x.id === m.from) : undefined);
+const newLibId = () => "m" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+const isPristine = m => PRESETS.some(p => !p.blank && p.name === m.name && p.icon === m.icon && JSON.stringify(canon(p.actions())) === JSON.stringify(canon(m.actions)));
+const minePreset = lib => ({ id: "mine:" + lib.id, mine: lib, name: lib.name, icon: lib.icon, desc: "Tu modo guardado.", actions: () => clone(lib.actions) });
+function saveMine(m) {
+  const body = { name: m.name, icon: m.icon, actions: clone(m.actions) }, lib = linkedLib(m);
+  if (lib) Object.assign(lib, body);
+  else {
+    if (S.library.length >= MY_MAX) return toast(`Ya tienes ${MY_MAX} modos propios: borra uno para guardar este`, true);
+    const id = newLibId(); S.library.push({ id, ...body }); m.from = id;
   }
-  const grid = el("div", "chip-grid");
-  PRESETS.forEach(p => grid.appendChild(chip(p.name, p.icon, p.desc, () => {
+  persist(); renderMenu(); toast(`«${m.name}» guardado en Mis modos`);
+}
+function deleteMine(lib) {
+  if (!window.confirm(`¿Borrar «${lib.name}» de Mis modos? Los huecos que lo usan lo conservan, pero ya no estará guardado.`)) return;
+  S.library = S.library.filter(x => x.id !== lib.id);
+  S.modes.forEach(m => { if (m && m.from === lib.id) delete m.from; });
+  selectedPreset = null; persist(); renderMenu(); toast(`«${lib.name}» borrado de Mis modos`);
+}
+function clearSlot(m) {
+  const lib = linkedLib(m), n = modeIdx + 1;
+  const loses = lib ? !sameMode(lib, m) : !isPristine(m);
+  if (loses && !window.confirm(lib ? `«${m.name}» tiene cambios sin guardar. Si lo quitas del hueco ${n} se pierden.`
+    : `«${m.name}» no está guardado en Mis modos. Si lo quitas del hueco ${n} se pierden sus atajos.`)) return;
+  S.modes[modeIdx] = null; modeMenuOpen = false; menuIconsOpen = false; menuView = "main"; persist(); closeEditorUI(); swapFx(); refreshUI();
+  toast(lib ? `Hueco ${n} libre. «${lib.name}» sigue en Mis modos` : `Hueco ${n} libre`);
+}
+// Plantillas y Mis modos: la misma cuadrícula de chips (icono + nombre) que «Atajos para»; la descripción va en la vista previa.
+function renderTplView(menu) {
+  const lead = el("span", "mode-icon"); lead.innerHTML = ic("layout-grid");
+  const head = menuHead(`Hueco ${modeIdx + 1} · elige un modo`, lead);
+  const sel = p => !!selectedPreset && selectedPreset.id === p.id;
+  const pick = p => () => {
     selectedPreset = p;
     if (p.blank) { blankIcon = "sliders-horizontal"; blankName = `Modo ${modeIdx + 1}`; }
     renderMenu();
-  }, p === selectedPreset)));
-  menu.append(head, grid);
+  };
+  const base = el("div", "chip-grid");
+  PRESETS.filter(p => !p.blank).forEach(p => base.appendChild(chip(p.name, p.icon, p.desc, pick(p), sel(p))));
+  const mine = el("div", "chip-grid"), full = S.library.length >= MY_MAX, blank = PRESETS.find(p => p.blank);
+  S.library.forEach(lib => { const p = minePreset(lib); mine.appendChild(chip(lib.name, lib.icon, "Tu modo guardado", pick(p), sel(p))); });
+  const add = chip(blank.name, blank.icon, full ? `Ya tienes ${MY_MAX} modos propios: borra uno para crear otro` : blank.desc, pick(blank), sel(blank));
+  add.disabled = full; mine.appendChild(add);
+  menu.append(head, el("div", "mode-menu-sub", "Plantillas"), base, el("div", "mode-menu-sub", `Mis modos · ${S.library.length}/${MY_MAX}`), mine);
   if (selectedPreset) menu.appendChild(presetPreview(selectedPreset));
 }
 function presetPreview(p) {
   const acts = p.actions(), box = el("div", "preset-preview"), top = el("div", "preset-top");
-  const mini = el("div", "mini-ref");
-  fillMini(mini, k => acts[k] || (p.blank ? S.layers[0].actions[k] : undefined), p.blank ? "Hereda de Directo hasta que lo cambies" : "Así queda el docker");
+  const inherits = p.blank || p.mine, mini = el("div", "mini-ref");
+  fillMini(mini, k => acts[k] || (inherits ? S.layers[0].actions[k] : undefined), inherits ? "Hereda de Directo lo que no defina" : "Así queda el docker");
   const info = el("div", "preset-info");
-  info.append(el("strong", "", p.name), el("p", "muted", p.note && !p.blank ? `${p.desc} ${p.note}` : p.desc));
-  const go = el("button", "primary", p.blank ? "Crear modo" : "Usar en este modo"); go.type = "button";
+  info.append(el("strong", "", p.name), el("p", "muted", p.note && !inherits ? `${p.desc} ${p.note}` : p.desc));
+  const go = el("button", "primary", p.blank ? "Crear modo" : "Usar en este hueco"); go.type = "button";
   go.addEventListener("click", () => applyPreset(p));
   top.append(mini, info);
   if (p.blank) {
     const name = el("input", "mode-inline-name"); name.type = "text"; name.maxLength = 30; name.value = blankName; name.setAttribute("aria-label", "Nombre del modo");
     name.addEventListener("input", () => { blankName = name.value; });
     const row = el("div", "blank-row"); row.append(name, go);
-    box.append(el("p", "muted", p.desc), row, iconPicker(blankIcon, n => { blankIcon = n; }));
-  } else { info.appendChild(go); box.appendChild(top); }
+    box.append(el("p", "muted", `${p.desc} Se guarda en Mis modos.`), row, iconPicker(blankIcon, n => { blankIcon = n; }));
+  } else {
+    const row = el("div", "mode-menu-actions"); row.appendChild(go);
+    if (p.mine) {
+      const del = el("button", "danger"); del.type = "button"; del.innerHTML = ic("trash-2") + "<span>Borrar</span>"; del.title = "Borra este modo de Mis modos";
+      del.addEventListener("click", () => deleteMine(p.mine)); row.appendChild(del);
+    }
+    info.appendChild(row); box.appendChild(top);
+  }
   return box;
 }
 function applyPreset(p) {
-  const m = slotMode();
-  if (m && Object.keys(m.actions).length && !window.confirm(`«${p.name}» reemplazará los atajos del modo «${m.name}». ¿Continuar?`)) return;
   const name = p.blank ? (blankName.trim().slice(0, 30) || `Modo ${modeIdx + 1}`) : p.name;
+  const mode = { name, icon: p.blank ? blankIcon : p.icon, actions: p.actions() };
+  if (p.blank) {   // crear un modo propio es guardarlo en Mis modos
+    if (S.library.length >= MY_MAX) return toast(`Ya tienes ${MY_MAX} modos propios: borra uno para crear otro`, true);
+    const id = newLibId(); S.library.push({ id, ...clone(mode) }); mode.from = id;
+  } else if (p.mine) mode.from = p.mine.id;
   modeMenuOpen = false; menuIconsOpen = false; menuView = "main"; selectedPreset = null;
-  fillMode({ name, icon: p.blank ? blankIcon : p.icon, actions: p.actions() });
+  fillMode(mode);
   toast(p.blank ? `Modo ${modeIdx + 1}: ${name}. Lo que no definas hace lo de Directo` : `Modo ${modeIdx + 1}: ${name}`);
 }
 document.addEventListener("click", e => { if (modeMenuOpen && e.target.isConnected && !$("modeRail").contains(e.target) && !$("modeMenu").contains(e.target) && !$("modeNow").contains(e.target)) closeModeMenu(); });

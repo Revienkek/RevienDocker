@@ -75,6 +75,14 @@ class ModeTests(unittest.TestCase):
         self.assertIsNone(self.s["modes"][1])
         self.assertEqual(se.normalize_studio({"modes": "x"})["modes"], [None, None, None])
 
+    def test_mis_modos_maximo_tres_y_enlace_con_el_hueco(self):
+        lib = [{"id": f"m{i}", "name": f"Modo {i}", "icon": "zap", "actions": {"KEY_1": K(0, 0x05)}} for i in range(5)]
+        s = se.normalize_studio({"library": lib, "modes": [{"name": "A", "from": "m1"}, {"name": "B", "from": "m4"}, None]})
+        self.assertEqual([m["id"] for m in s["library"]], ["m0", "m1", "m2"])
+        self.assertEqual(s["modes"][0]["from"], "m1")
+        self.assertNotIn("from", s["modes"][1])   # m4 no cabe en Mis modos: el enlace se descarta
+        self.assertEqual(se.normalize_studio({})["library"], [])
+
     def test_modo_activo_sustituye_a_directo_y_hereda_lo_que_no_define(self):
         a, origin = se.resolve(self.s, "KEY_1", "x.exe", False, 0)
         self.assertEqual((origin, a["code"]), ("mode:0", 0x05))
