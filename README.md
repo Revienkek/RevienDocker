@@ -34,7 +34,7 @@ Elige el modo en el selector de arriba. El lápiz de cada control abre sus ajust
 ## Ventana
 
 - La ventana tiene tamaño fijo: no se redimensiona ni se maximiza.
-- Abajo a la derecha están minimizar, cerrar y los ajustes (rueda dentada: estado del teclado y del motor, y buscar el teclado). No hay barra de título: la ventana se mueve arrastrando el lateral con el logotipo o la franja de abajo.
+- Abajo a la derecha están minimizar, cerrar y los ajustes (rueda dentada: estado del teclado y del motor, y buscar el teclado). No hay barra de título: la ventana se mueve arrastrando cualquier zona que no sea un botón o un campo.
 
 ## Estructura del repositorio
 

@@ -77,6 +77,7 @@ def main():
     ENGINE.apply(ENGINE.studio, persist=False)  # el motor arranca siempre: el docker y la app son uno
     threading.Thread(target=server.serve_forever, daemon=True, name="studio-http").start()
 
+    webview.settings["DRAG_REGION_DIRECT_TARGET_ONLY"] = True   # arrastra solo desde el propio elemento marcado (ver studio.js)
     window = webview.create_window(TITLE, f"http://127.0.0.1:{PORT}/index.html", width=WIN_W, height=WIN_H, resizable=False,
                                    frameless=True, easy_drag=False, background_color="#08090c", hidden="--minimized" in sys.argv)
     state = {"quit": False, "hidden": "--minimized" in sys.argv, "minimized": False}

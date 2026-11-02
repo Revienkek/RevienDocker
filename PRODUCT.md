@@ -35,8 +35,8 @@ Un docker físico con tres formas de uso sobre el mismo aparato y la misma panta
 ### Estructura canónica (Decisión)
 Idéntica en Directo, Inteligente y Modos; no se inventan variantes por modo:
 - **Lateral izquierdo (0.0.8):** el logotipo definitivo a toda la altura (título «REVIENDOCKER» en vector, girado, y el dibujo del interruptor). Sustituye a la barra superior, que **ya no existe**. Es también zona de arrastre de la ventana.
-- **Franja inferior (0.0.8):** minimizar, cerrar y la rueda dentada de **ajustes**, discretos, abajo a la derecha. El hueco libre de la franja también arrastra la ventana.
-2. **Selector:** botón contextual + selector Directo / Inteligente / Modos + luz y paleta.
+- **Franja inferior (0.0.8):** minimizar, cerrar y la rueda dentada de **ajustes**, discretos, abajo a la derecha. **Toda zona no interactiva** de la ventana (lateral, fondos, textos, huecos de la franja) arrastra la ventana; botones, campos y teclas no.
+2. **Selector:** botón contextual + selector Directo / Inteligente / Modos + luz (solo la bombilla, mismo tamaño y aspecto que el botón de la izquierda, para que la fila quede simétrica).
 3. **Fila del docker:** tres iconos a la izquierda + docker (3 teclas y rueda, un lápiz bajo cada pieza) + ✓ y × a la derecha. El carril izquierdo y la botonera derecha están **a la misma distancia** del docker.
 4. **Mensaje informativo centrado** debajo.
 

@@ -10,8 +10,10 @@ La versión actual está en `src/version.py` y en el nombre de la etiqueta de Gi
 - Rueda dentada de **ajustes** abajo a la derecha, tras la ×. Despliega en vertical teclado, motor y enchufe, solo con iconos. Lleva un punto propio únicamente si el teclado o el motor no están bien; se cierra al pulsar fuera, con Esc o tras buscar el teclado.
 
 ### Cambiado
-- La barra superior desaparece. Minimizar, cerrar y ajustes pasan a una franja discreta abajo a la derecha; la ventana se arrastra desde el lateral o la franja.
+- La barra superior desaparece. Minimizar, cerrar y ajustes pasan a una franja discreta abajo a la derecha; la ventana se arrastra desde cualquier zona no interactiva.
 - Menús y editor se centran sobre el área de contenido y terminan sobre la franja inferior.
+- La ventana se arrastra desde cualquier zona no interactiva, no solo desde el lateral y la franja.
+- Iluminación: solo la bombilla, mismo tamaño y aspecto que el ▶ de la izquierda (se quita el icono de paleta).
 - Captura del `README` actualizada.
 
 ### Eliminado

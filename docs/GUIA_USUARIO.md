@@ -8,7 +8,7 @@ Un programador para el macropad de 3 teclas + 1 rueda (chip WCH CH57x). El tecla
 
 ## 2. Arrancar
 
-**Como programa (recomendado):** abre el acceso directo «RevienDocker» del escritorio (o `dist\RevienDocker.exe`). Es una ventana propia, sin marco de Windows: abajo a la derecha tiene minimizar, cerrar y los ajustes (rueda dentada). Para moverla, arrastra el lateral con el logotipo o la franja de abajo. Su tamaño es fijo.
+**Como programa (recomendado):** abre el acceso directo «RevienDocker» del escritorio (o `dist\RevienDocker.exe`). Es una ventana propia, sin marco de Windows: abajo a la derecha tiene minimizar, cerrar y los ajustes (rueda dentada). Para moverla, arrastra cualquier zona que no sea un botón o un campo. Su tamaño es fijo.
 - RevienDocker debe estar abierto o en la bandeja para que el motor ejecute las acciones de los controles.
 - En modo **Inteligente**, cerrar la oculta en la bandeja (junto al reloj) y el motor sigue activo. Salir del todo: clic derecho en su icono → Salir.
 - En el menú del icono de la bandeja puedes elegir **Minimizar a la bandeja** o **Mostrar RevienDocker**, según esté visible u oculta. El motor continúa activo mientras la app esté en la bandeja.

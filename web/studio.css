@@ -88,7 +88,6 @@ kbd { font: 700 0.72rem var(--mono); background: var(--panel-3); border: 1px sol
 .mode-block { display: flex; flex-direction: column; align-items: center; gap: 8px; }
 .mode-controls { display: flex; align-items: center; gap: 10px; }
 .mode-block { position: relative; }
-.lighting-button { align-self: stretch; padding: 8px 12px; }
 .lighting-panel { position: absolute; top: 58px; right: max(0px, calc(50% - 250px)); z-index: 20; width: min(360px, 100%); padding: 16px; background: var(--panel); border: 1px solid var(--line-2); border-radius: var(--r); box-shadow: 0 12px 32px #000a; }
 .lighting-panel .fold-body { padding: 12px 0 0; }
 .lighting-title { display: flex; align-items: center; justify-content: space-between; }

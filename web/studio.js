@@ -818,6 +818,10 @@ $("btnNewLayer").addEventListener("click", () => {
   $("newExe").value = ""; $("newName").value = "";
 });
 
+// La ventana no tiene barra: se arrastra desde cualquier zona que no sea interactiva (pywebview solo arrastra desde elementos con esta clase).
+const INTERACTIVE = "button,input,select,textarea,summary,a,label,kbd,[role=radio],[role=switch],[role=button],[tabindex],.keycap,.enc-dir,.knob";
+window.addEventListener("mousedown", e => { if (e.button === 0 && e.target instanceof Element && !e.target.closest(INTERACTIVE)) e.target.classList.add("pywebview-drag-region"); }, true);
+
 document.querySelectorAll("[data-win]").forEach(b => b.addEventListener("click", () => api("/api/window", { action: b.dataset.win }).catch(() => toast("No se pudo cambiar la ventana", true))));
 
 // ---------- Motor: estado en vivo ----------
