@@ -197,6 +197,12 @@ details[open] > summary .chev { transform: rotate(180deg); }
 .knob:active { transform: scale(0.98) translateY(2px); }
 .knob-indicator { position: absolute; top: 14px; width: 4px; height: 12px; border-radius: 2px; background: #fff; }
 .knob span { position: relative; font: italic 600 0.64rem var(--mono); color: var(--key-text); text-align: center; overflow-wrap: anywhere; line-height: 1.15; }
+/* 0.1.3: los controles que más se usan también se iluminan al pasar el ratón (aro gris claro; el seleccionado sigue siendo blanco) */
+@media (hover: hover) and (pointer: fine) {
+  .keycap:not(.selected):hover::before { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 0 -3px 5px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 0, 0, 0.6); }
+  .knob:not(.selected):hover { box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px rgba(255, 255, 255, 0.4), 0 10px 16px rgba(0, 0, 0, 0.7); }
+  .encoder-ring .enc-dir:not(.selected):hover { border-color: rgba(255, 255, 255, 0.4); }
+}
 
 /* ---------- Modos: tres huecos (Alt+Shift+1/2/3) ---------- */
 .mode-bar { display: flex; flex-direction: column; gap: 14px; padding: 18px; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; }

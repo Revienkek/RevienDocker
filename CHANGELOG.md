@@ -3,6 +3,11 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versiones `0.x.y`: una por tanda de trabajo.
 La versión actual está en `src/version.py` y en el nombre de la etiqueta de GitHub (`v0.x.y`). Producto y estilo: [PRODUCT.md](PRODUCT.md).
 
+## [0.1.3] · 2026-11-02 · Hover en teclas y rueda
+
+### Corregido
+- Las tres teclas, la pulsación de la rueda y los dos giros se iluminan al pasar el ratón con un aro gris claro, como el resto de controles. El elemento seleccionado conserva su borde blanco.
+
 ## [0.1.2] · 2026-11-02 · Iconos de apps
 
 ### Añadido

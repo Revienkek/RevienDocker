@@ -103,6 +103,7 @@ Un solo vocabulario en toda la app, para que el usuario lea el estado sin pensar
 |---|---|
 | Reposo | Borde `--line`, texto `--muted` |
 | Hover (solo puntero fino) | Borde `--line-2`, fondo `--panel-3` |
+| Hover en teclas, rueda y giros | Aro gris claro (`rgba(255,255,255,0.4)`, 1 px) sobre la tecla, la rueda o la pastilla; el seleccionado mantiene el blanco |
 | Pulsado | `scale(0.97)`, 160 ms |
 | **Seleccionado / activo** | Borde blanco 1 px + fondo `--panel-3` + texto blanco + halo suave `0 0 0 3px rgba(255,255,255,.08)` |
 | Foco de teclado | Anillo blanco 2 px, separado 2 px |
