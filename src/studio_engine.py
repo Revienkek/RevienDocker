@@ -68,6 +68,7 @@ DEFAULT_STUDIO = {
     "library": [],
     "profiles": [],
     "direct_slots": [None, None, None],
+    "active_profile": None,
     "layers": [{"id": "base", "name": "Base", "exes": [], "actions": {}}],
     "obs": {"host": "127.0.0.1", "port": 4455, "password": ""},
 }
@@ -178,6 +179,8 @@ def normalize_studio(d):
     out["modes"] = _clean_modes(d.get("modes"), {m["id"] for m in out["library"]})
     out["profiles"] = _clean_profiles(d.get("profiles"))
     ids = {p["id"] for p in out["profiles"]}
+    active_profile = _clean_id(d.get("active_profile")) if isinstance(d.get("active_profile"), str) else ""
+    out["active_profile"] = active_profile if active_profile in ids else None
     slots = d.get("direct_slots") if isinstance(d.get("direct_slots"), list) else []
     out["direct_slots"] = []   # tres huecos del carril de Directo: vacío o el id de un perfil, sin repetir
     for i in range(DIRECT_SLOTS):
@@ -385,30 +388,57 @@ if IS_WIN:
             if i + 1 < count:
                 time.sleep(0.025)
 
-    def adjust_system_volume(code, step):
-        """Ajusta en puntos porcentuales el dispositivo de salida predeterminado."""
+    _audio_endpoint_cache = [None, 0.0]
+
+    def _get_audio_endpoint():
+        now = time.time()
+        ep, t_cached = _audio_endpoint_cache
+        if ep is not None and (now - t_cached) < 4.0:
+            return ep
         import comtypes
         from pycaw.pycaw import AudioUtilities
-
         comtypes.CoInitialize()
         try:
             device = AudioUtilities.GetSpeakers()
             if device is None:
-                raise RuntimeError("No hay dispositivo de salida de audio predeterminado")
-            endpoint = device.EndpointVolume
-            current = round(endpoint.GetMasterVolumeLevelScalar() * 100)
-            target = max(0, min(100, current + (step if code == 0xE9 else -step)))
-            # La pulsación estándar despierta el OSD de Windows. Esperamos a que
-            # el shell la procese y después fijamos el paso exacto solicitado.
+                return None
+            ep = device.EndpointVolume
+            _audio_endpoint_cache[0] = ep
+            _audio_endpoint_cache[1] = now
+            return ep
+        except Exception:
+            _audio_endpoint_cache[0] = None
+            return None
+
+    def adjust_system_volume(code, step):
+        """Ajusta en puntos porcentuales el dispositivo de salida predeterminado y muestra el visor nativo de Windows."""
+        endpoint = _get_audio_endpoint()
+        if endpoint is None:
             run_media(code, 1)
-            for _ in range(30):
-                if round(endpoint.GetMasterVolumeLevelScalar() * 100) != current:
-                    break
-                time.sleep(0.005)
+            return
+
+        try:
+            current = round(endpoint.GetMasterVolumeLevelScalar() * 100)
+        except Exception:
+            _audio_endpoint_cache[0] = None
+            endpoint = _get_audio_endpoint()
+            if endpoint is None:
+                run_media(code, 1)
+                return
+            try:
+                current = round(endpoint.GetMasterVolumeLevelScalar() * 100)
+            except Exception:
+                run_media(code, 1)
+                return
+
+        target = max(0, min(100, current + (step if code == 0xE9 else -step)))
+        # La pulsación despierta el visor nativo (OSD) de Windows al instante sin esperas
+        run_media(code, 1)
+        # Fijar inmediatamente el nivel exacto solicitado en el endpoint del sistema
+        try:
             endpoint.SetMasterVolumeLevelScalar(target / 100.0, None)
-            del endpoint, device
-        finally:
-            comtypes.CoUninitialize()
+        except Exception:
+            _audio_endpoint_cache[0] = None
 
 
     def adjust_spotify_volume(code, step):
