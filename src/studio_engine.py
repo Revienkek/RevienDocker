@@ -173,7 +173,7 @@ def normalize_studio(d):
     out["mode"] = d.get("mode") if d.get("mode") in ("direct", "smart", "modes") else "direct"
     out["trigger"] = d.get("trigger") if d.get("trigger") in TRIGGER_VK else "shift"
     out["led_mode"] = _int(d.get("led_mode"), 0, 255, 1)
-    out["flashed"] = str(d.get("flashed", ""))[:600]  # firma de lo último escrito en el teclado (para el aviso de «sin preparar»)
+    out["flashed"] = str(d.get("flashed", ""))[:2048]  # firma completa de lo último escrito en el teclado
     out.pop("applied", None)
     out["library"] = _clean_library(d.get("library"))
     out["modes"] = _clean_modes(d.get("modes"), {m["id"] for m in out["library"]})

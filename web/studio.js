@@ -1191,6 +1191,13 @@ $("btnDiscard").addEventListener("click", () => {
   } catch (_) {}
 });
 $("btnFlashAll").addEventListener("click", async () => {
+  // Las acciones y velocidades viven en el motor. Si el firmware ya tiene las
+  // teclas fantasma, confirmar esos cambios no requiere volver a escribirlo.
+  if (S.flashed && S.flashed === hwSig()) {
+    saveActiveProfile(); savedSnap = snapOf(); persist(); refreshUI({ quiet: true });
+    toast("Cambios guardados");
+    return;
+  }
   if (hidDevice) {
     for (const [tag, f] of framesToFlash()) {
       await hidDevice.sendReport(REPORT_ID, f);
