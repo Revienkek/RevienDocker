@@ -3,7 +3,7 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versiones `0.x.y`: una por tanda de trabajo.
 La versión actual está en `src/version.py` y en el nombre de la etiqueta de GitHub (`v0.x.y`). Producto y estilo: [PRODUCT.md](PRODUCT.md).
 
-## Pendiente de publicación
+## [0.1.7] · 2026-11-03 · Rueda de volumen estable
 
 ### Corregido
 - Cambiar la velocidad o las asignaciones y pulsar Aplicar ya no vuelve a escribir el macropad cuando ya está preparado. Se conserva completa la firma de preparación para reconocerlo tras reiniciar.
