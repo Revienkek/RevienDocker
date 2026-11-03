@@ -1,5 +1,7 @@
 # Volumen · 0.0.9
 
+> Documento histórico. Para el funcionamiento y diagnóstico actuales, consulta [Volumen y rueda](VOLUMEN_Y_RUEDA.md).
+
 ## Volumen general
 
 `adjust_system_volume` envía una pulsación multimedia estándar para activar el indicador de Windows, espera su procesamiento (máximo 150 ms) y fija el valor absoluto solicitado mediante Core Audio. Ya no solicita el indicador propio de Tk para el volumen general.
