@@ -388,58 +388,10 @@ if IS_WIN:
             if i + 1 < count:
                 time.sleep(0.025)
 
-    _audio_endpoint_cache = [None, 0.0]
-
-    def _get_audio_endpoint():
-        now = time.time()
-        ep, t_cached = _audio_endpoint_cache
-        if ep is not None and (now - t_cached) < 4.0:
-            return ep
-        import comtypes
-        from pycaw.pycaw import AudioUtilities
-        comtypes.CoInitialize()
-        try:
-            device = AudioUtilities.GetSpeakers()
-            if device is None:
-                return None
-            ep = device.EndpointVolume
-            _audio_endpoint_cache[0] = ep
-            _audio_endpoint_cache[1] = now
-            return ep
-        except Exception:
-            _audio_endpoint_cache[0] = None
-            return None
-
-    def adjust_system_volume(code, step):
-        """Ajusta en puntos porcentuales el dispositivo de salida predeterminado y muestra el visor nativo de Windows."""
-        endpoint = _get_audio_endpoint()
-        if endpoint is None:
-            run_media(code, 1)
-            return
-
-        try:
-            current = round(endpoint.GetMasterVolumeLevelScalar() * 100)
-        except Exception:
-            _audio_endpoint_cache[0] = None
-            endpoint = _get_audio_endpoint()
-            if endpoint is None:
-                run_media(code, 1)
-                return
-            try:
-                current = round(endpoint.GetMasterVolumeLevelScalar() * 100)
-            except Exception:
-                run_media(code, 1)
-                return
-
-        target = max(0, min(100, current + (step if code == 0xE9 else -step)))
-        # La pulsación despierta el visor nativo (OSD) de Windows al instante sin esperas
-        run_media(code, 1)
-        # Fijar inmediatamente el nivel exacto solicitado en el endpoint del sistema
-        try:
-            endpoint.SetMasterVolumeLevelScalar(target / 100.0, None)
-        except Exception:
-            _audio_endpoint_cache[0] = None
-
+    def adjust_system_volume(code, speed):
+        """Ajusta el volumen maestro enviando teclas multimedia nativas de Windows (2% por pulsacion).
+        Garantiza respuesta instantanea, visor nativo de Windows (OSD) y cero colisiones."""
+        run_media(code, speed)
 
     def adjust_spotify_volume(code, step):
         """Controla todas las sesiones de Spotify sin cambiar el volumen maestro."""

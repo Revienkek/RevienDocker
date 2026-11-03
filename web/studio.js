@@ -87,10 +87,11 @@ function describe(a) {
   else if (a.type === "mouse") main = a.wheel ? (a.wheel > 0 ? "Rueda ↑" : "Rueda ↓") : (MOUSE_SHORT[a.code] || "");
   else if ((a.type === "media" || a.type === "app_volume")) main = MEDIA_SHORT[a.code] || "";
   else { head = ["OBS"]; const o = OBS_BY_OP[a.op]; main = o ? (typeof o.short === "function" ? o.short(a.target || "…") : o.short) : "?"; }
-  return { parts: [...head, ...mods, ...(main ? [main] : [])], speed: speedApplies(a) && a.speed > 1 ? a.speed : 0,
-    volumeStep: (a.type === "media" || a.type === "app_volume") && (a.code === 0xE9 || a.code === 0xEA) };
+  const isVol = a.type === "media" && (a.code === 0xE9 || a.code === 0xEA);
+  return { parts: [...head, ...mods, ...(main ? [main] : [])], speed: speedApplies(a) && (a.speed > 1 || isVol) ? a.speed : 0,
+    volumeStep: isVol };
 }
-const textOf = a => { const d = describe(a); return (d.parts.join(a.type === "obs" ? " · " : "+") + (d.speed ? (d.volumeStep ? ` · ${d.speed}%` : " ×" + d.speed) : "")) || "—"; };
+const textOf = a => { const d = describe(a); return (d.parts.join(a.type === "obs" ? " · " : "+") + (d.speed ? (d.volumeStep ? ` · ${d.speed * 2}%` : " ×" + d.speed) : "")) || "—"; };
 const TYPE_NAME = { keyboard: "Teclado", mouse: "Ratón", media: "Multimedia", app_volume: "Volumen de Spotify", obs: "OBS Studio" };
 const TARGET_NAME = { KEY_1: "Tecla 1", KEY_2: "Tecla 2", KEY_3: "Tecla 3", KNOB_CCW: "Giro ↺ izquierda", KNOB_CW: "Giro ↻ derecha", KNOB_PRESS: "Pulsación del pomo" };
 const SLOT_ORDER = ["KEY_1", "KEY_2", "KEY_3", "KNOB_CCW", "KNOB_PRESS", "KNOB_CW"];
@@ -100,7 +101,7 @@ const TRIGGERS = { shift: "Shift", ctrl: "Ctrl", alt: "Alt" };
 
 // ---------- Estado ----------
 const defaultBase = () => ({ KEY_1: K(0, kc("F13")), KEY_2: K(0, kc("F14")), KEY_3: K(0, kc("F15")), KNOB_CCW: M(0xEA), KNOB_PRESS: M(0xE2), KNOB_CW: M(0xE9) });
-const defaultState = () => ({ mode: "direct", trigger: "shift", led_mode: 1, flashed: "", modes: [null, null, null], library: [], profiles: [], direct_slots: [null, null, null], obs: { host: "127.0.0.1", port: 4455, password: "" },
+const defaultState = () => ({ mode: "direct", trigger: "shift", led_mode: 1, flashed: "", modes: [null, null, null], library: [], profiles: [], direct_slots: [null, null, null], active_profile: null, obs: { host: "127.0.0.1", port: 4455, password: "" },
   layers: [{ id: "base", name: "Base", exes: [], actions: defaultBase() }] });
 const PROFILE_ICON = "sliders-horizontal";
 const MY_MAX = 3;   // «Mis modos»: tantos modos propios como huecos
@@ -155,6 +156,10 @@ function fixState(s) {
   if (s.layers[0].id !== "base") s.layers.unshift(d.layers[0]);
   s.layers.forEach(l => { l.exes = l.exes || []; l.actions = l.actions || {}; });
   if (!Object.keys(s.layers[0].actions).length) s.layers[0].actions = defaultBase();
+  if (!pids.has(s.active_profile)) {
+    const matching = s.profiles.filter(p => JSON.stringify(canon(p.actions)) === JSON.stringify(canon(s.layers[0].actions)));
+    s.active_profile = matching.length ? matching[0].id : null;
+  }
   return s;
 }
 
@@ -166,6 +171,7 @@ async function api(path, body) {
 }
 let saveTimer = null;
 function persist() {
+  saveActiveProfile();
   try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch (_) {}
   if (!API.ok) return;
   clearTimeout(saveTimer);
@@ -207,7 +213,7 @@ function renderChips(box, a) {
     if (i) box.appendChild(el("span", "chip-plus", "+"));
     box.appendChild(el("span", "chip", p));
   });
-  if (d.speed) box.appendChild(el("span", "chip-x", d.volumeStep ? `Paso ${d.speed}%` : "×" + d.speed));
+  if (d.speed) box.appendChild(el("span", "chip-x", d.volumeStep ? `Paso ${d.speed * 2}%` : "×" + d.speed));
 }
 function renderSeg(box, current, onPick, items = SPEEDS.map(([v, n]) => [v, `${n} ×${v}`])) {
   box.innerHTML = "";
@@ -219,7 +225,7 @@ function renderSeg(box, current, onPick, items = SPEEDS.map(([v, n]) => [v, `${n
 }
 
 // ---------- Paquetes ----------
-const isWheelVolume = (slot, a) => (slot === "KNOB_CCW" || slot === "KNOB_CW") && a && (a.type === "media" || a.type === "app_volume") && (a.code === 0xE9 || a.code === 0xEA);
+const isWheelVolume = (slot, a) => (slot === "KNOB_CCW" || slot === "KNOB_CW") && a && a.type === "media" && (a.code === 0xE9 || a.code === 0xEA);
 // El docker y la app son uno: el teclado solo manda F13–F18 y el motor decide qué hacer (Directo, Inteligente o Modos).
 const hwAction = slot => K(0, kc(GHOST[slot]));
 // Mismo protocolo que el backend (app.py): cada mensaje son 63 bytes tras el Report ID 0x03.
@@ -322,7 +328,7 @@ function refreshUI(opts = {}) {
   $("btnTest").hidden = !API.ok;
   renderChips($("curChips"), a);
   $("speedRow").hidden = !speedApplies(a);
-  const speedOptions = isWheelVolume(currentTarget, a) ? [[1, "±1 %"], [2, "±2 %"], [3, "±3 %"], [5, "±5 %"]] : SPEEDS;
+  const speedOptions = isWheelVolume(currentTarget, a) ? [[1, "±2 %"], [2, "±4 %"], [3, "±6 %"], [5, "±10 %"]] : SPEEDS;
   renderSeg($("speedSeg"), a.speed, v => {
     const volume = x => x && (x.type === "media" || x.type === "app_volume") && (x.code === 0xE9 || x.code === 0xEA);
     if (isKnob && volume(a) && volume(shown("KNOB_CCW")) && volume(shown("KNOB_CW"))) {
@@ -367,7 +373,7 @@ function refreshUI(opts = {}) {
       knobSpeed = v;
       ["KNOB_CCW", "KNOB_CW"].forEach(k => { const x = shown(k); if (x) layer().actions[k] = withSpeed(x, v); });
       persist(); refreshUI();
-    }, isWheelVolume("KNOB_CCW", left) && isWheelVolume("KNOB_CW", right) ? [[1, "±1 %"], [2, "±2 %"], [3, "±3 %"], [5, "±5 %"]] : SPEEDS);
+    }, isWheelVolume("KNOB_CCW", left) && isWheelVolume("KNOB_CW", right) ? [[1, "±2 %"], [2, "±4 %"], [3, "±6 %"], [5, "±10 %"]] : SPEEDS);
   }
 
   document.querySelectorAll("#obsOps .opt").forEach(o => o.classList.toggle("active", a.type === "obs" && a.op === o.dataset.op));
@@ -421,7 +427,7 @@ function renderWheelPill(slot, action) {
   let icon = a.type === "obs" ? "clapperboard" : a.type === "mouse" ? "mouse" : "keyboard", text = textOf(a);
   if ((a.type === "media" || a.type === "app_volume") && [0xE9, 0xEA].includes(a.code)) {
     icon = a.type === "app_volume" ? "music" : "volume-2";
-    text = (a.code === 0xE9 ? "+" : "−") + a.speed + "%";
+    text = (a.code === 0xE9 ? "+" : "−") + (a.type === "media" ? (a.speed * 2) + "%" : a.speed + "%");
   } else if (a.type === "mouse" && a.wheel) { text = (a.wheel > 0 ? "↑" : "↓") + (a.speed > 1 ? "×" + a.speed : ""); }
   else if (a.type === "media") { icon = "music"; }
   button.innerHTML = ic(icon);
@@ -510,7 +516,7 @@ function renderRail() {
   rail.removeAttribute("aria-hidden");
   if (mode === "direct") { rail.setAttribute("role", "radiogroup"); rail.setAttribute("aria-label", "Perfiles de Directo"); }
   else { rail.setAttribute("role", "radiogroup"); rail.setAttribute("aria-label", mode === "smart" ? "Tecla de activación" : "Modos de trabajo"); }
-  if (mode === "direct") {   // Directo: tres accesos a perfiles guardados; el activo es el que coincide con las teclas
+  if (mode === "direct") {   // Directo: tres accesos a perfiles guardados
     S.direct_slots.forEach((id, i) => {
       const p = profileById(id), on = !!p && profileActive(p), b = el("button", "mode-rail-btn" + (on ? " active" : "") + (p ? "" : " empty"));
       b.type = "button"; b.setAttribute("role", "radio"); b.setAttribute("aria-checked", String(on));
@@ -702,11 +708,15 @@ function setAction(a) { layer().actions[currentTarget] = a; persist(); refreshUI
 })();
 
 // ---------- Perfiles de Directo ----------
-// Un perfil es una copia confirmada de las asignaciones de Directo con nombre e icono. Los tres huecos del carril apuntan a
+// Cada perfil conserva sus propias asignaciones de Directo. Los tres huecos del carril apuntan a
 // perfiles de la lista (el menú «+» es la biblioteca): un clic en un hueco usa ese perfil al instante.
 let profilePick = -1, profileIconId = "";   // hueco libre que pidió elegir perfil · perfil cuyo selector de icono está abierto
 const profileById = id => S.profiles.find(p => p.id === id);
-const profileActive = p => JSON.stringify(canon(p.actions)) === JSON.stringify(canon(S.layers[0].actions));
+const profileActive = p => S.active_profile === p.id;
+function saveActiveProfile() {
+  const profile = profileById(S.active_profile);
+  if (profile) profile.actions = clone(S.layers[0].actions);
+}
 const newProfileId = () => "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
 function showProfilePanel(show, pick = -1) {
   const panel = $("profilePanel");
@@ -717,8 +727,9 @@ function showProfilePanel(show, pick = -1) {
 }
 function useProfile(profile) {
   if (profileActive(profile)) return true;
-  if (savedSnap && JSON.stringify(canon(S.layers[0].actions)) !== JSON.stringify(canon(JSON.parse(savedSnap).layers[0].actions)) && !window.confirm("Hay cambios sin confirmar. ¿Cambiar de perfil?")) return false;
+  saveActiveProfile();
   S.layers[0].actions = clone(profile.actions);
+  S.active_profile = profile.id;
   try { const snap = JSON.parse(savedSnap); snap.layers[0].actions = clone(profile.actions); savedSnap = JSON.stringify(snap); } catch (_) {}   // un perfil ya es una copia confirmada
   persist(); closeEditorUI(); refreshUI(); toast(`Perfil: ${profile.name}`);
   return true;
@@ -756,6 +767,7 @@ function renderProfiles() {
     remove.addEventListener("click", () => {
       if (!window.confirm(`¿Eliminar el perfil «${profile.name}»?`)) return;
       S.profiles.splice(index, 1); S.direct_slots = S.direct_slots.map(id => id === profile.id ? null : id);
+      if (S.active_profile === profile.id) S.active_profile = null;
       persist(); renderProfiles(); renderRail();
     });
     row.append(icon, select, slots, remove); item.appendChild(row);
@@ -768,10 +780,9 @@ $("profileSave").addEventListener("click", () => {
   const name = $("profileName").value.trim().slice(0, 12);
   if (!name) return toast("Escribe un nombre para el perfil", true);
   if (S.profiles.some(p => p.name.toLocaleLowerCase() === name.toLocaleLowerCase())) return toast("Ya existe un perfil con ese nombre", true);
-  const confirmed = savedSnap && JSON.parse(savedSnap).layers[0].actions;
-  if (!confirmed || JSON.stringify(confirmed) !== JSON.stringify(S.layers[0].actions)) return toast("Confirma primero los cambios con el botón ✓", true);
-  const profile = { id: newProfileId(), name, icon: PROFILE_ICON, actions: clone(confirmed) }, free = profilePick >= 0 && !S.direct_slots[profilePick] ? profilePick : S.direct_slots.indexOf(null);
+  const profile = { id: newProfileId(), name, icon: PROFILE_ICON, actions: clone(S.layers[0].actions) }, free = profilePick >= 0 && !S.direct_slots[profilePick] ? profilePick : S.direct_slots.indexOf(null);
   S.profiles.push(profile);
+  S.active_profile = profile.id;
   if (free >= 0) S.direct_slots[free] = profile.id;   // el perfil nuevo ocupa el hueco que se pidió o, si no, el primer hueco libre
   profilePick = -1; $("profileName").value = ""; persist(); renderProfiles(); renderRail(); toast(free >= 0 ? `Perfil guardado en el hueco ${free + 1}` : "Perfil guardado");
 });
@@ -1166,6 +1177,7 @@ $("btnConnect").addEventListener("click", async () => {
 });
 function markApplied() {
   S.flashed = hwSig();   // lo último escrito en el teclado (no se puede leer); los atajos ya no pasan por el firmware
+  saveActiveProfile();
   savedSnap = snapOf();
   persist(); refreshUI({ quiet: true });
 }
@@ -1194,7 +1206,7 @@ $("btnFlashAll").addEventListener("click", async () => {
     if (r.ok === false) return toast("No se pudo escribir en el teclado: " + r.error, true);
     r.logs.forEach(l => logLine(l, "#34d399"));
     if (r.logs.some(l => l.includes("TX USB"))) { markApplied(); toast("Teclado preparado"); }
-    else { savedSnap = snapOf(); refreshUI({ quiet: true }); toast("Cambios guardados"); }
+    else { saveActiveProfile(); savedSnap = snapOf(); persist(); refreshUI({ quiet: true }); toast("Cambios guardados"); }
   } catch (_) {
     for (const [tag, f] of framesToFlash()) logLine(`[SIMULADOR] ${tag}: 03 ${hexOf(f)} ...`, "#34d399");
   }

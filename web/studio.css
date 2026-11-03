@@ -334,6 +334,7 @@ details[open] > summary .chev { transform: rotate(180deg); }
   transition: transform 160ms var(--ease-out), background-color 160ms ease, border-color 160ms ease, color 160ms ease, box-shadow 160ms ease; }
 @media (hover: hover) and (pointer: fine) { .mode-rail-btn:hover { background: var(--panel-2); border-color: var(--line-2); color: var(--text); } }
 .mode-rail-btn .ic { width: 18px; height: 18px; }
+.mode-rail-btn:not(.active):not(.empty) { border-color: transparent; background: transparent; box-shadow: none; }
 .mode-rail-btn.active { background: var(--panel-2); border-color: var(--line-2); color: var(--text); }
 .mode-rail-btn.empty { border-style: dashed; color: var(--muted); }
 .mode-rail-btn kbd { position: absolute; top: -6px; left: -6px; font-size: 0.56rem; padding: 0 3px; background: transparent; border-color: transparent; box-shadow: none; opacity: 0.4; }

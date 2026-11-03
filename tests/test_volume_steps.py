@@ -1,4 +1,4 @@
-"""Pasos de volumen y selección del motor, sin tocar el audio real."""
+"""Pasos de volumen nativos y selección del motor, sin tocar el audio real."""
 
 import unittest
 from unittest.mock import MagicMock, patch
@@ -6,22 +6,20 @@ from unittest.mock import MagicMock, patch
 import studio_engine as engine
 
 
-@unittest.skipUnless(engine.IS_WIN, "Core Audio solo está disponible en Windows")
+@unittest.skipUnless(engine.IS_WIN, "Teclas multimedia nativas disponibles en Windows")
 class VolumeStepTests(unittest.TestCase):
-    def test_absolute_volume_steps_and_limits(self):
-        endpoint = MagicMock()
-        device = MagicMock()
-        device.EndpointVolume = endpoint
-        with patch.object(engine, "run_media"), patch.object(engine.time, "sleep"), \
-                patch("comtypes.CoInitialize"), patch("comtypes.CoUninitialize"), \
-                patch("pycaw.pycaw.AudioUtilities.GetSpeakers", return_value=device):
-            for code, start, step, expected in ((0xE9, .40, 1, .41), (0xE9, .40, 2, .42),
-                                                (0xEA, .40, 3, .37), (0xEA, .40, 5, .35),
-                                                (0xE9, .98, 5, 1.0), (0xEA, .02, 5, 0.0)):
-                with self.subTest(code=code, step=step, start=start):
-                    endpoint.GetMasterVolumeLevelScalar.return_value = start
-                    engine.adjust_system_volume(code, step)
-                    endpoint.SetMasterVolumeLevelScalar.assert_called_with(expected, None)
+    def test_native_volume_steps(self):
+        with patch.object(engine, "run_media") as mock_run_media:
+            for code, speed in ((0xE9, 1), (0xE9, 2), (0xEA, 3), (0xEA, 5)):
+                with self.subTest(code=code, speed=speed):
+                    engine.adjust_system_volume(code, speed)
+                    mock_run_media.assert_called_with(code, speed)
+
+    def test_run_media_sends_native_keys(self):
+        with patch.object(engine, "_send") as mock_send, patch.object(engine.time, "sleep"):
+            # 0xE9 es Vol Up -> VK 0xAF
+            engine.run_media(0xE9, 2)
+            self.assertEqual(mock_send.call_count, 2)
 
     def test_volume_wheel_always_goes_through_engine(self):
         e = engine.StudioEngine(simulate=True)
@@ -32,6 +30,7 @@ class VolumeStepTests(unittest.TestCase):
         self.assertEqual(e.executed[0][0]["speed"], 3)
         e.handle("KEY_1", False)
         self.assertEqual(len(e.executed), 1)
+
 
 if __name__ == "__main__":
     unittest.main()
