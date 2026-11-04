@@ -13,7 +13,7 @@ class VolumeStepTests(unittest.TestCase):
             for code, speed in ((0xE9, 1), (0xE9, 2), (0xEA, 3), (0xEA, 5)):
                 with self.subTest(code=code, speed=speed):
                     engine.adjust_system_volume(code, speed)
-                    mock_run_media.assert_called_with(code, speed)
+                    mock_run_media.assert_called_with(code, 2)
 
     def test_run_media_sends_native_keys(self):
         with patch.object(engine, "_send") as mock_send, patch.object(engine.time, "sleep"):

@@ -225,6 +225,8 @@ details[open] > summary .chev { transform: rotate(180deg); }
 .chip-x { color: var(--amber); font: 600 0.9rem var(--mono); }
 .cur-card.inherited .chip { border-style: dashed; }
 .cur-actions { display: flex; gap: 8px; }
+#audioTarget { margin-top: 10px; }
+#audioTargetSelect { min-width: 0; max-width: 100%; padding: 6px 8px; border: 1px solid var(--line); border-radius: 4px; background: var(--panel-2); color: var(--text); font: inherit; }
 .cur-actions .primary { flex: 0 1 auto; }
 .speed-row { display: flex; align-items: center; gap: 10px; }
 .speed-row label { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }

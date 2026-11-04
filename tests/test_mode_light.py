@@ -78,7 +78,7 @@ class ModeLightTests(unittest.TestCase):
         light.pulse()
         self.assertEqual(light.write.call_count, 2)
 
-    def test_engine_only_notifies_valid_physical_switches(self):
+    def test_engine_keeps_mode_switches_free_of_usb_light_writes(self):
         engine = StudioEngine(simulate=True)
         engine.simulate = False
         engine.mode_light = Mock()
@@ -89,7 +89,7 @@ class ModeLightTests(unittest.TestCase):
             self.assertEqual(engine.active_mode, 0)
             engine.set_mode(0, physical=True)
             self.assertIsNone(engine.active_mode)
-            self.assertEqual(engine.mode_light.pulse.call_count, 2)
+            engine.mode_light.pulse.assert_not_called()
             engine.set_mode(1, physical=True)
             engine.set_mode(0)  # UI: no physical key to identify.
-            self.assertEqual(engine.mode_light.pulse.call_count, 2)
+            engine.mode_light.pulse.assert_not_called()

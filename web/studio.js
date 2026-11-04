@@ -67,16 +67,16 @@ const SPEEDS = [[1, "Fino"], [2, "Normal"], [3, "Rápido"], [5, "Turbo"]];
 // ---------- Acciones: { type, mod, code, wheel (-1/0/1), speed [, op, target] } ----------
 const K  = (mod, code) => ({ type: "keyboard", mod, code, wheel: 0, speed: 1 });
 const M  = (code, speed = 1) => ({ type: "media", mod: 0, code, wheel: 0, speed });
-const AV = (code, speed = 1) => ({ ...M(code, speed), type: "app_volume", target: "spotify.exe" });
+const AV = (code, target = "spotify.exe") => ({ ...M(code), type: "app_volume", target });
 const Ms = (mod, btn, wheel = 0, speed = 1) => ({ type: "mouse", mod, code: btn, wheel, speed });
 const O  = (op, target = "", speed = 1) => ({ type: "obs", mod: 0, code: 0, wheel: 0, speed, op, target });
 const EMPTY = K(0, 0);
 const popcount = m => MOD_BITS.filter(x => m & x.bit).length;
 const hasMain = a => a.type === "keyboard" ? !!a.code : a.type === "mouse" ? !!(a.code || a.wheel) : true;
 const countOf = a => ((a.type === "media" || a.type === "app_volume") || a.type === "obs") ? 1 : popcount(a.mod) + (hasMain(a) ? 1 : 0);
-const speedApplies = a => ((a.type === "media" || a.type === "app_volume") && (a.code === 0xE9 || a.code === 0xEA)) || (a.type === "mouse" && !!a.wheel) ||
-  (a.type === "obs" && !!(OBS_BY_OP[a.op] || {}).speed);
-const sameAction = (a, b) => !!a && !!b && a.type === b.type && a.mod === b.mod && a.code === b.code && a.wheel === b.wheel && a.op === b.op;
+const isVolume = a => !!a && (((a.type === "media" || a.type === "app_volume") && [0xE9, 0xEA].includes(a.code)) || (a.type === "obs" && ["volume_up", "volume_down"].includes(a.op)));
+const speedApplies = a => !isVolume(a) && ((a.type === "mouse" && !!a.wheel) || (a.type === "obs" && !!(OBS_BY_OP[a.op] || {}).speed));
+const sameAction = (a, b) => !!a && !!b && a.type === b.type && a.mod === b.mod && a.code === b.code && a.wheel === b.wheel && a.op === b.op && a.target === b.target;
 const modsOf = a => ((a.type === "media" || a.type === "app_volume") || a.type === "obs") ? 0 : a.mod;
 const speedOf = a => speedApplies(a) ? a.speed : 1;
 
@@ -87,12 +87,13 @@ function describe(a) {
   else if (a.type === "mouse") main = a.wheel ? (a.wheel > 0 ? "Rueda ↑" : "Rueda ↓") : (MOUSE_SHORT[a.code] || "");
   else if ((a.type === "media" || a.type === "app_volume")) main = MEDIA_SHORT[a.code] || "";
   else { head = ["OBS"]; const o = OBS_BY_OP[a.op]; main = o ? (typeof o.short === "function" ? o.short(a.target || "…") : o.short) : "?"; }
+  if (a.type === "app_volume") head = [audioAppName(a.target)];
   const isVol = a.type === "media" && (a.code === 0xE9 || a.code === 0xEA);
   return { parts: [...head, ...mods, ...(main ? [main] : [])], speed: speedApplies(a) && (a.speed > 1 || isVol) ? a.speed : 0,
     volumeStep: isVol };
 }
 const textOf = a => { const d = describe(a); return (d.parts.join(a.type === "obs" ? " · " : "+") + (d.speed ? (d.volumeStep ? ` · ${d.speed * 2}%` : " ×" + d.speed) : "")) || "—"; };
-const TYPE_NAME = { keyboard: "Teclado", mouse: "Ratón", media: "Multimedia", app_volume: "Volumen de Spotify", obs: "OBS Studio" };
+const TYPE_NAME = { keyboard: "Teclado", mouse: "Ratón", media: "Multimedia", app_volume: "Volumen de aplicación", obs: "OBS Studio" };
 const TARGET_NAME = { KEY_1: "Tecla 1", KEY_2: "Tecla 2", KEY_3: "Tecla 3", KNOB_CCW: "Giro ↺ izquierda", KNOB_CW: "Giro ↻ derecha", KNOB_PRESS: "Pulsación del pomo" };
 const SLOT_ORDER = ["KEY_1", "KEY_2", "KEY_3", "KNOB_CCW", "KNOB_PRESS", "KNOB_CW"];
 const HW_SLOTS = { KEY_1: 0x01, KEY_2: 0x02, KEY_3: 0x03, KNOB_CCW: 0x0D, KNOB_PRESS: 0x0E, KNOB_CW: 0x0F };
@@ -242,6 +243,7 @@ function slotMessages(slot, a) {
 // ---------- Recetas de rueda ----------
 const RECIPES = [
   { icon: "volume-2", name: "Volumen", desc: "Sube y baja el volumen del PC; pulsar silencia", ccw: M(0xEA), cw: M(0xE9), press: M(0xE2) },
+  { icon: "music", name: "Volumen Spotify", desc: "Ajusta solo Spotify en el mezclador de Windows", ccw: AV(0xEA), cw: AV(0xE9), press: AV(0xE2) },
   { icon: "scroll", name: "Scroll", desc: "Desplaza cualquier página; pulsar = clic central (autoscroll)", ccw: Ms(0, 0, 1), cw: Ms(0, 0, -1), press: Ms(0, 4) },
   { icon: "zoom-in", name: "Zoom", desc: "Ctrl + rueda en navegador, Photoshop, Excel…; pulsar = 100%", ccw: Ms(1, 0, -1), cw: Ms(1, 0, 1), press: K(1, kc("Digit0")) },
   { icon: "panel-top", name: "Pestañas", desc: "Salta entre pestañas; pulsar reabre la cerrada", ccw: K(3, kc("Tab")), cw: K(1, kc("Tab")), press: K(3, kc("KeyT")) },
@@ -326,6 +328,9 @@ function refreshUI(opts = {}) {
   $("btnClear").title = isApp() ? "Quitar (usar Directo)" : "Borrar";
   $("btnClear").disabled = isApp() ? !own(currentTarget) : false;
   $("btnTest").hidden = !API.ok;
+  $("btnAudioTarget").hidden = !API.ok || !["KNOB_CCW", "KNOB_CW"].includes(currentTarget);
+  $("btnAudioTarget").setAttribute("aria-expanded", "false");
+  $("audioTarget").hidden = true;
   renderChips($("curChips"), a);
   $("speedRow").hidden = !speedApplies(a);
   const speedOptions = isWheelVolume(currentTarget, a) ? [[1, "±2 %"], [2, "±4 %"], [3, "±6 %"], [5, "±10 %"]] : SPEEDS;
@@ -367,7 +372,7 @@ function refreshUI(opts = {}) {
     $("recipeMap").textContent = act ? mapOf(act) : "";
     const left = shown("KNOB_CCW") || EMPTY, right = shown("KNOB_CW") || EMPTY;
     if (speedApplies(a)) knobSpeed = a.speed;
-    $("knobSpeedRow").hidden = false;
+    $("knobSpeedRow").hidden = isVolume(left) || isVolume(right);
     $("knobSpeedRow").classList.toggle("dim", !(speedApplies(left) || speedApplies(right)));
     renderSeg($("knobSpeedSeg"), knobSpeed, v => {
       knobSpeed = v;
@@ -427,7 +432,7 @@ function renderWheelPill(slot, action) {
   let icon = a.type === "obs" ? "clapperboard" : a.type === "mouse" ? "mouse" : "keyboard", text = textOf(a);
   if ((a.type === "media" || a.type === "app_volume") && [0xE9, 0xEA].includes(a.code)) {
     icon = a.type === "app_volume" ? "music" : "volume-2";
-    text = (a.code === 0xE9 ? "+" : "−") + (a.type === "media" ? (a.speed * 2) + "%" : a.speed + "%");
+    text = (a.code === 0xE9 ? "+" : "−") + "4%";
   } else if (a.type === "mouse" && a.wheel) { text = (a.wheel > 0 ? "↑" : "↓") + (a.speed > 1 ? "×" + a.speed : ""); }
   else if (a.type === "media") { icon = "music"; }
   button.innerHTML = ic(icon);
@@ -864,6 +869,44 @@ async function setLed(mode) {
   b.addEventListener("click", () => setLed(v)); $("ledModes").appendChild(b);
 });
 $("ledToggle").addEventListener("click", () => setLed(S.led_mode ? 0 : ledOn));
+function audioAppName(exe) {
+  return !exe || exe === "spotify.exe" ? "Spotify" : exe.replace(/\.exe$/i, "");
+}
+
+$("btnAudioTarget").addEventListener("click", async () => {
+  const panel = $("audioTarget"), button = $("btnAudioTarget"), select = $("audioTargetSelect");
+  panel.hidden = !panel.hidden;
+  button.setAttribute("aria-expanded", String(!panel.hidden));
+  if (panel.hidden) return;
+  const selected = cur().type === "app_volume" ? cur().target || "spotify.exe" : "";
+  select.replaceChildren(new Option("Elige un destino…", ""), new Option("Windows · volumen general", "system"));
+  const placeholder = select.options[0];
+  placeholder.disabled = true;
+  const names = new Set(["spotify.exe", ...(selected ? [selected] : [])]);
+  for (const exe of names) select.add(new Option(audioAppName(exe), exe));
+  select.value = selected || (isVolume(cur()) && cur().type === "media" ? "system" : "");
+  select.focus();
+  try {
+    const { apps } = await api("/api/audio-apps");
+    if (panel.hidden || select.options[0] !== placeholder) return;
+    for (const exe of apps) {
+      if (names.has(exe) || !/\.exe$/i.test(exe)) continue;
+      names.add(exe);
+      select.add(new Option(audioAppName(exe), exe));
+    }
+  } catch (_) {
+    if (!panel.hidden) toast("No se pudieron listar otras aplicaciones con audio", true);
+  }
+});
+
+$("audioTargetSelect").addEventListener("change", e => {
+  const target = e.target.value;
+  if (!target || !["KNOB_CCW", "KNOB_CW"].includes(currentTarget)) return;
+  const code = currentTarget === "KNOB_CCW" ? 0xEA : 0xE9;
+  setAction(target === "system" ? M(code) : AV(code, target));
+  $("btnAudioTarget").focus();
+});
+
 $("btnClear").addEventListener("click", () => {
   if (isApp()) { delete layer().actions[currentTarget]; persist(); refreshUI(); }
   else setAction(K(0, 0));

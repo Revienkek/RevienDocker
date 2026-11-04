@@ -1,6 +1,6 @@
 # Volumen y rueda: funcionamiento y diagnóstico
 
-Estado registrado el 3 de noviembre de 2026, tras la corrección local de 0.1.6.
+Estado actualizado el 4 de noviembre de 2026; cambio local pendiente de validación física.
 
 ## Cómo funciona
 
@@ -9,16 +9,14 @@ El motor de RevienDocker recibe cada giro y decide qué acción ejecutar según
 Directo, Inteligente o el modo activo. La configuración de cada sentido puede
 ser distinta. El motor debe estar abierto, también puede estar en la bandeja.
 
-Para el volumen general, `src/studio_engine.py` ejecuta `adjust_system_volume`,
-que envía pulsaciones multimedia nativas de Windows mediante `run_media`. Cada
-pulsación equivale normalmente a dos puntos de volumen: los ajustes de la
-interfaz ±2, ±4, ±6 y ±10 % envían respectivamente 1, 2, 3 y 5 pulsaciones.
-Entre pulsaciones de un mismo giro hay 25 ms. La tecla multimedia también
-invoca el indicador nativo de Windows. Los porcentajes dependen del tratamiento
-del dispositivo de audio por Windows.
-
-Spotify sigue otra ruta: `app_volume` modifica las sesiones de audio de Spotify
-sin ajustar el volumen general. Mantener independientes ambas rutas al cambiarlas.
+El volumen general usa dos pulsaciones multimedia nativas de Windows por giro,
+normalmente 4 puntos, y conserva el indicador de Windows. Para Spotify y otras
+sesiones de audio configuradas, el motor ajusta directamente 4 puntos de la
+sesión correspondiente sin cambiar el volumen general. El selector de velocidad
+se oculta para el volumen; los valores antiguos de velocidad no modifican el paso.
+El icono de volumen junto a la papelera abre el selector de destino para cada
+giro en Directo, Inteligente y Modos. Ofrece Windows, Spotify y las aplicaciones
+con sesión de audio en el dispositivo de salida predeterminado. Las acciones de volumen de OBS usan un paso fijo de 4 dB.
 
 El documento [VOLUMEN_0.0.9.md](VOLUMEN_0.0.9.md) es histórico: describe una
 implementación anterior con Core Audio para el volumen general y pasos de
@@ -67,3 +65,9 @@ Para otra instalación sin esa evidencia, preparar el teclado normalmente.
 Validación física de esta corrección: Revien cambió entre 2 % y 4 %, pulsó
 Aplicar y confirmó que la rueda respondía bien en ambos sentidos. No se verificó
 con esa prueba cada velocidad, modo o dispositivo de audio posible.
+
+El cambio físico de modo conserva el aviso en pantalla y deja de escribir los
+comandos USB del destello. Esta medida requiere validación física al alternar
+entre Windows y Spotify sin reconectar. El control por sesión modifica el
+mezclador de Windows. La barra interna de Spotify requiere una integración
+con el reproductor que todavía está pendiente.

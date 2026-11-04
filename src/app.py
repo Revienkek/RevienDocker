@@ -13,7 +13,7 @@ import time
 from pathlib import Path
 from http.server import HTTPServer, SimpleHTTPRequestHandler, ThreadingHTTPServer
 
-from studio_engine import ENGINE, RESOURCE_DIR, list_windows
+from studio_engine import ENGINE, RESOURCE_DIR, list_audio_apps, list_windows
 
 # Intentamos cargar hidapi; si no está instalado o no hay hardware, usamos Simulador
 try:
@@ -230,6 +230,11 @@ class StudioHandler(SimpleHTTPRequestHandler):
             return self._json({"ok": True, **self.engine.capture_events(since)})
         if self.path == "/api/device":
             return self._json({"ok": True, **self.controller.probe()})
+        if self.path == "/api/audio-apps":
+            try:
+                return self._json({"apps": list_audio_apps()})
+            except Exception:
+                return self._json({"error": "No se pudieron consultar las sesiones de audio"}, 503)
         if self.path == "/api/windows":
             return self._json({"ok": True, "windows": list_windows()})
         self._json({"ok": False, "error": "not found"}, 404)

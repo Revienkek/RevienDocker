@@ -115,7 +115,12 @@
         <div class="speed-row" id="speedRow"><label><i data-ic="gauge"></i>Velocidad</label><div class="seg" id="speedSeg"></div></div>
         <div class="cur-actions">
           <button id="btnTest" hidden title="Ejecuta la acción en este PC tras 3 segundos"><i data-ic="play"></i>Probar</button>
+          <button id="btnAudioTarget" hidden aria-expanded="false" aria-controls="audioTarget" aria-label="Elegir destino del volumen" title="Elegir destino del volumen"><i data-ic="volume-2"></i></button>
           <button id="btnClear" title="Borrar"><i data-ic="trash-2"></i></button>
+        </div>
+        <div id="audioTarget" class="speed-row" hidden>
+          <label for="audioTargetSelect">Controlar volumen de</label>
+          <select id="audioTargetSelect"></select>
         </div>
       </div>
 

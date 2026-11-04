@@ -93,7 +93,8 @@ def _clean_action(a):
     if t == "app_volume":
         if out["code"] not in (0xE9, 0xEA, 0xE2):
             return None
-        out["target"] = "spotify.exe"
+        target = str(a.get("target") or "spotify.exe").strip().lower()
+        out["target"] = target if re.fullmatch(r"[^\\/:*?\"<>|]{1,76}\.exe", target) else "spotify.exe"
     if t == "obs":
         op = a.get("op")
         if op not in OBS_OPS:
@@ -391,9 +392,27 @@ if IS_WIN:
     def adjust_system_volume(code, speed):
         """Ajusta el volumen maestro enviando teclas multimedia nativas de Windows (2% por pulsacion).
         Garantiza respuesta instantanea, visor nativo de Windows (OSD) y cero colisiones."""
-        run_media(code, speed)
+        run_media(code, 2)  # 4 puntos con las teclas multimedia de Windows
 
-    def adjust_spotify_volume(code, step):
+    def list_audio_apps():
+        import comtypes
+        from psutil import Error as ProcessError
+        from pycaw.pycaw import AudioUtilities
+        comtypes.CoInitialize()
+        try:
+            names = set()
+            for session in AudioUtilities.GetAllSessions():
+                try:
+                    process = session.Process
+                    if process:
+                        names.add(process.name().lower())
+                except (OSError, ProcessError):
+                    continue  # El proceso pudo cerrarse mientras se enumeraba.
+            return sorted(names)
+        finally:
+            comtypes.CoUninitialize()
+
+    def adjust_spotify_volume(code, step, target="spotify.exe"):
         """Controla todas las sesiones de Spotify sin cambiar el volumen maestro."""
         import comtypes
         from pycaw.pycaw import AudioUtilities
@@ -402,18 +421,18 @@ if IS_WIN:
             controls = []
             for session in AudioUtilities.GetAllSessions():
                 process = session.Process
-                if process and process.name().lower() == "spotify.exe":
+                if process and process.name().lower() == target.lower():
                     controls.append(session.SimpleAudioVolume)
             if not controls:
-                raise RuntimeError("Spotify no tiene una sesión de audio. Reproduce algo en Spotify.")
+                raise RuntimeError(f"{target} no tiene una sesión de audio activa.")
             mute = not controls[0].GetMute() if code == 0xE2 else None
             for control in controls:
                 if mute is not None:
                     control.SetMute(mute, None)
                 else:
                     current = round(control.GetMasterVolume() * 100)
-                    target = max(0, min(100, current + (step if code == 0xE9 else -step)))
-                    control.SetMasterVolume(target / 100.0, None)
+                    level = max(0, min(100, current + (step if code == 0xE9 else -step)))
+                    control.SetMasterVolume(level / 100.0, None)
         finally:
             comtypes.CoUninitialize()
 
@@ -533,6 +552,9 @@ else:
         return ""
 
     def list_windows():
+        return []
+
+    def list_audio_apps():
         return []
 
 
@@ -664,7 +686,7 @@ class ObsClient:
             self.req("ToggleInputMute", {"inputName": target})
         elif op in ("volume_up", "volume_down"):
             db = self.req("GetInputVolume", {"inputName": target})["inputVolumeDb"]
-            db = max(-100.0, min(26.0, db + (step if op == "volume_up" else -step)))
+            db = max(-100.0, min(26.0, db + (4 if op == "volume_up" else -4)))
             self.req("SetInputVolume", {"inputName": target, "inputVolumeDb": db})
         elif op == "toggle_record":
             self.req("ToggleRecord")
@@ -709,8 +731,8 @@ class StudioEngine:
         if not m:
             return self.active_mode
         self.active_mode = None if self.active_mode == index else index
-        if physical and not self.simulate and self.mode_light is not None:
-            self.mode_light.pulse()
+        # El cambio de modo solo afecta al motor. Escribir la iluminación aquí
+        # puede dejar la rueda inconsistente hasta reconectar el macropad.
         if not self.simulate:
             try:
                 from volume_overlay import show_message
@@ -800,7 +822,7 @@ class StudioEngine:
             if t == "keyboard":
                 run_keyboard(a["mod"], a["code"])
             elif t == "app_volume":
-                adjust_spotify_volume(a["code"], a["speed"])
+                adjust_spotify_volume(a["code"], 4, a.get("target", "spotify.exe"))
             elif t == "media":
                 if a["code"] in (0xE9, 0xEA):
                     adjust_system_volume(a["code"], a["speed"])
