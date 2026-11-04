@@ -1,6 +1,6 @@
 # Volumen y rueda: funcionamiento y diagnóstico
 
-Estado actualizado el 4 de noviembre de 2026; cambio local pendiente de validación física.
+Estado actualizado el 4 de noviembre de 2026; validado por Revien en el macropad.
 
 ## Cómo funciona
 
@@ -71,3 +71,8 @@ comandos USB del destello. Esta medida requiere validación física al alternar
 entre Windows y Spotify sin reconectar. El control por sesión modifica el
 mezclador de Windows. La barra interna de Spotify requiere una integración
 con el reproductor que todavía está pendiente.
+
+Validación posterior: Revien confirmó que los controles funcionan correctamente
+tras desconectar y volver a conectar el macropad. La barra interna de Spotify
+no refleja correctamente el cambio. No se confirmó que alternar destinos funcione
+sin esa reconexión inicial.
