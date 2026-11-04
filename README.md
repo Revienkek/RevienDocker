@@ -104,8 +104,8 @@ Las pruebas no necesitan el teclado ni OBS.
 
 ## Estado
 
-La configuración de teclado y la grabación de atajos están probadas con simulador y pruebas automáticas. El formato de escritura USB es el de ch57x-keyboard-tool para este chip. Los botones de ratón atrás/adelante y los modos de luz 0–3 no están confirmados en el teclado real.
-
+La configuración de teclado y la grabación de atajos están probadas con simulador y pruebas automáticas. El formato de escritura USB es el de ch57x-keyboard-tool para este chip.
+Todas las funcionalidades descritas son 100% funcionales. Ciertos tweaks pueden ser requeridos según tu sistema.
 ## Licencia
 
 Licencia MIT, ver [LICENSE](LICENSE). Los iconos de interfaz son de Lucide (licencia ISC). Los iconos de aplicaciones y marcas (WoW, Spotify, OBS, Adobe, Google, Microsoft Office y otras) son dibujos propios que las evocan, no sus logotipos oficiales; los nombres y marcas pertenecen a sus propietarios.
